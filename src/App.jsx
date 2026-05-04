@@ -8,34 +8,33 @@ import {
   LayoutDashboard, Target, BookOpen, Users, FileText, GraduationCap,
   ClipboardList, MessageSquare, Wallet, BarChart3, Plus, Pencil, Trash2,
   Search, Check, LogOut, X, ChevronRight, TrendingUp, Save, Menu,
-  Phone, MessageCircle, Handshake, AlertTriangle, Star
 } from "lucide-react";
-
+ 
 function decodeText(value) {
   if (typeof value !== "string") return value;
   let str = value;
-
+ 
   for (let i = 0; i < 5; i++) {
     const before = str;
-
+ 
     try {
       if (/%[0-9A-Fa-f]{2}/.test(str)) str = decodeURIComponent(str);
     } catch {}
-
+ 
     str = str.replace(/\\\\u([0-9A-Fa-f]{4})/g, "\\u$1");
     str = str.replace(/\\u([0-9A-Fa-f]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
     str = str.replace(/\\U([0-9A-Fa-f]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
     str = str.replace(/u(00[0-9A-Fa-f]{2}|01[0-9A-Fa-f]{2}|1[0-9A-Fa-f]{3})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
     str = str.replace(/U(00[0-9A-Fa-f]{2}|01[0-9A-Fa-f]{2}|1[0-9A-Fa-f]{3})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-
+ 
     if (str === before) break;
   }
-
+ 
   return str;
 }
-
+ 
 const T = (s) => decodeText(s);
-
+ 
 const L = {
   tq: T("T%E1%BB%95ng%20quan"),
   km: T("Kh%C3%A1ch%20m%E1%BB%9Bi"),
@@ -170,7 +169,7 @@ const L = {
   tkiem: T("T%C3%ACm%20ki%E1%BA%BFm..."),
   dong: T("%C4%91")
 };
-
+ 
 const FM = {
   leads: { lastContact: "last_contact" },
   reports: { absentNames: "absent_names" },
@@ -179,7 +178,7 @@ const FM = {
   contracts: { start: "start_date", end: "end_date" },
   hsk_exams: { examDate: "exam_date" }
 };
-
+ 
 function toDb(t, o) {
   const m = FM[t];
   if (!m) return { ...o };
@@ -187,7 +186,7 @@ function toDb(t, o) {
   for (const [k, v] of Object.entries(o || {})) r[m[k] || k] = typeof v === "string" ? decodeText(v) : v;
   return r;
 }
-
+ 
 function toApp(t, o) {
   const m = FM[t];
   const rm = {};
@@ -196,7 +195,7 @@ function toApp(t, o) {
   for (const [k, v] of Object.entries(o || {})) r[rm[k] || k] = typeof v === "string" ? decodeText(v) : v;
   return r;
 }
-
+ 
 async function loadT(t) {
   try {
     const { data } = await supabase.from(t).select("*");
@@ -205,23 +204,23 @@ async function loadT(t) {
     return [];
   }
 }
-
+ 
 async function addRow(t, row) {
   const d = toDb(t, row);
   delete d.created_at;
   await supabase.from(t).insert([d]);
 }
-
+ 
 async function updateRow(t, row) {
   const d = toDb(t, row);
   delete d.created_at;
   await supabase.from(t).update(d).eq("id", row.id);
 }
-
+ 
 async function deleteRow(t, id) {
   await supabase.from(t).delete().eq("id", id);
 }
-
+ 
 const vnd = (n) => new Intl.NumberFormat("vi-VN").format(n || 0) + L.dong;
 const today = new Date().toISOString().slice(0, 10);
 const A = "#10B981";
@@ -232,7 +231,7 @@ const daysLeft = (d) => {
   return Number.isFinite(t) ? Math.ceil((t - Date.now()) / 86400000) : 0;
 };
 const FN = "Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
-
+ 
 const USERS = [
   { user: "admin", pass: "hantinh2026", role: "admin", name: "Admin", cls: "all" },
   { user: "cohoa", pass: "gv2026", role: "teacher", name: L.cohoa, cls: "CN-A1" },
@@ -240,7 +239,7 @@ const USERS = [
   { user: "cowang", pass: "gv2026", role: "teacher", name: L.cowang, cls: "CN-A2" },
   { user: "thaynam", pass: "gv2026", role: "teacher", name: L.tnam, cls: "CN-B1" }
 ];
-
+ 
 const monthTrend = [
   { m: "T12", rev: 42, lead: 8, enroll: 2 },
   { m: "T1", rev: 48, lead: 12, enroll: 4 },
@@ -249,66 +248,74 @@ const monthTrend = [
   { m: "T4", rev: 65, lead: 11, enroll: 3 },
   { m: "T5", rev: 72, lead: 14, enroll: 5 }
 ];
-
+ 
 const attendTrend = [
   { w: "T1", v: 88 }, { w: "T2", v: 91 }, { w: "T3", v: 85 }, { w: "T4", v: 93 },
   { w: "T5", v: 90 }, { w: "T6", v: 87 }, { w: "T7", v: 92 }, { w: "T8", v: 94 }
 ];
-
+ 
 function Spark({ data, w = 80, h = 28 }) {
   if (!data || data.length < 2) return null;
   const mn = Math.min(...data);
   const mx = Math.max(...data);
   const rg = mx - mn || 1;
   const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - 2 - ((v - mn) / rg) * (h - 4)}`).join(" ");
-  return <svg width={w} height={h} style={{ display: "block" }}><polyline points={pts} fill="none" stroke={A} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity=".45" /></svg>;
+  return <svg width={w} height={h} style={{ display: "block" }}><polyline points={pts} fill="none" stroke={A} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity=".6" /></svg>;
 }
-
+ 
 function Tip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background: "#27272A", border: "1px solid #3F3F46", borderRadius: 8, padding: "8px 12px", fontSize: 12, fontFamily: FN }}>
-      <div style={{ color: "#71717A", fontSize: 10, fontWeight: 600, marginBottom: 4 }}>{decodeText(label)}</div>
-      {payload.map((p, i) => <div key={i} style={{ color: "#FAFAFA", fontWeight: 600 }}>{decodeText(p.name)}: <span style={{ color: p.color || A }}>{p.value}</span></div>)}
+    <div style={{ background: "linear-gradient(135deg, #1C1C20 0%, #141417 100%)", border: "1px solid #2A2A30", borderRadius: 10, padding: "10px 14px", fontSize: 12, fontFamily: FN, boxShadow: "0 8px 32px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.03) inset" }}>
+      <div style={{ color: "#52525B", fontSize: 10, fontWeight: 600, marginBottom: 4, letterSpacing: ".04em", textTransform: "uppercase" }}>{decodeText(label)}</div>
+      {payload.map((p, i) => <div key={i} style={{ color: "#E4E4E7", fontWeight: 600 }}>{decodeText(p.name)}: <span style={{ color: p.color || A }}>{p.value}</span></div>)}
     </div>
   );
 }
-
+ 
 function Bd({ t, v }) {
-  const m = { ok: ["#10B98118", A], er: ["#EF444415", "#EF4444"], wa: ["#F59E0B12", "#F59E0B"], in: ["#3B82F612", "#3B82F6"], mu: ["#27272A", "#71717A"], pu: ["#8B5CF612", "#8B5CF6"], or: ["#F9731612", "#F97316"] };
-  const [bg, fg] = m[v] || m.mu;
-  return <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 4, fontSize: 10, fontWeight: 600, background: bg, color: fg }}>{decodeText(t)}</span>;
+  const m = {
+    ok: ["rgba(16,185,129,.1)", A, "rgba(16,185,129,.15)"],
+    er: ["rgba(239,68,68,.08)", "#EF4444", "rgba(239,68,68,.12)"],
+    wa: ["rgba(245,158,11,.07)", "#F59E0B", "rgba(245,158,11,.1)"],
+    in: ["rgba(59,130,246,.08)", "#3B82F6", "rgba(59,130,246,.12)"],
+    mu: ["rgba(39,39,42,.6)", "#71717A", "rgba(39,39,42,.8)"],
+    pu: ["rgba(139,92,246,.08)", "#8B5CF6", "rgba(139,92,246,.12)"],
+    or: ["rgba(249,115,22,.08)", "#F97316", "rgba(249,115,22,.12)"]
+  };
+  const [bg, fg, border] = m[v] || m.mu;
+  return <span style={{ display: "inline-block", padding: "3px 9px", borderRadius: 6, fontSize: 10, fontWeight: 600, background: bg, color: fg, border: `1px solid ${border}`, letterSpacing: ".02em" }}>{decodeText(t)}</span>;
 }
-
+ 
 function ModalForm({ type, initial, isNew, onSave, onClose, cls2, teachers, isAdmin, userName, mob }) {
   const d = useRef({ ...initial });
-  const is = { padding: "10px 12px", border: "1px solid #27272A", borderRadius: 8, fontSize: 14, outline: "none", width: "100%", fontFamily: FN, background: "#09090B", color: "#FAFAFA", transition: "border-color .15s,box-shadow .15s" };
-  const fo = (e) => { e.target.style.borderColor = "#10B981"; e.target.style.boxShadow = "0 0 0 3px #10B98112"; };
-  const bl = (e) => { e.target.style.borderColor = "#27272A"; e.target.style.boxShadow = "none"; };
-
+  const is = { padding: "10px 12px", border: "1px solid #1F1F23", borderRadius: 10, fontSize: 14, outline: "none", width: "100%", fontFamily: FN, background: "#0C0C0E", color: "#FAFAFA", transition: "border-color .2s, box-shadow .2s" };
+  const fo = (e) => { e.target.style.borderColor = "#10B981"; e.target.style.boxShadow = "0 0 0 3px rgba(16,185,129,.08), 0 0 20px rgba(16,185,129,.04)"; };
+  const bl = (e) => { e.target.style.borderColor = "#1F1F23"; e.target.style.boxShadow = "none"; };
+ 
   const F = ({ label, k, type: t }) => (
     <div style={{ flex: 1, marginBottom: 12 }}>
-      <label style={{ display: "block", fontSize: 11, color: "#52525B", fontWeight: 500, marginBottom: 6 }}>{label}</label>
+      <label style={{ display: "block", fontSize: 11, color: "#52525B", fontWeight: 500, marginBottom: 6, letterSpacing: ".02em" }}>{label}</label>
       {t === "textarea" ? <textarea style={{ ...is, minHeight: 56, resize: "vertical" }} defaultValue={d.current[k] || ""} onFocus={fo} onBlur={bl} onChange={(e) => { d.current[k] = e.target.value; }} />
         : t === "date" ? <input style={is} type="date" defaultValue={d.current[k] || ""} onFocus={fo} onBlur={bl} onChange={(e) => { d.current[k] = e.target.value; }} />
         : t === "number" ? <input style={is} type="number" defaultValue={d.current[k] || 0} onFocus={fo} onBlur={bl} onChange={(e) => { d.current[k] = parseFloat(e.target.value) || 0; }} />
         : <input style={is} defaultValue={d.current[k] || ""} onFocus={fo} onBlur={bl} onChange={(e) => { d.current[k] = e.target.value; }} />}
     </div>
   );
-
+ 
   const S = ({ label, k, opts }) => (
     <div style={{ flex: 1, marginBottom: 12 }}>
-      <label style={{ display: "block", fontSize: 11, color: "#52525B", fontWeight: 500, marginBottom: 6 }}>{label}</label>
+      <label style={{ display: "block", fontSize: 11, color: "#52525B", fontWeight: 500, marginBottom: 6, letterSpacing: ".02em" }}>{label}</label>
       <select style={{ ...is, appearance: "auto" }} defaultValue={d.current[k] || ""} onChange={(e) => { d.current[k] = e.target.value; }}>
         {opts.map((o) => Array.isArray(o) ? <option key={o[0]} value={o[0]}>{o[1]}</option> : <option key={o}>{o}</option>)}
       </select>
     </div>
   );
-
+ 
   const R = ({ children }) => <div style={{ display: "flex", gap: 8 }}>{children}</div>;
   const src = ["Facebook", "TikTok", L.gthieu, "Walk-in", "Website"];
   const lv = ["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5", "HSK 6"];
-
+ 
   return (
     <div className="_mo" onClick={onClose}>
       <div className={"_mp" + (mob ? " _mm" : "")} onClick={(e) => e.stopPropagation()}>
@@ -316,7 +323,7 @@ function ModalForm({ type, initial, isNew, onSave, onClose, cls2, teachers, isAd
           <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAFA" }}>{isNew ? L.themmoi : L.sua}</span>
           <button className="_xb" onClick={onClose}><X size={14} /></button>
         </div>
-
+ 
         {type === "l" && <><R><F label={L.hoten} k="name" /><F label={L.sdt} k="phone" /></R><R><S label={L.nguonh} k="source" opts={src} /><S label={L.qtam} k="interest" opts={lv.slice(0, 5)} /></R><S label={L.gdoan} k="stage" opts={[["inquiry", L.htham], ["trial", L.hthu], ["registered", L.dadk], ["lost", L.mat]]} /><F label={L.gchu} k="note" type="textarea" /></>}
         {type === "s" && <><R><F label={L.hoten} k="name" /><F label={L.sdt} k="phone" /></R><R><S label={L.lop} k="cls" opts={cls2.map((c) => c.id)} /><S label={L.tdo} k="level" opts={lv} /></R><R><F label={L.diemh} k="score" type="number" /><F label="CC %" k="attend" type="number" /></R><R><S label={L.nguonh} k="source" opts={src} /><S label={L.tthai} k="status" opts={[L.dhoc, L.tnghi, L.nghih]} /></R></>}
         {type === "tr" && <><R><F label={L.hoten} k="name" /><F label={L.sdt} k="phone" /></R><R><F label={L.ngay} k="date" type="date" /><F label={L.gio} k="time" /></R><R><S label={L.lop} k="cls" opts={cls2.map((c) => c.id)} /><S label="GV" k="teacher" opts={teachers} /></R><R><S label="TT" k="status" opts={[["scheduled", L.dxep], ["completed", L.dahoc], ["no-show", L.kden]]} /><S label="KQ" k="result" opts={[["", "--"], ["enrolled", L.dadk], ["thinking", L.snghi], ["not-interested", L.kqt]]} /></R><F label={L.nlai} k="followUp" type="date" /></>}
@@ -325,7 +332,7 @@ function ModalForm({ type, initial, isNew, onSave, onClose, cls2, teachers, isAd
         {type === "r" && <><R><F label={L.ngay} k="date" type="date" />{isAdmin ? <S label="GV" k="teacher" opts={teachers} /> : <div style={{ flex: 1 }}><label style={{ display: "block", fontSize: 11, color: "#52525B", fontWeight: 500, marginBottom: 6 }}>GV</label><input style={{ ...is, opacity: .5 }} value={userName} disabled /></div>}<S label={L.lop} k="cls" opts={cls2.map((c) => c.id)} /></R><R><F label={L.comat} k="present" type="number" /><F label={L.vang} k="absent" type="number" /></R><F label={L.hvvang} k="absentNames" /><F label={L.bhoc} k="lesson" type="textarea" /><F label="BTVN" k="homework" type="textarea" /><F label={L.chuy} k="flags" type="textarea" /><F label={L.nbat} k="highlights" type="textarea" /></>}
         {type === "i" && <><R><F label={L.nguoi} k="refName" /><F label={L.ngay} k="date" type="date" /></R><R><S label={L.loai} k="type" opts={[["call", L.goi], ["message", L.nhan], ["meeting", L.gap]]} /><F label={L.boi} k="by" /></R><F label={L.ndung} k="content" type="textarea" /></>}
         {type === "f" && <><F label={L.hoten} k="name" /><R><S label={L.lop} k="cls" opts={cls2.map((c) => c.id)} /><F label={L.tphi} k="total" type="number" /></R><R><F label={L.hdot2} k="d2d" /><S label="TT" k="st" opts={[["paid", L.ddong], ["pending", L.cho], ["overdue", L.qhan]]} /></R></>}
-
+ 
         <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
           <button className="_ba" style={{ flex: 1, justifyContent: "center" }} onClick={() => { const data = { ...d.current }; if (type === "f" && data.total) { data.d1 = Math.round(data.total / 2); data.d2 = Math.round(data.total / 2); } if (type === "hk") data.status = data.passed === "yes" ? "passed" : data.passed === "no" ? "failed" : "registered"; onSave(data); }}><Save size={13} />{L.luu}</button>
           <button className="_bg" onClick={onClose}>{L.huy}</button>
@@ -334,7 +341,7 @@ function ModalForm({ type, initial, isNew, onSave, onClose, cls2, teachers, isAd
     </div>
   );
 }
-
+ 
 export default function App() {
   const [user, setUser] = useState(null);
   const [lu, setLu] = useState("");
@@ -356,16 +363,16 @@ export default function App() {
   const [dtab, setDtab] = useState("kpi");
   const [ok, setOk] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-
+ 
   useEffect(() => {
     if (document.getElementById("_htf")) return;
     const pc = document.createElement("link"); pc.rel = "preconnect"; pc.href = "https://fonts.googleapis.com"; document.head.appendChild(pc);
     const pc2 = document.createElement("link"); pc2.rel = "preconnect"; pc2.href = "https://fonts.gstatic.com"; pc2.crossOrigin = "anonymous"; document.head.appendChild(pc2);
     const lk = document.createElement("link"); lk.id = "_htf"; lk.rel = "stylesheet"; lk.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"; document.head.appendChild(lk);
   }, []);
-
+ 
   useEffect(() => { const h = () => setMob(window.innerWidth < 768); window.addEventListener("resize", h); return () => window.removeEventListener("resize", h); }, []);
-
+ 
   useEffect(() => {
     (async () => {
       const [s, c, f, r, l, i, t, ct, h] = await Promise.all([loadT("students"), loadT("classes"), loadT("finance"), loadT("reports"), loadT("leads"), loadT("interactions"), loadT("trials"), loadT("contracts"), loadT("hsk_exams")]);
@@ -375,7 +382,7 @@ export default function App() {
       setOk(true);
     })();
   }, []);
-
+ 
   const tbl = { s: "students", l: "leads", tr: "trials", ct: "contracts", hk: "hsk_exams", r: "reports", i: "interactions", f: "finance" };
   const stx = { s: [stu, setStu], l: [leads, setLeads], tr: [trials, setTrials], ct: [contracts, setContracts], hk: [hsk, setHsk], r: [rpt, setRpt], i: [inter, setInter], f: [fin, setFin] };
   const doSave = async (type, data, isNew) => { const [arr, setter] = stx[type]; if (isNew) { setter(type === "r" || type === "i" ? [data, ...arr] : [...arr, data]); await addRow(tbl[type], data); } else { setter(arr.map((x) => x.id === data.id ? data : x)); await updateRow(tbl[type], data); } };
@@ -384,24 +391,25 @@ export default function App() {
   const logout = () => { setUser(null); localStorage.removeItem("ht_user"); setPg("home"); };
   const isAdmin = user?.role === "admin";
   const canSee = (c) => isAdmin || (user?.cls || "").split(",").includes(c);
-
-  if (!ok) return <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", fontFamily: FN, background: "#09090B", color: "#52525B", gap: 8, fontSize: 13 }}><div style={{ width: 14, height: 14, border: "2px solid #27272A", borderTopColor: A, borderRadius: "50%", animation: "_sp .5s linear infinite" }} />Loading</div>;
-
+ 
+  if (!ok) return <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", fontFamily: FN, background: "#050506", color: "#52525B", gap: 8, fontSize: 13 }}><div style={{ width: 16, height: 16, border: "2px solid #1A1A1F", borderTopColor: A, borderRadius: "50%", animation: "_sp .6s linear infinite" }} /><span style={{ letterSpacing: ".03em" }}>Loading</span></div>;
+ 
   if (!user) return (
-    <div style={{ fontFamily: FN, minHeight: "100vh", background: "#09090B", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <style>{`@keyframes _sp{to{transform:rotate(360deg)}}`}</style>
-      <div style={{ width: mob ? "100%" : 360, background: "#18181B", border: "1px solid #27272A", borderRadius: 12, padding: mob ? 24 : 36 }}>
-        <div style={{ width: 40, height: 40, borderRadius: 10, background: A, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 18, fontWeight: 800, margin: "0 auto 20px" }}>H</div>
-        <div style={{ fontSize: 20, fontWeight: 700, color: "#FAFAFA", textAlign: "center", marginBottom: 4 }}>{L.htinh} Premium</div>
-        <div style={{ color: "#52525B", fontSize: 13, textAlign: "center", marginBottom: 28 }}>{L.dnht}</div>
+    <div style={{ fontFamily: FN, minHeight: "100vh", background: "#050506", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, position: "relative", overflow: "hidden" }}>
+      <style>{`@keyframes _sp{to{transform:rotate(360deg)}}@keyframes _gp{0%,100%{opacity:.4}50%{opacity:.7}}`}</style>
+      <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(16,185,129,.06) 0%, transparent 70%)", top: "50%", left: "50%", transform: "translate(-50%,-50%)", animation: "_gp 4s ease-in-out infinite", pointerEvents: "none" }} />
+      <div style={{ width: mob ? "100%" : 380, background: "linear-gradient(180deg, #121215 0%, #0C0C0E 100%)", border: "1px solid #1F1F23", borderRadius: 16, padding: mob ? 28 : 40, position: "relative", boxShadow: "0 25px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.02) inset, 0 0 120px rgba(16,185,129,.03)" }}>
+        <div style={{ width: 44, height: 44, borderRadius: 12, background: `linear-gradient(135deg, ${A} 0%, #059669 100%)`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 18, fontWeight: 800, margin: "0 auto 24px", boxShadow: `0 0 30px rgba(16,185,129,.25)` }}>H</div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: "#FAFAFA", textAlign: "center", marginBottom: 4, letterSpacing: "-.02em" }}>{L.htinh} Premium</div>
+        <div style={{ color: "#3F3F46", fontSize: 13, textAlign: "center", marginBottom: 32 }}>{L.dnht}</div>
         <input className="_in" placeholder={L.tkh} value={lu} onChange={(e) => setLu(e.target.value)} onKeyDown={(e) => e.key === "Enter" && login()} />
         <input className="_in" placeholder={L.mk} type="password" value={lp} onChange={(e) => setLp(e.target.value)} onKeyDown={(e) => e.key === "Enter" && login()} />
         {le && <div style={{ color: "#EF4444", fontSize: 12, marginBottom: 8, textAlign: "center" }}>{le}</div>}
-        <button className="_ba" style={{ width: "100%", justifyContent: "center" }} onClick={login}>{L.dnhap}</button>
+        <button className="_ba" style={{ width: "100%", justifyContent: "center", marginTop: 4 }} onClick={login}>{L.dnhap}</button>
       </div>
     </div>
   );
-
+ 
   const query = q.trim().toLowerCase();
   const act = stu.filter((s) => s.status === L.dhoc);
   const ov = fin.filter((f) => f.st === "overdue");
@@ -417,83 +425,83 @@ export default function App() {
   const funnelData = [{ s: L.bhoi, v: leads.filter((l) => l.stage !== "lost").length }, { s: L.bthu, v: leads.filter((l) => l.stage === "trial" || l.stage === "registered").length }, { s: L.dk, v: leads.filter((l) => l.stage === "registered").length }, { s: L.dhoc, v: act.length }];
   const payPie = [{ n: L.bdu, v: fin.filter((f) => f.st === "paid").length }, { n: L.cho, v: pend.length }, { n: L.bno, v: ov.length }];
   const scoreDist = [{ r: "<5", n: stu.filter((s) => (s.score || 0) < 5).length }, { r: "5-6.5", n: stu.filter((s) => (s.score || 0) >= 5 && s.score < 6.5).length }, { r: "6.5-8", n: stu.filter((s) => (s.score || 0) >= 6.5 && s.score < 8).length }, { r: "8-9", n: stu.filter((s) => (s.score || 0) >= 8 && s.score < 9).length }, { r: "9+", n: stu.filter((s) => (s.score || 0) >= 9).length }];
-
+ 
   const om = (t, d, n) => setModal({ t, d, n });
   const gc = (c) => mob ? "1fr" : `repeat(${c},1fr)`;
-  const Ch = ({ title, children, h = 180 }) => <div className="_c"><div style={{ fontSize: 11, fontWeight: 600, color: "#52525B", marginBottom: 12, textTransform: "uppercase", letterSpacing: ".05em" }}>{title}</div><ResponsiveContainer width="100%" height={h}>{children}</ResponsiveContainer></div>;
+  const Ch = ({ title, children, h = 180 }) => <div className="_c"><div style={{ fontSize: 10, fontWeight: 600, color: "#3F3F46", marginBottom: 12, textTransform: "uppercase", letterSpacing: ".08em" }}>{title}</div><ResponsiveContainer width="100%" height={h}>{children}</ResponsiveContainer></div>;
   const sb = (s) => ({ Facebook: "in", TikTok: "pu", [L.gthieu]: "ok", "Walk-in": "or", Website: "wa" })[s] || "mu";
   const stB = (s) => ({ inquiry: [L.bhoi, "in"], trial: [L.bthu, "wa"], registered: [L.dk, "ok"], lost: [L.mat, "mu"] })[s] || [decodeText(s), "mu"];
-
+ 
   const adminMenu = [{ id: "home", l: L.tq, ic: LayoutDashboard }, { id: "leads", l: L.km, ic: Target }, { id: "trials", l: L.ht, ic: BookOpen }, { id: "stu", l: L.hv, ic: Users }, { id: "contracts", l: L.hd, ic: FileText }, { id: "hsk", l: "HSK", ic: GraduationCap }, { id: "rpt", l: L.bc, ic: ClipboardList }, { id: "log", l: L.ls, ic: MessageSquare }, { id: "fin", l: L.tc, ic: Wallet }, { id: "charts", l: L.bd, ic: BarChart3 }];
   const teacherMenu = [{ id: "home", l: L.tq, ic: LayoutDashboard }, { id: "stu", l: L.hv, ic: Users }, { id: "rpt", l: L.bc, ic: ClipboardList }, { id: "hsk", l: "HSK", ic: GraduationCap }];
   const menu = isAdmin ? adminMenu : teacherMenu;
   const mobNav = isAdmin ? [{ id: "home", ic: LayoutDashboard, l: "Home" }, { id: "leads", ic: Target, l: "Khach" }, { id: "stu", ic: Users, l: "HV" }, { id: "rpt", ic: ClipboardList, l: "BC" }, { id: "more", ic: Menu, l: "More" }] : [{ id: "home", ic: LayoutDashboard, l: "Home" }, { id: "stu", ic: Users, l: "HV" }, { id: "rpt", ic: ClipboardList, l: "BC" }, { id: "hsk", ic: GraduationCap, l: "HSK" }];
   const moreMenu = adminMenu.filter((m) => !["home", "leads", "stu", "rpt"].includes(m.id));
-
+ 
   return (
-    <div style={{ fontFamily: FN, display: "flex", flexDirection: mob ? "column" : "row", height: "100vh", background: "#09090B", color: "#FAFAFA", overflow: "hidden" }}>
+    <div style={{ fontFamily: FN, display: "flex", flexDirection: mob ? "column" : "row", height: "100vh", background: "#050506", color: "#FAFAFA", overflow: "hidden" }}>
       <style>{`
-@keyframes _sp{to{transform:rotate(360deg)}}@keyframes _fi{from{opacity:0}to{opacity:1}}@keyframes _si{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}@keyframes _su{from{transform:translateY(100%)}to{transform:translateY(0)}}
-*{box-sizing:border-box;margin:0;padding:0}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#27272A;border-radius:99px}input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}select{color-scheme:dark}::selection{background:#10B98130}
-._c{background:#18181B;border:1px solid #27272A;border-radius:12px;padding:20px;transition:border-color .2s}._c:hover{border-color:#3F3F46}
-._ni{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:#71717A;transition:all .15s}._ni:hover{color:#A1A1AA;background:#1F1F23}._ni._a{color:#FAFAFA;background:#27272A;font-weight:600}
-._ba{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:${FN};background:${A};color:#fff;transition:all .15s}._ba:hover{filter:brightness(1.15)}._bs{padding:5px 12px;font-size:11px;border-radius:6px}
-._bg{padding:9px 18px;background:#27272A;border:none;border-radius:8px;font-size:13px;color:#A1A1AA;cursor:pointer;font-family:${FN};font-weight:500;transition:all .15s}._bg:hover{background:#3F3F46;color:#FAFAFA}
-._bo{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:6px;border:1px solid #27272A;background:transparent;cursor:pointer;font-size:11px;font-weight:600;font-family:${FN};color:#71717A;transition:all .15s}._bo:hover{border-color:${A};color:${A}}
-table{width:100%;border-collapse:collapse;min-width:600px}th{padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:#3F3F46;text-transform:uppercase;letter-spacing:.05em;background:#111113;border-bottom:1px solid #27272A}td{padding:11px 16px;font-size:14px;border-bottom:1px solid #1F1F23;color:#71717A;transition:background .1s}tr:hover td{background:#1F1F23}
-._ab{padding:5px;border-radius:6px;border:none;background:transparent;color:#3F3F46;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .1s}._ab:hover{color:${A};background:#18181B}._ab._d:hover{color:#EF4444;background:#18181B}
-._tb{padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:#52525B;border:none;background:transparent;font-family:${FN};transition:all .15s}._tb:hover{color:#A1A1AA}._tb._a{background:#27272A;color:#FAFAFA}
-._in{width:100%;padding:10px 12px;border:1px solid #27272A;border-radius:8px;font-size:14px;outline:none;font-family:${FN};background:#09090B;color:#FAFAFA;margin-bottom:10px;transition:border-color .15s,box-shadow .15s}._in:focus{border-color:${A};box-shadow:0 0 0 3px #10B98112}._in::placeholder{color:#3F3F46}
-._pb{height:3px;background:#27272A;border-radius:99px;overflow:hidden}._pf{height:100%;border-radius:99px}
-._bn{display:flex;background:#09090B;border-top:1px solid #27272A;padding:6px 0}._bi{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;cursor:pointer;color:#3F3F46;transition:.15s}._bi._a{color:${A}}
-._mp2{position:absolute;bottom:60px;right:8px;background:#18181B;border:1px solid #27272A;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.4);padding:4px;width:200px;z-index:50}
-._mo{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;z-index:100;animation:_fi .1s}._mp{background:#18181B;border:1px solid #27272A;border-radius:14px;padding:24px;width:500px;max-height:88vh;overflow-y:auto;animation:_si .15s ease-out}._mm{width:100%;max-height:92vh;border-radius:14px 14px 0 0;position:fixed;bottom:0;left:0;right:0;animation:_su .2s ease-out;padding:20px 16px 28px}._xb{background:#27272A;border:none;width:28px;height:28px;border-radius:6px;cursor:pointer;color:#71717A;display:flex;align-items:center;justify-content:center;transition:all .1s}._xb:hover{background:#3F3F46;color:#FAFAFA}
+@keyframes _sp{to{transform:rotate(360deg)}}@keyframes _fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}@keyframes _si{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}@keyframes _su{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes _gp{0%,100%{opacity:.3}50%{opacity:.6}}
+*{box-sizing:border-box;margin:0;padding:0}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#1A1A1F;border-radius:99px}::-webkit-scrollbar-thumb:hover{background:#2A2A30}input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}select{color-scheme:dark}::selection{background:rgba(16,185,129,.2)}
+._c{background:linear-gradient(180deg,#111113 0%,#0C0C0E 100%);border:1px solid #1A1A1F;border-radius:14px;padding:20px;position:relative;box-shadow:0 2px 16px rgba(0,0,0,.2),0 0 0 1px rgba(255,255,255,.02) inset;transition:border-color .3s,box-shadow .3s,transform .2s}._c:hover{border-color:#252529;box-shadow:0 4px 24px rgba(0,0,0,.3),0 0 0 1px rgba(255,255,255,.03) inset,0 0 60px rgba(16,185,129,.02);transform:translateY(-1px)}
+._ni{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:500;color:#52525B;transition:all .2s;position:relative;margin-bottom:1px}._ni:hover{color:#A1A1AA;background:rgba(255,255,255,.03)}._ni._a{color:#E4E4E7;background:linear-gradient(90deg,rgba(16,185,129,.08) 0%,transparent 100%);font-weight:600}._ni._a::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:16px;background:${A};border-radius:0 4px 4px 0;box-shadow:0 0 12px rgba(16,185,129,.4)}
+._ba{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:${FN};background:linear-gradient(135deg,${A} 0%,#059669 100%);color:#fff;transition:all .2s;box-shadow:0 2px 8px rgba(16,185,129,.2)}._ba:hover{filter:brightness(1.1);box-shadow:0 4px 20px rgba(16,185,129,.3);transform:translateY(-1px)}._bs{padding:5px 12px;font-size:11px;border-radius:8px}
+._bg{padding:9px 18px;background:#111113;border:1px solid #1F1F23;border-radius:10px;font-size:13px;color:#71717A;cursor:pointer;font-family:${FN};font-weight:500;transition:all .2s}._bg:hover{background:#18181B;border-color:#2A2A30;color:#A1A1AA}
+._bo{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:8px;border:1px solid #1F1F23;background:transparent;cursor:pointer;font-size:11px;font-weight:600;font-family:${FN};color:#52525B;transition:all .2s}._bo:hover{border-color:rgba(16,185,129,.4);color:${A};box-shadow:0 0 16px rgba(16,185,129,.08)}
+table{width:100%;border-collapse:collapse;min-width:600px}th{padding:10px 16px;text-align:left;font-size:10px;font-weight:600;color:#2A2A30;text-transform:uppercase;letter-spacing:.08em;background:#08080A;border-bottom:1px solid #1A1A1F}td{padding:12px 16px;font-size:14px;border-bottom:1px solid #111113;color:#71717A;transition:background .15s}tr:hover td{background:rgba(16,185,129,.02)}
+._ab{padding:5px;border-radius:8px;border:none;background:transparent;color:#2A2A30;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}._ab:hover{color:${A};background:rgba(16,185,129,.06)}._ab._d:hover{color:#EF4444;background:rgba(239,68,68,.06)}
+._tb{padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:#3F3F46;border:none;background:transparent;font-family:${FN};transition:all .2s}._tb:hover{color:#71717A}._tb._a{background:linear-gradient(135deg,rgba(16,185,129,.1) 0%,rgba(16,185,129,.05) 100%);color:#E4E4E7;box-shadow:0 0 0 1px rgba(16,185,129,.15) inset}
+._in{width:100%;padding:10px 12px;border:1px solid #1A1A1F;border-radius:10px;font-size:14px;outline:none;font-family:${FN};background:#08080A;color:#FAFAFA;margin-bottom:10px;transition:border-color .2s,box-shadow .2s}._in:focus{border-color:rgba(16,185,129,.5);box-shadow:0 0 0 3px rgba(16,185,129,.08),0 0 24px rgba(16,185,129,.04)}._in::placeholder{color:#27272A}
+._pb{height:3px;background:#111113;border-radius:99px;overflow:hidden}._pf{height:100%;border-radius:99px}
+._bn{display:flex;background:linear-gradient(180deg,#0A0A0C 0%,#050506 100%);border-top:1px solid #1A1A1F;padding:6px 0;backdrop-filter:blur(20px)}._bi{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;cursor:pointer;color:#27272A;transition:.2s}._bi._a{color:${A}}._bi._a::after{content:'';display:block;width:3px;height:3px;border-radius:50%;background:${A};box-shadow:0 0 6px rgba(16,185,129,.5);margin-top:2px}
+._mp2{position:absolute;bottom:60px;right:8px;background:linear-gradient(180deg,#141417 0%,#0C0C0E 100%);border:1px solid #1F1F23;border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.02) inset;padding:6px;width:200px;z-index:50}
+._mo{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(30px);display:flex;align-items:center;justify-content:center;z-index:100;animation:_fi .15s}._mp{background:linear-gradient(180deg,#151518 0%,#0E0E10 100%);border:1px solid #1F1F23;border-radius:16px;padding:24px;width:500px;max-height:88vh;overflow-y:auto;animation:_si .2s ease-out;box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.03) inset,0 0 120px rgba(16,185,129,.02)}._mm{width:100%;max-height:92vh;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;animation:_su .25s ease-out;padding:20px 16px 28px}._xb{background:#151518;border:1px solid #1F1F23;width:28px;height:28px;border-radius:8px;cursor:pointer;color:#3F3F46;display:flex;align-items:center;justify-content:center;transition:all .15s}._xb:hover{background:#1F1F23;border-color:#2A2A30;color:#A1A1AA}
 `}</style>
-
-      {!mob && <div style={{ width: 220, borderRight: "1px solid #27272A", display: "flex", flexDirection: "column", flexShrink: 0 }}>
-        <div style={{ padding: "16px 14px", display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid #1F1F23" }}><div style={{ width: 30, height: 30, borderRadius: 8, background: A, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 800 }}>H</div><div><div style={{ fontWeight: 700, fontSize: 14 }}>{L.htinh}</div><div style={{ fontSize: 10, color: "#52525B", fontWeight: 500 }}>Premium</div></div></div>
-        <nav style={{ flex: 1, padding: "8px 6px", overflow: "auto" }}>{menu.map((m) => { const Ic = m.ic; return <div key={m.id} className={"_ni" + (pg === m.id ? " _a" : "")} onClick={() => setPg(m.id)}><Ic size={15} strokeWidth={pg === m.id ? 2 : 1.5} />{m.l}</div>; })}</nav>
-        <div style={{ padding: "12px 10px", borderTop: "1px solid #1F1F23" }}><div style={{ display: "flex", alignItems: "center", gap: 8 }}><div style={{ width: 28, height: 28, borderRadius: 7, background: "#27272A", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "#A1A1AA" }}>{user.name.charAt(0)}</div><div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#A1A1AA", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}</div><div style={{ fontSize: 10, color: "#3F3F46" }}>{isAdmin ? "Admin" : "GV"}</div></div><button onClick={logout} className="_ab _d"><LogOut size={13} /></button></div></div>
+ 
+      {!mob && <div style={{ width: 224, borderRight: "1px solid #111113", display: "flex", flexDirection: "column", flexShrink: 0, background: "linear-gradient(180deg, #0A0A0C 0%, #050506 100%)" }}>
+        <div style={{ padding: "18px 16px", display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid #111113" }}><div style={{ width: 32, height: 32, borderRadius: 9, background: `linear-gradient(135deg, ${A} 0%, #059669 100%)`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 800, boxShadow: "0 0 20px rgba(16,185,129,.2)" }}>H</div><div><div style={{ fontWeight: 700, fontSize: 14, letterSpacing: "-.01em" }}>{L.htinh}</div><div style={{ fontSize: 10, color: "#2A2A30", fontWeight: 600, letterSpacing: ".06em", textTransform: "uppercase" }}>Premium</div></div></div>
+        <nav style={{ flex: 1, padding: "10px 8px", overflow: "auto" }}>{menu.map((m) => { const Ic = m.ic; return <div key={m.id} className={"_ni" + (pg === m.id ? " _a" : "")} onClick={() => setPg(m.id)}><Ic size={15} strokeWidth={pg === m.id ? 2 : 1.5} />{m.l}</div>; })}</nav>
+        <div style={{ padding: "14px 12px", borderTop: "1px solid #111113" }}><div style={{ display: "flex", alignItems: "center", gap: 8 }}><div style={{ width: 30, height: 30, borderRadius: 8, background: "linear-gradient(135deg, #18181B 0%, #111113 100%)", border: "1px solid #1F1F23", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "#52525B" }}>{user.name.charAt(0)}</div><div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#A1A1AA", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}</div><div style={{ fontSize: 10, color: "#27272A" }}>{isAdmin ? "Admin" : "GV"}</div></div><button onClick={logout} className="_ab _d"><LogOut size={13} /></button></div></div>
       </div>}
-
+ 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        <div style={{ padding: "8px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #1F1F23", flexShrink: 0 }}>
-          {mob ? <div style={{ display: "flex", alignItems: "center", gap: 8 }}><div style={{ width: 24, height: 24, borderRadius: 6, background: A, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 10, fontWeight: 800 }}>H</div><span style={{ fontWeight: 700, fontSize: 13 }}>{L.htinh}</span></div> : <div style={{ position: "relative", width: 220 }}><Search size={13} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#3F3F46" }} /><input className="_in" style={{ marginBottom: 0, paddingLeft: 30, fontSize: 13 }} placeholder={L.tkiem} value={q} onChange={(e) => setQ(e.target.value)} /></div>}
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>{!mob && (ov.length + needFU.length) > 0 && <span style={{ fontSize: 10, fontWeight: 600, color: "#EF4444", background: "#EF444412", padding: "3px 8px", borderRadius: 4 }}>{ov.length + needFU.length} {L.cxl}</span>}{mob && <button onClick={logout} className="_ab _d"><LogOut size={14} /></button>}</div>
+        <div style={{ padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #111113", flexShrink: 0, background: "rgba(5,5,6,.8)", backdropFilter: "blur(20px)" }}>
+          {mob ? <div style={{ display: "flex", alignItems: "center", gap: 8 }}><div style={{ width: 26, height: 26, borderRadius: 7, background: `linear-gradient(135deg, ${A} 0%, #059669 100%)`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 10, fontWeight: 800, boxShadow: "0 0 12px rgba(16,185,129,.2)" }}>H</div><span style={{ fontWeight: 700, fontSize: 13, letterSpacing: "-.01em" }}>{L.htinh}</span></div> : <div style={{ position: "relative", width: 240 }}><Search size={13} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#27272A" }} /><input className="_in" style={{ marginBottom: 0, paddingLeft: 32, fontSize: 13, background: "#08080A" }} placeholder={L.tkiem} value={q} onChange={(e) => setQ(e.target.value)} /></div>}
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>{!mob && (ov.length + needFU.length) > 0 && <span style={{ fontSize: 10, fontWeight: 600, color: "#EF4444", background: "rgba(239,68,68,.08)", padding: "4px 10px", borderRadius: 6, border: "1px solid rgba(239,68,68,.12)", letterSpacing: ".02em" }}>{ov.length + needFU.length} {L.cxl}</span>}{mob && <button onClick={logout} className="_ab _d"><LogOut size={14} /></button>}</div>
         </div>
-
-        <div style={{ flex: 1, overflow: "auto", padding: mob ? 12 : 20 }}>
+ 
+        <div style={{ flex: 1, overflow: "auto", padding: mob ? 12 : 24 }}>
           {pg === "home" && <div>
-            <div style={{ fontSize: mob ? 20 : 24, fontWeight: 700, marginBottom: 20 }}>{L.tq}</div>
-            {isAdmin && <div style={{ display: "inline-flex", gap: 2, background: "#18181B", borderRadius: 8, padding: 2, marginBottom: 16, border: "1px solid #27272A" }}>{[["kpi", L.chiso], ["funnel", L.pheu], ["trends", L.xhg]].map(([id, l]) => <button key={id} className={"_tb" + (dtab === id ? " _a" : "")} onClick={() => setDtab(id)}>{l}</button>)}</div>}
-            <div style={{ display: "grid", gridTemplateColumns: gc(isAdmin ? 3 : 2), gap: 10, marginBottom: 16 }}>{(isAdmin ? [{ l: L.km, v: leads.filter((l) => l.stage !== "lost").length, sp: [8, 12, 10, 15, 11, 14], tr: 12 }, { l: L.hv, v: act.length, sp: [18, 20, 22, 21, 24, 26], tr: 8 }, { l: L.hskdo, v: `${hskRate}%`, sp: [60, 65, 70, 68, 75, hskRate] }, { l: L.dthu, v: vnd(collected), sp: [42, 48, 52, 58, 65, 72], tr: 11 }, { l: L.nohp, v: ov.length, er: ov.length > 0 }, { l: L.cnhac, v: needFU.length }] : [{ l: L.hvlt, v: stu.filter((s) => canSee(s.cls)).length }, { l: L.bc, v: rpt.filter((r) => r.teacher === user.name).length }, { l: L.dtb, v: (stu.filter((s) => canSee(s.cls) && s.status === L.dhoc).reduce((a, s) => a + s.score, 0) / Math.max(stu.filter((s) => canSee(s.cls) && s.status === L.dhoc).length, 1)).toFixed(1) }, { l: L.ccan, v: `${Math.round(stu.filter((s) => canSee(s.cls) && s.status === L.dhoc).reduce((a, s) => a + s.attend, 0) / Math.max(stu.filter((s) => canSee(s.cls) && s.status === L.dhoc).length, 1))}%` }]).map((s, i) => <div key={i} className="_c"><div style={{ fontSize: 11, fontWeight: 500, color: "#52525B", marginBottom: 8 }}>{s.l}</div><div style={{ fontSize: mob ? 28 : 36, fontWeight: 800, letterSpacing: "-.04em", color: s.er ? "#EF4444" : "#FAFAFA", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{s.v}</div>{(s.sp || s.tr !== undefined) && <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>{s.sp && <Spark data={s.sp} />}{s.tr && <span style={{ fontSize: 11, fontWeight: 600, color: A, display: "flex", alignItems: "center", gap: 2 }}><TrendingUp size={11} />{s.tr}%</span>}</div>}</div>)}</div>
-            {dtab === "kpi" && isAdmin && <div style={{ display: "grid", gridTemplateColumns: gc(3), gap: 10 }}><div className="_c"><div style={{ fontSize: 11, fontWeight: 600, color: "#52525B", marginBottom: 12, textTransform: "uppercase", letterSpacing: ".05em" }}>{L.cthu}</div>{ov.map((f) => <div key={f.id} style={{ padding: "8px 0", borderBottom: "1px solid #1F1F23", display: "flex", justifyContent: "space-between", alignItems: "center" }}><div><div style={{ fontWeight: 600, color: "#A1A1AA", fontSize: 13 }}>{f.name}</div><div style={{ color: "#EF4444", fontSize: 12 }}>{vnd(f.d2)}</div></div><button className="_ba _bs" onClick={() => { setFin(fin.map((x) => x.id === f.id ? { ...x, st: "paid" } : x)); updateRow("finance", { ...f, st: "paid" }); }}><Check size={11} /></button></div>)}{ov.length === 0 && <div style={{ color: A, fontSize: 12 }}>OK</div>}</div><div className="_c"><div style={{ fontSize: 11, fontWeight: 600, color: "#52525B", marginBottom: 12, textTransform: "uppercase", letterSpacing: ".05em" }}>Top 5</div>{ranked.slice(0, 5).map((s, i) => <div key={s.id} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", fontSize: 13 }}><span style={{ color: "#71717A" }}><span style={{ color: i < 3 ? A : "#3F3F46", fontWeight: 700, marginRight: 8 }}>{i + 1}</span>{s.name}</span><span style={{ fontWeight: 700 }}>{s.score}</span></div>)}</div><div className="_c"><div style={{ fontSize: 11, fontWeight: 600, color: "#52525B", marginBottom: 12, textTransform: "uppercase", letterSpacing: ".05em" }}>{L.gday}</div>{rpt.slice(0, 4).map((r) => <div key={r.id} style={{ padding: "6px 0", borderBottom: "1px solid #1F1F23", fontSize: 12 }}><span style={{ color: "#A1A1AA", fontWeight: 600 }}>{r.teacher}</span> <span style={{ color: "#3F3F46" }}>{r.cls} {r.date}</span></div>)}</div></div>}
-            {dtab === "funnel" && isAdmin && <div style={{ display: "grid", gridTemplateColumns: gc(2), gap: 10 }}><div className="_c"><div style={{ fontSize: 11, fontWeight: 600, color: "#52525B", marginBottom: 14, textTransform: "uppercase", letterSpacing: ".05em" }}>{L.pheu}</div>{funnelData.map((f, i) => <div key={f.s} style={{ height: 32, borderRadius: 6, display: "flex", alignItems: "center", padding: "0 12px", color: "#000", fontWeight: 700, fontSize: 11, marginBottom: 6, background: CX[i], width: `${Math.max((f.v / Math.max(funnelData[0].v, 1)) * 100, 25)}%` }}>{f.s}: {f.v}</div>)}</div><Ch title={L.nguon}><PieChart><Pie data={srcData} cx="50%" cy="50%" innerRadius={30} outerRadius={60} dataKey="v" label={({ name, v }) => `${name.slice(0, 3)}:${v}`} fontSize={10} stroke="none">{srcData.map((e, i) => <Cell key={i} fill={CX[i]} />)}</Pie><Tooltip content={<Tip />} /></PieChart></Ch></div>}
-            {dtab === "trends" && isAdmin && <div style={{ display: "grid", gridTemplateColumns: gc(2), gap: 10 }}><Ch title={L.dthu2}><BarChart data={monthTrend}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23" /><XAxis dataKey="m" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false} /><YAxis fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="rev" fill={A} radius={[4, 4, 0, 0]} /></BarChart></Ch><Ch title={L.ccan}><LineChart data={attendTrend}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23" /><XAxis dataKey="w" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false} /><YAxis domain={[80, 100]} fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Line type="monotone" dataKey="v" stroke="#3B82F6" strokeWidth={1.5} dot={{ fill: "#3B82F6", r: 3, strokeWidth: 0 }} /></LineChart></Ch></div>}
+            <div style={{ fontSize: mob ? 22 : 28, fontWeight: 800, marginBottom: 24, letterSpacing: "-.03em" }}>{L.tq}</div>
+            {isAdmin && <div style={{ display: "inline-flex", gap: 2, background: "#0A0A0C", borderRadius: 10, padding: 3, marginBottom: 20, border: "1px solid #1A1A1F" }}>{[["kpi", L.chiso], ["funnel", L.pheu], ["trends", L.xhg]].map(([id, l]) => <button key={id} className={"_tb" + (dtab === id ? " _a" : "")} onClick={() => setDtab(id)}>{l}</button>)}</div>}
+            <div style={{ display: "grid", gridTemplateColumns: gc(isAdmin ? 3 : 2), gap: 12, marginBottom: 20 }}>{(isAdmin ? [{ l: L.km, v: leads.filter((l) => l.stage !== "lost").length, sp: [8, 12, 10, 15, 11, 14], tr: 12 }, { l: L.hv, v: act.length, sp: [18, 20, 22, 21, 24, 26], tr: 8 }, { l: L.hskdo, v: `${hskRate}%`, sp: [60, 65, 70, 68, 75, hskRate] }, { l: L.dthu, v: vnd(collected), sp: [42, 48, 52, 58, 65, 72], tr: 11 }, { l: L.nohp, v: ov.length, er: ov.length > 0 }, { l: L.cnhac, v: needFU.length }] : [{ l: L.hvlt, v: stu.filter((s) => canSee(s.cls)).length }, { l: L.bc, v: rpt.filter((r) => r.teacher === user.name).length }, { l: L.dtb, v: (stu.filter((s) => canSee(s.cls) && s.status === L.dhoc).reduce((a, s) => a + s.score, 0) / Math.max(stu.filter((s) => canSee(s.cls) && s.status === L.dhoc).length, 1)).toFixed(1) }, { l: L.ccan, v: `${Math.round(stu.filter((s) => canSee(s.cls) && s.status === L.dhoc).reduce((a, s) => a + s.attend, 0) / Math.max(stu.filter((s) => canSee(s.cls) && s.status === L.dhoc).length, 1))}%` }]).map((s, i) => <div key={i} className="_c" style={{ overflow: "hidden" }}><div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${s.er ? "rgba(239,68,68,.2)" : "rgba(255,255,255,.04)"}, transparent)` }} /><div style={{ fontSize: 11, fontWeight: 500, color: "#3F3F46", marginBottom: 10, letterSpacing: ".02em" }}>{s.l}</div><div style={{ fontSize: mob ? 30 : 38, fontWeight: 800, letterSpacing: "-.04em", color: s.er ? "#EF4444" : "#FAFAFA", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{s.v}</div>{(s.sp || s.tr !== undefined) && <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>{s.sp && <Spark data={s.sp} />}{s.tr && <span style={{ fontSize: 11, fontWeight: 600, color: A, display: "flex", alignItems: "center", gap: 2 }}><TrendingUp size={11} />{s.tr}%</span>}</div>}</div>)}</div>
+            {dtab === "kpi" && isAdmin && <div style={{ display: "grid", gridTemplateColumns: gc(3), gap: 12 }}><div className="_c"><div style={{ fontSize: 10, fontWeight: 600, color: "#2A2A30", marginBottom: 14, textTransform: "uppercase", letterSpacing: ".08em" }}>{L.cthu}</div>{ov.map((f) => <div key={f.id} style={{ padding: "10px 0", borderBottom: "1px solid #111113", display: "flex", justifyContent: "space-between", alignItems: "center" }}><div><div style={{ fontWeight: 600, color: "#A1A1AA", fontSize: 13 }}>{f.name}</div><div style={{ color: "#EF4444", fontSize: 12, marginTop: 2 }}>{vnd(f.d2)}</div></div><button className="_ba _bs" onClick={() => { setFin(fin.map((x) => x.id === f.id ? { ...x, st: "paid" } : x)); updateRow("finance", { ...f, st: "paid" }); }}><Check size={11} /></button></div>)}{ov.length === 0 && <div style={{ color: A, fontSize: 12, opacity: .6 }}>OK</div>}</div><div className="_c"><div style={{ fontSize: 10, fontWeight: 600, color: "#2A2A30", marginBottom: 14, textTransform: "uppercase", letterSpacing: ".08em" }}>Top 5</div>{ranked.slice(0, 5).map((s, i) => <div key={s.id} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", fontSize: 13 }}><span style={{ color: "#52525B" }}><span style={{ color: i < 3 ? A : "#27272A", fontWeight: 800, marginRight: 8, fontSize: 11, fontVariantNumeric: "tabular-nums" }}>{i + 1}</span>{s.name}</span><span style={{ fontWeight: 800, fontVariantNumeric: "tabular-nums", color: "#E4E4E7" }}>{s.score}</span></div>)}</div><div className="_c"><div style={{ fontSize: 10, fontWeight: 600, color: "#2A2A30", marginBottom: 14, textTransform: "uppercase", letterSpacing: ".08em" }}>{L.gday}</div>{rpt.slice(0, 4).map((r) => <div key={r.id} style={{ padding: "7px 0", borderBottom: "1px solid #111113", fontSize: 12 }}><span style={{ color: "#A1A1AA", fontWeight: 600 }}>{r.teacher}</span> <span style={{ color: "#27272A" }}>{r.cls} {r.date}</span></div>)}</div></div>}
+            {dtab === "funnel" && isAdmin && <div style={{ display: "grid", gridTemplateColumns: gc(2), gap: 12 }}><div className="_c"><div style={{ fontSize: 10, fontWeight: 600, color: "#2A2A30", marginBottom: 16, textTransform: "uppercase", letterSpacing: ".08em" }}>{L.pheu}</div>{funnelData.map((f, i) => <div key={f.s} style={{ height: 34, borderRadius: 8, display: "flex", alignItems: "center", padding: "0 12px", color: "#000", fontWeight: 700, fontSize: 11, marginBottom: 6, background: `linear-gradient(90deg, ${CX[i]} 0%, ${CX[i]}CC 100%)`, width: `${Math.max((f.v / Math.max(funnelData[0].v, 1)) * 100, 25)}%`, boxShadow: `0 2px 12px ${CX[i]}30` }}>{f.s}: {f.v}</div>)}</div><Ch title={L.nguon}><PieChart><Pie data={srcData} cx="50%" cy="50%" innerRadius={30} outerRadius={60} dataKey="v" label={({ name, v }) => `${name.slice(0, 3)}:${v}`} fontSize={10} stroke="none">{srcData.map((e, i) => <Cell key={i} fill={CX[i]} />)}</Pie><Tooltip content={<Tip />} /></PieChart></Ch></div>}
+            {dtab === "trends" && isAdmin && <div style={{ display: "grid", gridTemplateColumns: gc(2), gap: 12 }}><Ch title={L.dthu2}><BarChart data={monthTrend}><CartesianGrid strokeDasharray="3 3" stroke="#111113" /><XAxis dataKey="m" fontSize={10} stroke="#27272A" tickLine={false} axisLine={false} /><YAxis fontSize={10} stroke="#27272A" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="rev" fill={A} radius={[6, 6, 0, 0]} /></BarChart></Ch><Ch title={L.ccan}><LineChart data={attendTrend}><CartesianGrid strokeDasharray="3 3" stroke="#111113" /><XAxis dataKey="w" fontSize={10} stroke="#27272A" tickLine={false} axisLine={false} /><YAxis domain={[80, 100]} fontSize={10} stroke="#27272A" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Line type="monotone" dataKey="v" stroke="#3B82F6" strokeWidth={2} dot={{ fill: "#3B82F6", r: 3, strokeWidth: 0 }} /></LineChart></Ch></div>}
           </div>}
-
-          {pg === "leads" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}><div style={{ fontSize: 20, fontWeight: 700 }}>{L.ktn}</div><button className="_ba" onClick={() => om("l", { id: `LD${Date.now()}`, name: "", phone: "", source: "Facebook", stage: "inquiry", interest: "HSK 1", note: "", created: today, lastContact: today }, 1)}><Plus size={13} />{L.them}</button></div><div style={{ overflow: "auto", borderRadius: 12 }}><div className="_c" style={{ padding: 0 }}><table><thead><tr>{[L.ten, L.sdt, L.nguonh, "QT", "GD", ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{leads.map((l) => { const [st, sv] = stB(l.stage); return <tr key={l.id}><td style={{ fontWeight: 600, color: "#D4D4D8" }}>{l.name}</td><td>{l.phone}</td><td><Bd t={l.source} v={sb(l.source)} /></td><td><Bd t={l.interest} v="in" /></td><td><Bd t={st} v={sv} /></td><td><div style={{ display: "flex", gap: 3, alignItems: "center" }}>{l.stage === "inquiry" && <button className="_bo" onClick={() => { setLeads(leads.map((x) => x.id === l.id ? { ...x, stage: "trial" } : x)); updateRow("leads", { ...l, stage: "trial" }); }}><ChevronRight size={11} />{L.bthu}</button>}{l.stage === "trial" && <button className="_ba _bs" onClick={() => { setLeads(leads.map((x) => x.id === l.id ? { ...x, stage: "registered" } : x)); updateRow("leads", { ...l, stage: "registered" }); }}>{L.dk}</button>}<button className="_ab" onClick={() => om("l", { ...l }, 0)}><Pencil size={12} /></button><button className="_ab _d" onClick={() => { if (confirm(L.xoa)) doDel("l", l.id); }}><Trash2 size={12} /></button></div></td></tr>; })}</tbody></table></div></div></div>}
-
-          {pg === "stu" && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}><div style={{ fontSize: 20, fontWeight: 700 }}>{L.hv}</div>{isAdmin && <button className="_ba" onClick={() => om("s", { id: `HV${Date.now()}`, name: "", phone: "", cls: cls2[0]?.id || "", level: "HSK 1", status: L.dhoc, score: 0, attend: 90, source: "Facebook" }, 1)}><Plus size={13} />{L.them}</button>}</div><div style={{ overflow: "auto", borderRadius: 12 }}><div className="_c" style={{ padding: 0 }}><table><thead><tr>{["#", "HV", "Level", L.lop, L.diemh, "CC", "TT", ...(isAdmin ? [""] : [])].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{stu.filter((s) => (!q || s.name.toLowerCase().includes(query)) && canSee(s.cls)).map((s, i) => <tr key={s.id}><td style={{ color: "#3F3F46", fontSize: 11 }}>{i + 1}</td><td><div style={{ fontWeight: 600, color: "#D4D4D8" }}>{s.name}</div><div style={{ color: "#52525B", fontSize: 12 }}>{s.phone}</div></td><td><Bd t={s.level} v="in" /></td><td style={{ color: "#52525B" }}>{s.cls}</td><td style={{ fontWeight: 800, color: s.score >= 8 ? A : s.score >= 6.5 ? "#F59E0B" : "#EF4444", fontSize: 18, fontVariantNumeric: "tabular-nums" }}>{s.score}</td><td><div style={{ display: "flex", alignItems: "center", gap: 6 }}><div className="_pb" style={{ width: 44 }}><div className="_pf" style={{ width: `${s.attend}%`, background: s.attend >= 90 ? A : "#F59E0B" }} /></div><span style={{ fontSize: 10, color: "#52525B", fontWeight: 600 }}>{s.attend}%</span></div></td><td><Bd t={s.status} v={s.status === L.dhoc ? "ok" : s.status === L.tnghi ? "wa" : "mu"} /></td>{isAdmin && <td><button className="_ab" onClick={() => om("s", { ...s }, 0)}><Pencil size={12} /></button><button className="_ab _d" onClick={() => { if (confirm(L.xoa)) doDel("s", s.id); }}><Trash2 size={12} /></button></td>}</tr>)}</tbody></table></div></div></div>}
-
-          {pg === "trials" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}><div style={{ fontSize: 20, fontWeight: 700 }}>{L.ht}</div><button className="_ba" onClick={() => om("tr", { id: `TL${Date.now()}`, name: "", phone: "", source: "Facebook", date: today, time: "18:00", cls: cls2[0]?.id || "", teacher: teachers[0] || "", status: "scheduled", result: "", followUp: "" }, 1)}><Plus size={13} />{L.xlich}</button></div><div style={{ overflow: "auto", borderRadius: 12 }}><div className="_c" style={{ padding: 0 }}><table><thead><tr>{[L.ten, L.ngay, L.lop, "TT", "KQ", L.nhac, ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{trials.map((t) => <tr key={t.id}><td style={{ fontWeight: 600, color: "#D4D4D8" }}>{t.name}</td><td style={{ fontSize: 13, color: "#52525B" }}>{t.date} {t.time}</td><td style={{ color: "#52525B" }}>{t.cls}</td><td><Bd t={{ scheduled: L.bxep, completed: L.bxong, "no-show": L.bkd }[t.status] || t.status} v={{ scheduled: "in", completed: "ok", "no-show": "er" }[t.status] || "mu"} /></td><td>{t.result ? <Bd t={{ enrolled: L.dk, thinking: L.bnghi, "not-interested": L.bkqt }[t.result]} v={{ enrolled: "ok", thinking: "wa", "not-interested": "mu" }[t.result]} /> : <span style={{ color: "#27272A" }}>--</span>}</td><td style={{ color: t.followUp && daysLeft(t.followUp) <= 1 ? "#EF4444" : "#3F3F46", fontSize: 12 }}>{t.followUp || "--"}</td><td><div style={{ display: "flex", gap: 3 }}>{t.status === "scheduled" && <button className="_ba _bs" onClick={() => { setTrials(trials.map((x) => x.id === t.id ? { ...x, status: "completed" } : x)); updateRow("trials", { ...t, status: "completed" }); }}><Check size={11} /></button>}<button className="_ab" onClick={() => om("tr", { ...t }, 0)}><Pencil size={12} /></button></div></td></tr>)}</tbody></table></div></div></div>}
-
-          {pg === "contracts" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}><div style={{ fontSize: 20, fontWeight: 700 }}>{L.hd}</div><button className="_ba" onClick={() => om("ct", { id: `HD${Date.now()}`, name: "", cls: cls2[0]?.id || "", start: today, end: "", duration: L["6t"], fee: 0, status: "active", note: "" }, 1)}><Plus size={13} />{L.tao}</button></div><div style={{ overflow: "auto", borderRadius: 12 }}><div className="_c" style={{ padding: 0 }}><table><thead><tr>{["HV", L.lop, "BD", "KT", L.phi, "TT", L.con, ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{contracts.map((c) => { const dl = daysLeft(c.end); const rs = c.status === "renewed" ? "renewed" : dl <= 0 ? "expired" : dl <= 30 ? "expiring" : "active"; return <tr key={c.id}><td style={{ fontWeight: 600, color: "#D4D4D8" }}>{c.name}</td><td><Bd t={c.cls} v="in" /></td><td style={{ fontSize: 12, color: "#52525B" }}>{c.start}</td><td style={{ fontSize: 12, color: "#52525B" }}>{c.end}</td><td style={{ fontWeight: 700, color: A }}>{vnd(c.fee)}</td><td><Bd t={{ active: "OK", expiring: L.bsap, expired: L.bhet, renewed: L.gh }[rs]} v={{ active: "ok", expiring: "wa", expired: "er", renewed: "in" }[rs]} /></td><td style={{ fontWeight: 700, color: dl <= 0 ? "#EF4444" : dl <= 30 ? "#F59E0B" : A, fontVariantNumeric: "tabular-nums" }}>{dl <= 0 ? L.bhet : `${dl} ${L.ngaythuong}`}</td><td><div style={{ display: "flex", gap: 3 }}>{(rs === "expiring" || rs === "expired") && <button className="_ba _bs" onClick={() => { const nc = { ...c, status: "renewed" }; setContracts(contracts.map((x) => x.id === c.id ? nc : x)); updateRow("contracts", nc); }}>{L.gh}</button>}<button className="_ab" onClick={() => om("ct", { ...c }, 0)}><Pencil size={12} /></button></div></td></tr>; })}</tbody></table></div></div></div>}
-
-          {pg === "hsk" && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}><div style={{ fontSize: 20, fontWeight: 700 }}>Thi HSK</div>{isAdmin && <button className="_ba" onClick={() => om("hk", { id: `HSK${Date.now()}`, name: "", level: "HSK 1", examDate: "", score: 0, passed: "", status: "registered" }, 1)}><Plus size={13} />{L.dk}</button>}</div><div style={{ display: "grid", gridTemplateColumns: gc(2), gap: 10, marginBottom: 14 }}><Ch title={L.kqua}><BarChart data={["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5"].map((l) => ({ l, p: hsk.filter((h) => h.level === l && h.passed === "yes").length, f: hsk.filter((h) => h.level === l && h.passed === "no").length }))}><XAxis dataKey="l" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false} /><YAxis fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="p" name={L.dat} fill={A} stackId="a" radius={[4, 4, 0, 0]} /><Bar dataKey="f" name={L.btruot} fill="#EF4444" stackId="a" radius={[4, 4, 0, 0]} /></BarChart></Ch><div className="_c" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: 11, fontWeight: 600, color: "#52525B", marginBottom: 12, textTransform: "uppercase", letterSpacing: ".05em" }}>{L.tyle}</div><div style={{ fontSize: 48, fontWeight: 800, color: hskRate >= 70 ? A : "#F59E0B", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{hskRate}%</div><div style={{ fontSize: 12, color: "#52525B", marginTop: 6 }}>{hskP}/{hskTt}</div><div className="_pb" style={{ marginTop: 10, width: "40%" }}><div className="_pf" style={{ width: `${hskRate}%`, background: A }} /></div></div></div><div style={{ overflow: "auto", borderRadius: 12 }}><div className="_c" style={{ padding: 0 }}><table><thead><tr>{["HV", "Level", L.ngay, L.diemh, "KQ", ...(isAdmin ? [""] : [])].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{hsk.map((h) => <tr key={h.id}><td style={{ fontWeight: 600, color: "#D4D4D8" }}>{h.name}</td><td><Bd t={h.level} v="pu" /></td><td style={{ fontSize: 12, color: "#52525B" }}>{h.examDate}</td><td style={{ fontWeight: 800, fontSize: 16, fontVariantNumeric: "tabular-nums" }}>{h.score || <span style={{ color: "#27272A" }}>--</span>}</td><td>{h.passed === "yes" ? <Bd t={L.dat} v="ok" /> : h.passed === "no" ? <Bd t={L.btruot} v="er" /> : <Bd t={L.bchua} v="in" />}</td>{isAdmin && <td><button className="_ab" onClick={() => om("hk", { ...h }, 0)}><Pencil size={12} /></button></td>}</tr>)}</tbody></table></div></div></div>}
-
-          {pg === "rpt" && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}><div style={{ fontSize: 20, fontWeight: 700 }}>{L.bc}</div><button className="_ba" onClick={() => om("r", { id: `RP${Date.now()}`, date: today, teacher: isAdmin ? (teachers[0] || "") : user.name, cls: cls2[0]?.id || "", present: 0, absent: 0, absentNames: "", lesson: "", homework: "", flags: "", highlights: "" }, 1)}><Plus size={13} />{L.tao}</button></div>{rpt.filter((r) => isAdmin || r.teacher === user.name).map((r) => <div key={r.id} className="_c" style={{ marginBottom: 8 }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}><div><span style={{ fontWeight: 600, color: "#A1A1AA", fontSize: 13 }}>{r.teacher}</span> <span style={{ color: "#3F3F46", fontSize: 11 }}>{r.cls} {r.date}</span></div><div style={{ display: "flex", gap: 4, alignItems: "center" }}><Bd t={`${r.present}/${r.present + r.absent}`} v={r.absent === 0 ? "ok" : "wa"} /><button className="_ab" onClick={() => om("r", { ...r }, 0)}><Pencil size={12} /></button></div></div><div style={{ fontSize: 13, color: "#71717A", lineHeight: 1.6 }}>{r.lesson}</div>{r.flags && <div style={{ background: "#EF44440A", borderRadius: 6, padding: "6px 10px", marginTop: 6, fontSize: 11, color: "#EF4444", display: "flex", alignItems: "start", gap: 6 }}><AlertTriangle size={11} style={{ marginTop: 1, flexShrink: 0 }} />{r.flags}</div>}{r.highlights && <div style={{ background: "#10B9810A", borderRadius: 6, padding: "6px 10px", marginTop: 6, fontSize: 11, color: A, display: "flex", alignItems: "start", gap: 6 }}><Star size={11} style={{ marginTop: 1, flexShrink: 0 }} />{r.highlights}</div>}</div>)}</div>}
-
-          {pg === "log" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}><div style={{ fontSize: 20, fontWeight: 700 }}>{L.ls}</div><button className="_ba" onClick={() => om("i", { id: `IT${Date.now()}`, ref: "", refName: "", date: today, type: "call", content: "", by: "Admin" }, 1)}><Plus size={13} />{L.them}</button></div>{inter.map((it) => <div key={it.id} style={{ display: "flex", gap: 10, padding: "12px 0", borderBottom: "1px solid #1F1F23" }}><div style={{ width: 28, height: 28, borderRadius: 7, background: "#27272A", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#52525B" }}>{it.type === "call" ? <Phone size={12} /> : it.type === "meeting" ? <Handshake size={12} /> : <MessageCircle size={12} />}</div><div><div><span style={{ fontWeight: 600, color: "#A1A1AA", fontSize: 13 }}>{it.refName}</span> <span style={{ color: "#3F3F46", fontSize: 10 }}>{it.date}</span> <Bd t={it.type === "call" ? L.goi : it.type === "meeting" ? L.gap : L.nhan} v={it.type === "call" ? "ok" : "in"} /></div><div style={{ color: "#52525B", marginTop: 4, fontSize: 13, lineHeight: 1.5 }}>{it.content}</div></div></div>)}</div>}
-
-          {pg === "fin" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}><div style={{ fontSize: 20, fontWeight: 700 }}>{L.tc}</div><button className="_ba" onClick={() => om("f", { id: `HP${Date.now()}`, name: "", cls: cls2[0]?.id || "", total: 0, d1: 0, d2: 0, d2d: "", st: "pending" }, 1)}><Plus size={13} />{L.them}</button></div><div style={{ overflow: "auto", borderRadius: 12 }}><div className="_c" style={{ padding: 0 }}><table><thead><tr>{["HV", L.lop, L.tong, "D1", "D2", L.han, "TT", ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{fin.map((f) => <tr key={f.id}><td style={{ fontWeight: 600, color: "#D4D4D8" }}>{f.name}</td><td><Bd t={f.cls} v="in" /></td><td style={{ fontWeight: 700, color: A }}>{vnd(f.total)}</td><td style={{ fontSize: 12, color: "#52525B" }}>{vnd(f.d1)}</td><td style={{ fontSize: 12, color: "#52525B" }}>{vnd(f.d2)}</td><td style={{ color: f.st === "overdue" ? "#EF4444" : "#3F3F46", fontSize: 12 }}>{f.d2d}</td><td>{f.st === "paid" ? <Bd t="OK" v="ok" /> : f.st === "pending" ? <Bd t={L.cho} v="wa" /> : <Bd t={L.bno} v="er" />}</td><td><div style={{ display: "flex", gap: 3 }}>{f.st !== "paid" && <button className="_ba _bs" onClick={() => { setFin(fin.map((x) => x.id === f.id ? { ...x, st: "paid" } : x)); updateRow("finance", { ...f, st: "paid" }); }}><Check size={11} /></button>}<button className="_ab" onClick={() => om("f", { ...f }, 0)}><Pencil size={12} /></button></div></td></tr>)}</tbody></table></div></div></div>}
-
-          {pg === "charts" && isAdmin && <div><div style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>{L.bd}</div><div style={{ display: "grid", gridTemplateColumns: gc(2), gap: 10 }}><Ch title={L.dthu2}><BarChart data={monthTrend}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23" /><XAxis dataKey="m" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false} /><YAxis fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="rev" fill={A} radius={[4, 4, 0, 0]} /></BarChart></Ch><Ch title={L.ccan}><LineChart data={attendTrend}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23" /><XAxis dataKey="w" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false} /><YAxis domain={[80, 100]} fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Line type="monotone" dataKey="v" stroke="#3B82F6" strokeWidth={1.5} dot={{ fill: "#3B82F6", r: 3, strokeWidth: 0 }} /></LineChart></Ch><Ch title={L.thtoan}><PieChart><Pie data={payPie} cx="50%" cy="50%" innerRadius={30} outerRadius={60} dataKey="v" label={({ n, v }) => `${n}:${v}`} fontSize={10} stroke="none">{payPie.map((e, i) => <Cell key={i} fill={[CX[0], CX[3], CX[4]][i]} />)}</Pie><Tooltip content={<Tip />} /></PieChart></Ch><Ch title={L.diem}><BarChart data={scoreDist}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23" /><XAxis dataKey="r" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false} /><YAxis fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="n" fill="#8B5CF6" radius={[4, 4, 0, 0]} /></BarChart></Ch></div></div>}
+ 
+          {pg === "leads" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.02em" }}>{L.ktn}</div><button className="_ba" onClick={() => om("l", { id: `LD${Date.now()}`, name: "", phone: "", source: "Facebook", stage: "inquiry", interest: "HSK 1", note: "", created: today, lastContact: today }, 1)}><Plus size={13} />{L.them}</button></div><div style={{ overflow: "auto", borderRadius: 14 }}><div className="_c" style={{ padding: 0, overflow: "hidden" }}><table><thead><tr>{[L.ten, L.sdt, L.nguonh, "QT", "GD", ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{leads.map((l) => { const [st, sv] = stB(l.stage); return <tr key={l.id}><td style={{ fontWeight: 600, color: "#D4D4D8" }}>{l.name}</td><td>{l.phone}</td><td><Bd t={l.source} v={sb(l.source)} /></td><td><Bd t={l.interest} v="in" /></td><td><Bd t={st} v={sv} /></td><td><div style={{ display: "flex", gap: 3, alignItems: "center" }}>{l.stage === "inquiry" && <button className="_bo" onClick={() => { setLeads(leads.map((x) => x.id === l.id ? { ...x, stage: "trial" } : x)); updateRow("leads", { ...l, stage: "trial" }); }}><ChevronRight size={11} />{L.bthu}</button>}{l.stage === "trial" && <button className="_ba _bs" onClick={() => { setLeads(leads.map((x) => x.id === l.id ? { ...x, stage: "registered" } : x)); updateRow("leads", { ...l, stage: "registered" }); }}>{L.dk}</button>}<button className="_ab" onClick={() => om("l", { ...l }, 0)}><Pencil size={12} /></button><button className="_ab _d" onClick={() => { if (confirm(L.xoa)) doDel("l", l.id); }}><Trash2 size={12} /></button></div></td></tr>; })}</tbody></table></div></div></div>}
+ 
+          {pg === "stu" && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.02em" }}>{L.hv}</div>{isAdmin && <button className="_ba" onClick={() => om("s", { id: `HV${Date.now()}`, name: "", phone: "", cls: cls2[0]?.id || "", level: "HSK 1", status: L.dhoc, score: 0, attend: 90, source: "Facebook" }, 1)}><Plus size={13} />{L.them}</button>}</div><div style={{ overflow: "auto", borderRadius: 14 }}><div className="_c" style={{ padding: 0, overflow: "hidden" }}><table><thead><tr>{["#", "HV", "Level", L.lop, L.diemh, "CC", "TT", ...(isAdmin ? [""] : [])].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{stu.filter((s) => (!q || s.name.toLowerCase().includes(query)) && canSee(s.cls)).map((s, i) => <tr key={s.id}><td style={{ color: "#27272A", fontSize: 11 }}>{i + 1}</td><td><div style={{ fontWeight: 600, color: "#D4D4D8" }}>{s.name}</div><div style={{ color: "#3F3F46", fontSize: 12 }}>{s.phone}</div></td><td><Bd t={s.level} v="in" /></td><td style={{ color: "#3F3F46" }}>{s.cls}</td><td style={{ fontWeight: 800, color: s.score >= 8 ? A : s.score >= 6.5 ? "#F59E0B" : "#EF4444", fontSize: 20, fontVariantNumeric: "tabular-nums", letterSpacing: "-.02em" }}>{s.score}</td><td><div style={{ display: "flex", alignItems: "center", gap: 6 }}><div className="_pb" style={{ width: 44 }}><div className="_pf" style={{ width: `${s.attend}%`, background: s.attend >= 90 ? A : "#F59E0B", boxShadow: s.attend >= 90 ? `0 0 6px rgba(16,185,129,.3)` : `0 0 6px rgba(245,158,11,.3)` }} /></div><span style={{ fontSize: 10, color: "#3F3F46", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{s.attend}%</span></div></td><td><Bd t={s.status} v={s.status === L.dhoc ? "ok" : s.status === L.tnghi ? "wa" : "mu"} /></td>{isAdmin && <td><button className="_ab" onClick={() => om("s", { ...s }, 0)}><Pencil size={12} /></button><button className="_ab _d" onClick={() => { if (confirm(L.xoa)) doDel("s", s.id); }}><Trash2 size={12} /></button></td>}</tr>)}</tbody></table></div></div></div>}
+ 
+          {pg === "trials" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.02em" }}>{L.ht}</div><button className="_ba" onClick={() => om("tr", { id: `TL${Date.now()}`, name: "", phone: "", source: "Facebook", date: today, time: "18:00", cls: cls2[0]?.id || "", teacher: teachers[0] || "", status: "scheduled", result: "", followUp: "" }, 1)}><Plus size={13} />{L.xlich}</button></div><div style={{ overflow: "auto", borderRadius: 14 }}><div className="_c" style={{ padding: 0, overflow: "hidden" }}><table><thead><tr>{[L.ten, L.ngay, L.lop, "TT", "KQ", L.nhac, ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{trials.map((t) => <tr key={t.id}><td style={{ fontWeight: 600, color: "#D4D4D8" }}>{t.name}</td><td style={{ fontSize: 13, color: "#3F3F46" }}>{t.date} {t.time}</td><td style={{ color: "#3F3F46" }}>{t.cls}</td><td><Bd t={{ scheduled: L.bxep, completed: L.bxong, "no-show": L.bkd }[t.status] || t.status} v={{ scheduled: "in", completed: "ok", "no-show": "er" }[t.status] || "mu"} /></td><td>{t.result ? <Bd t={{ enrolled: L.dk, thinking: L.bnghi, "not-interested": L.bkqt }[t.result]} v={{ enrolled: "ok", thinking: "wa", "not-interested": "mu" }[t.result]} /> : <span style={{ color: "#1A1A1F" }}>--</span>}</td><td style={{ color: t.followUp && daysLeft(t.followUp) <= 1 ? "#EF4444" : "#27272A", fontSize: 12 }}>{t.followUp || "--"}</td><td><div style={{ display: "flex", gap: 3 }}>{t.status === "scheduled" && <button className="_ba _bs" onClick={() => { setTrials(trials.map((x) => x.id === t.id ? { ...x, status: "completed" } : x)); updateRow("trials", { ...t, status: "completed" }); }}><Check size={11} /></button>}<button className="_ab" onClick={() => om("tr", { ...t }, 0)}><Pencil size={12} /></button></div></td></tr>)}</tbody></table></div></div></div>}
+ 
+          {pg === "contracts" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.02em" }}>{L.hd}</div><button className="_ba" onClick={() => om("ct", { id: `HD${Date.now()}`, name: "", cls: cls2[0]?.id || "", start: today, end: "", duration: L["6t"], fee: 0, status: "active", note: "" }, 1)}><Plus size={13} />{L.tao}</button></div><div style={{ overflow: "auto", borderRadius: 14 }}><div className="_c" style={{ padding: 0, overflow: "hidden" }}><table><thead><tr>{["HV", L.lop, "BD", "KT", L.phi, "TT", L.con, ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{contracts.map((c) => { const dl = daysLeft(c.end); const rs = c.status === "renewed" ? "renewed" : dl <= 0 ? "expired" : dl <= 30 ? "expiring" : "active"; return <tr key={c.id}><td style={{ fontWeight: 600, color: "#D4D4D8" }}>{c.name}</td><td><Bd t={c.cls} v="in" /></td><td style={{ fontSize: 12, color: "#3F3F46" }}>{c.start}</td><td style={{ fontSize: 12, color: "#3F3F46" }}>{c.end}</td><td style={{ fontWeight: 700, color: A }}>{vnd(c.fee)}</td><td><Bd t={{ active: "OK", expiring: L.bsap, expired: L.bhet, renewed: L.gh }[rs]} v={{ active: "ok", expiring: "wa", expired: "er", renewed: "in" }[rs]} /></td><td style={{ fontWeight: 700, color: dl <= 0 ? "#EF4444" : dl <= 30 ? "#F59E0B" : A, fontVariantNumeric: "tabular-nums" }}>{dl <= 0 ? L.bhet : `${dl} ${L.ngaythuong}`}</td><td><div style={{ display: "flex", gap: 3 }}>{(rs === "expiring" || rs === "expired") && <button className="_ba _bs" onClick={() => { const nc = { ...c, status: "renewed" }; setContracts(contracts.map((x) => x.id === c.id ? nc : x)); updateRow("contracts", nc); }}>{L.gh}</button>}<button className="_ab" onClick={() => om("ct", { ...c }, 0)}><Pencil size={12} /></button></div></td></tr>; })}</tbody></table></div></div></div>}
+ 
+          {pg === "hsk" && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.02em" }}>Thi HSK</div>{isAdmin && <button className="_ba" onClick={() => om("hk", { id: `HSK${Date.now()}`, name: "", level: "HSK 1", examDate: "", score: 0, passed: "", status: "registered" }, 1)}><Plus size={13} />{L.dk}</button>}</div><div style={{ display: "grid", gridTemplateColumns: gc(2), gap: 12, marginBottom: 16 }}><Ch title={L.kqua}><BarChart data={["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5"].map((l) => ({ l, p: hsk.filter((h) => h.level === l && h.passed === "yes").length, f: hsk.filter((h) => h.level === l && h.passed === "no").length }))}><XAxis dataKey="l" fontSize={10} stroke="#27272A" tickLine={false} axisLine={false} /><YAxis fontSize={10} stroke="#27272A" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="p" name={L.dat} fill={A} stackId="a" radius={[6, 6, 0, 0]} /><Bar dataKey="f" name={L.btruot} fill="#EF4444" stackId="a" radius={[6, 6, 0, 0]} /></BarChart></Ch><div className="_c" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}><div style={{ position: "absolute", width: 200, height: 200, borderRadius: "50%", background: `radial-gradient(circle, ${hskRate >= 70 ? "rgba(16,185,129,.08)" : "rgba(245,158,11,.08)"} 0%, transparent 70%)`, pointerEvents: "none" }} /><div style={{ fontSize: 10, fontWeight: 600, color: "#2A2A30", marginBottom: 14, textTransform: "uppercase", letterSpacing: ".08em" }}>{L.tyle}</div><div style={{ fontSize: 52, fontWeight: 800, color: hskRate >= 70 ? A : "#F59E0B", lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-.04em", textShadow: hskRate >= 70 ? "0 0 40px rgba(16,185,129,.2)" : "0 0 40px rgba(245,158,11,.2)" }}>{hskRate}%</div><div style={{ fontSize: 12, color: "#3F3F46", marginTop: 8 }}>{hskP}/{hskTt}</div><div className="_pb" style={{ marginTop: 12, width: "40%" }}><div className="_pf" style={{ width: `${hskRate}%`, background: A, boxShadow: "0 0 8px rgba(16,185,129,.3)" }} /></div></div></div><div style={{ overflow: "auto", borderRadius: 14 }}><div className="_c" style={{ padding: 0, overflow: "hidden" }}><table><thead><tr>{["HV", "Level", L.ngay, L.diemh, "KQ", ...(isAdmin ? [""] : [])].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{hsk.map((h) => <tr key={h.id}><td style={{ fontWeight: 600, color: "#D4D4D8" }}>{h.name}</td><td><Bd t={h.level} v="pu" /></td><td style={{ fontSize: 12, color: "#3F3F46" }}>{h.examDate}</td><td style={{ fontWeight: 800, fontSize: 18, fontVariantNumeric: "tabular-nums" }}>{h.score || <span style={{ color: "#1A1A1F" }}>--</span>}</td><td>{h.passed === "yes" ? <Bd t={L.dat} v="ok" /> : h.passed === "no" ? <Bd t={L.btruot} v="er" /> : <Bd t={L.bchua} v="in" />}</td>{isAdmin && <td><button className="_ab" onClick={() => om("hk", { ...h }, 0)}><Pencil size={12} /></button></td>}</tr>)}</tbody></table></div></div></div>}
+ 
+          {pg === "rpt" && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.02em" }}>{L.bc}</div><button className="_ba" onClick={() => om("r", { id: `RP${Date.now()}`, date: today, teacher: isAdmin ? (teachers[0] || "") : user.name, cls: cls2[0]?.id || "", present: 0, absent: 0, absentNames: "", lesson: "", homework: "", flags: "", highlights: "" }, 1)}><Plus size={13} />{L.tao}</button></div>{rpt.filter((r) => isAdmin || r.teacher === user.name).map((r) => <div key={r.id} className="_c" style={{ marginBottom: 10 }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}><div><span style={{ fontWeight: 600, color: "#A1A1AA", fontSize: 13 }}>{r.teacher}</span> <span style={{ color: "#27272A", fontSize: 11 }}>{r.cls} {r.date}</span></div><div style={{ display: "flex", gap: 4, alignItems: "center" }}><Bd t={`${r.present}/${r.present + r.absent}`} v={r.absent === 0 ? "ok" : "wa"} /><button className="_ab" onClick={() => om("r", { ...r }, 0)}><Pencil size={12} /></button></div></div><div style={{ fontSize: 13, color: "#52525B", lineHeight: 1.6 }}>{r.lesson}</div>{r.flags && <div style={{ background: "rgba(239,68,68,.04)", border: "1px solid rgba(239,68,68,.08)", borderRadius: 8, padding: "8px 12px", marginTop: 8, fontSize: 11, color: "#EF4444", display: "flex", alignItems: "start", gap: 6 }}><span style={{ marginTop: 1, flexShrink: 0, fontSize: 10 }}>!</span>{r.flags}</div>}{r.highlights && <div style={{ background: "rgba(16,185,129,.04)", border: "1px solid rgba(16,185,129,.08)", borderRadius: 8, padding: "8px 12px", marginTop: 8, fontSize: 11, color: A, display: "flex", alignItems: "start", gap: 6 }}><span style={{ marginTop: 1, flexShrink: 0, fontSize: 10 }}>*</span>{r.highlights}</div>}</div>)}</div>}
+ 
+          {pg === "log" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.02em" }}>{L.ls}</div><button className="_ba" onClick={() => om("i", { id: `IT${Date.now()}`, ref: "", refName: "", date: today, type: "call", content: "", by: "Admin" }, 1)}><Plus size={13} />{L.them}</button></div>{inter.map((it) => <div key={it.id} style={{ display: "flex", gap: 12, padding: "14px 0", borderBottom: "1px solid #111113" }}><div style={{ width: 30, height: 30, borderRadius: 8, background: "linear-gradient(135deg, #111113 0%, #0C0C0E 100%)", border: "1px solid #1A1A1F", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#3F3F46", fontSize: 12 }}>{it.type === "call" ? "\u260E" : it.type === "meeting" ? "\u2606" : "\u2709"}</div><div><div><span style={{ fontWeight: 600, color: "#A1A1AA", fontSize: 13 }}>{it.refName}</span> <span style={{ color: "#27272A", fontSize: 10 }}>{it.date}</span> <Bd t={it.type === "call" ? L.goi : it.type === "meeting" ? L.gap : L.nhan} v={it.type === "call" ? "ok" : "in"} /></div><div style={{ color: "#3F3F46", marginTop: 6, fontSize: 13, lineHeight: 1.6 }}>{it.content}</div></div></div>)}</div>}
+ 
+          {pg === "fin" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.02em" }}>{L.tc}</div><button className="_ba" onClick={() => om("f", { id: `HP${Date.now()}`, name: "", cls: cls2[0]?.id || "", total: 0, d1: 0, d2: 0, d2d: "", st: "pending" }, 1)}><Plus size={13} />{L.them}</button></div><div style={{ overflow: "auto", borderRadius: 14 }}><div className="_c" style={{ padding: 0, overflow: "hidden" }}><table><thead><tr>{["HV", L.lop, L.tong, "D1", "D2", L.han, "TT", ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{fin.map((f) => <tr key={f.id}><td style={{ fontWeight: 600, color: "#D4D4D8" }}>{f.name}</td><td><Bd t={f.cls} v="in" /></td><td style={{ fontWeight: 700, color: A }}>{vnd(f.total)}</td><td style={{ fontSize: 12, color: "#3F3F46" }}>{vnd(f.d1)}</td><td style={{ fontSize: 12, color: "#3F3F46" }}>{vnd(f.d2)}</td><td style={{ color: f.st === "overdue" ? "#EF4444" : "#27272A", fontSize: 12 }}>{f.d2d}</td><td>{f.st === "paid" ? <Bd t="OK" v="ok" /> : f.st === "pending" ? <Bd t={L.cho} v="wa" /> : <Bd t={L.bno} v="er" />}</td><td><div style={{ display: "flex", gap: 3 }}>{f.st !== "paid" && <button className="_ba _bs" onClick={() => { setFin(fin.map((x) => x.id === f.id ? { ...x, st: "paid" } : x)); updateRow("finance", { ...f, st: "paid" }); }}><Check size={11} /></button>}<button className="_ab" onClick={() => om("f", { ...f }, 0)}><Pencil size={12} /></button></div></td></tr>)}</tbody></table></div></div></div>}
+ 
+          {pg === "charts" && isAdmin && <div><div style={{ fontSize: 22, fontWeight: 800, marginBottom: 20, letterSpacing: "-.02em" }}>{L.bd}</div><div style={{ display: "grid", gridTemplateColumns: gc(2), gap: 12 }}><Ch title={L.dthu2}><BarChart data={monthTrend}><CartesianGrid strokeDasharray="3 3" stroke="#111113" /><XAxis dataKey="m" fontSize={10} stroke="#27272A" tickLine={false} axisLine={false} /><YAxis fontSize={10} stroke="#27272A" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="rev" fill={A} radius={[6, 6, 0, 0]} /></BarChart></Ch><Ch title={L.ccan}><LineChart data={attendTrend}><CartesianGrid strokeDasharray="3 3" stroke="#111113" /><XAxis dataKey="w" fontSize={10} stroke="#27272A" tickLine={false} axisLine={false} /><YAxis domain={[80, 100]} fontSize={10} stroke="#27272A" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Line type="monotone" dataKey="v" stroke="#3B82F6" strokeWidth={2} dot={{ fill: "#3B82F6", r: 3, strokeWidth: 0 }} /></LineChart></Ch><Ch title={L.thtoan}><PieChart><Pie data={payPie} cx="50%" cy="50%" innerRadius={30} outerRadius={60} dataKey="v" label={({ n, v }) => `${n}:${v}`} fontSize={10} stroke="none">{payPie.map((e, i) => <Cell key={i} fill={[CX[0], CX[3], CX[4]][i]} />)}</Pie><Tooltip content={<Tip />} /></PieChart></Ch><Ch title={L.diem}><BarChart data={scoreDist}><CartesianGrid strokeDasharray="3 3" stroke="#111113" /><XAxis dataKey="r" fontSize={10} stroke="#27272A" tickLine={false} axisLine={false} /><YAxis fontSize={10} stroke="#27272A" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="n" fill="#8B5CF6" radius={[6, 6, 0, 0]} /></BarChart></Ch></div></div>}
         </div>
       </div>
-
-      {mob && <div className="_bn">{mobNav.map((m) => { const Ic = m.ic; return <div key={m.id} className={"_bi" + (pg === m.id || (m.id === "more" && showMenu) ? " _a" : "")} onClick={() => { if (m.id === "more") setShowMenu(!showMenu); else { setPg(m.id); setShowMenu(false); } }}><Ic size={16} strokeWidth={pg === m.id ? 2 : 1.5} /><span style={{ fontSize: 9 }}>{m.l}</span></div>; })}{showMenu && <div className="_mp2">{moreMenu.map((m) => { const Ic = m.ic; return <div key={m.id} className="_ni" onClick={() => { setPg(m.id); setShowMenu(false); }}><Ic size={14} />{m.l}</div>; })}<div className="_ni" onClick={logout} style={{ color: "#EF4444" }}><LogOut size={14} />{L.thoat}</div></div>}</div>}
-
+ 
+      {mob && <div className="_bn">{mobNav.map((m) => { const Ic = m.ic; return <div key={m.id} className={"_bi" + (pg === m.id || (m.id === "more" && showMenu) ? " _a" : "")} onClick={() => { if (m.id === "more") setShowMenu(!showMenu); else { setPg(m.id); setShowMenu(false); } }}><Ic size={16} strokeWidth={pg === m.id ? 2 : 1.5} /><span style={{ fontSize: 9, fontWeight: 500 }}>{m.l}</span></div>; })}{showMenu && <div className="_mp2">{moreMenu.map((m) => { const Ic = m.ic; return <div key={m.id} className="_ni" onClick={() => { setPg(m.id); setShowMenu(false); }}><Ic size={14} />{m.l}</div>; })}<div className="_ni" onClick={logout} style={{ color: "#EF4444" }}><LogOut size={14} />{L.thoat}</div></div>}</div>}
+ 
       {modal && <ModalForm type={modal.t} initial={modal.d} isNew={modal.n} cls2={cls2} teachers={teachers} isAdmin={isAdmin} userName={user.name} mob={mob} onSave={async (d) => { await doSave(modal.t, d, modal.n); setModal(null); }} onClose={() => setModal(null)} />}
     </div>
   );
