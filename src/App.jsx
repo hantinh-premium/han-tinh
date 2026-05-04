@@ -1,21 +1,27 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, AreaChart, Area } from "recharts";
 import { supabase } from "./supabase";
- 
+
 // ── DB ──
 const FM={leads:{lastContact:"last_contact"},reports:{absentNames:"absent_names"},interactions:{refName:"ref_name",by:"by_user"},trials:{date:"trial_date",time:"trial_time",followUp:"follow_up"},contracts:{start:"start_date",end:"end_date"},hsk_exams:{examDate:"exam_date"}};
 function toDb(t,o){const m=FM[t];if(!m)return{...o};const r={};for(const[k,v]of Object.entries(o))r[m[k]||k]=v;return r}
 function toApp(t,o){const m=FM[t];if(!m)return{...o};const rm={};for(const[k,v]of Object.entries(m))rm[v]=k;const r={};for(const[k,v]of Object.entries(o))r[rm[k]||k]=v;return r}
-async function loadT(t){try{const{data}=await supabase.from(t).select("*");return(data||[]).map(r=>toApp(t,r))}catch{return[]}}
-async function addRow(t,row){const d=toDb(t,row);delete d.created_at;await supabase.from(t).insert([d])}
-async function updateRow(t,row){const d=toDb(t,row);delete d.created_at;await supabase.from(t).update(d).eq("id",row.id)}
-async function deleteRow(t,id){await supabase.from(t).delete().eq("id",id)}
- 
+async function loadT(t){
+  try{
+    const{data,error}=await supabase.from(t).select("*");
+    if(error) throw error;
+    return(data||[]).map(r=>toApp(t,r));
+  }catch(e){console.warn(`[${t}] load failed`,e);return[]}
+}
+async function addRow(t,row){const d=toDb(t,row);delete d.created_at;const{error}=await supabase.from(t).insert([d]);if(error)throw error}
+async function updateRow(t,row){const d=toDb(t,row);delete d.created_at;const{error}=await supabase.from(t).update(d).eq("id",row.id);if(error)throw error}
+async function deleteRow(t,id){const{error}=await supabase.from(t).delete().eq("id",id);if(error)throw error}
+
 const vnd=n=>new Intl.NumberFormat("vi-VN").format(n)+"đ";
 const today=new Date().toISOString().slice(0,10);
 const CL=["#16a34a","#0d9488","#2563eb","#ca8a04","#dc2626","#7c3aed","#ea580c"];
-const daysLeft=d=>Math.ceil((new Date(d)-new Date())/86400000);
- 
+const daysLeft=d=>{if(!d)return 0;const t=new Date(d).getTime();return Number.isFinite(t)?Math.ceil((t-Date.now())/86400000):0};
+
 const USERS=[
   {user:"admin",pass:"hantinh2026",role:"admin",name:"Admin",cls:"all"},
   {user:"cohoa",pass:"gv2026",role:"teacher",name:"Cô Hoa",cls:"CN-A1"},
@@ -25,12 +31,12 @@ const USERS=[
 ];
 const monthTrend=[{m:"T12",rev:42,lead:8,enroll:2},{m:"T1",rev:48,lead:12,enroll:4},{m:"T2",rev:52,lead:10,enroll:3},{m:"T3",rev:58,lead:15,enroll:5},{m:"T4",rev:65,lead:11,enroll:3},{m:"T5",rev:72,lead:14,enroll:5}];
 const attendTrend=[{w:"T1",v:88},{w:"T2",v:91},{w:"T3",v:85},{w:"T4",v:93},{w:"T5",v:90},{w:"T6",v:87},{w:"T7",v:92},{w:"T8",v:94}];
- 
+
 // ── MODAL (useRef = không lag) ──
 function ModalForm({type,initial,isNew,onSave,onClose,cls2,teachers,isAdmin,userName,mob}){
   const d=useRef({...initial});
   const IS={padding:mob?"10px 12px":"12px 16px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:mob?15:16,outline:"none",width:"100%",fontFamily:"inherit",background:"#fff"};
- 
+
   const F=({label,k,type:t})=><div style={{flex:1,marginBottom:mob?10:14}}>
     <label style={{display:"block",fontSize:mob?13:14,color:"#374151",fontWeight:600,marginBottom:4}}>{label}</label>
     {t==="textarea"?<textarea style={{...IS,minHeight:mob?50:60,resize:"vertical"}} defaultValue={d.current[k]||""} onChange={e=>{d.current[k]=e.target.value}}/>
@@ -38,18 +44,18 @@ function ModalForm({type,initial,isNew,onSave,onClose,cls2,teachers,isAdmin,user
     :t==="number"?<input style={IS} type="number" defaultValue={d.current[k]||0} onChange={e=>{d.current[k]=parseFloat(e.target.value)||0}}/>
     :<input style={IS} defaultValue={d.current[k]||""} onChange={e=>{d.current[k]=e.target.value}}/>}
   </div>;
- 
+
   const S=({label,k,opts})=><div style={{flex:1,marginBottom:mob?10:14}}>
     <label style={{display:"block",fontSize:mob?13:14,color:"#374151",fontWeight:600,marginBottom:4}}>{label}</label>
     <select style={{...IS,appearance:"auto"}} defaultValue={d.current[k]||""} onChange={e=>{d.current[k]=e.target.value}}>
       {opts.map(o=>Array.isArray(o)?<option key={o[0]} value={o[0]}>{o[1]}</option>:<option key={o}>{o}</option>)}
     </select>
   </div>;
- 
+
   const Fl=({children})=><div style={{display:"flex",gap:mob?6:10,flexDirection:mob?"column":"row"}}>{children}</div>;
   const sources=["Facebook","TikTok","Giới thiệu","Walk-in","Website"];
   const levels=["HSK 1","HSK 2","HSK 3","HSK 4","HSK 5","HSK 6"];
- 
+
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.35)",display:"flex",alignItems:mob?"flex-end":"center",justifyContent:"center",zIndex:100}} onClick={onClose}>
       <div style={{background:"#fff",borderRadius:mob?"20px 20px 0 0":"20px",padding:mob?20:30,width:mob?"100%":"540px",maxHeight:mob?"92vh":"88vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
@@ -57,7 +63,7 @@ function ModalForm({type,initial,isNew,onSave,onClose,cls2,teachers,isAdmin,user
           <h3 style={{fontSize:mob?18:20,fontWeight:700}}>{isNew?"Thêm":"Sửa"} {{s:"Học viên",l:"Khách tiềm năng",tr:"Học thử",ct:"Hợp đồng",hk:"Thi HSK",r:"Báo cáo buổi học",i:"Ghi nhận tương tác",f:"Học phí"}[type]}</h3>
           <button style={{background:"none",border:"none",fontSize:22,cursor:"pointer",color:"#9ca3af"}} onClick={onClose}>✕</button>
         </div>
- 
+
         {type==="l"&&<><Fl><F label="Họ tên" k="name"/><F label="Số điện thoại" k="phone"/></Fl><Fl><S label="Nguồn" k="source" opts={sources}/><S label="Quan tâm" k="interest" opts={levels.slice(0,5)}/></Fl><S label="Giai đoạn" k="stage" opts={[["inquiry","Hỏi thăm"],["trial","Học thử"],["registered","Đã đăng ký"],["lost","Mất"]]}/><F label="Ghi chú" k="note" type="textarea"/></>}
         {type==="s"&&<><Fl><F label="Họ tên" k="name"/><F label="Số điện thoại" k="phone"/></Fl><Fl><S label="Lớp" k="cls" opts={cls2.map(c=>c.id)}/><S label="Trình độ" k="level" opts={levels}/></Fl><Fl><F label="Điểm TB" k="score" type="number"/><F label="Chuyên cần %" k="attend" type="number"/></Fl><Fl><S label="Nguồn" k="source" opts={sources}/><S label="Trạng thái" k="status" opts={["Đang học","Tạm nghỉ","Nghỉ học"]}/></Fl></>}
         {type==="tr"&&<><Fl><F label="Họ tên" k="name"/><F label="SĐT" k="phone"/></Fl><Fl><F label="Ngày" k="date" type="date"/><F label="Giờ" k="time"/></Fl><Fl><S label="Lớp" k="cls" opts={cls2.map(c=>c.id)}/><S label="Giáo viên" k="teacher" opts={teachers}/></Fl><Fl><S label="Trạng thái" k="status" opts={[["scheduled","Đã xếp"],["completed","Đã học"],["no-show","Không đến"]]}/><S label="Kết quả" k="result" opts={[["","Chưa có"],["enrolled","Đã ĐK"],["thinking","Suy nghĩ"],["not-interested","Không QT"]]}/></Fl><F label="Ngày nhắc lại" k="followUp" type="date"/></>}
@@ -66,7 +72,7 @@ function ModalForm({type,initial,isNew,onSave,onClose,cls2,teachers,isAdmin,user
         {type==="r"&&<><Fl><F label="Ngày" k="date" type="date"/>{isAdmin?<S label="Giáo viên" k="teacher" opts={teachers}/>:<div style={{flex:1,marginBottom:14}}><label style={{display:"block",fontSize:14,color:"#374151",fontWeight:600,marginBottom:4}}>Giáo viên</label><input style={{...IS,background:"#f3f4f6"}} value={userName} disabled/></div>}<S label="Lớp" k="cls" opts={cls2.map(c=>c.id)}/></Fl><Fl><F label="Có mặt" k="present" type="number"/><F label="Vắng" k="absent" type="number"/></Fl><F label="HV vắng" k="absentNames"/><F label="📖 Bài học" k="lesson" type="textarea"/><F label="📝 BTVN" k="homework" type="textarea"/><F label="⚠️ Cần chú ý" k="flags" type="textarea"/><F label="⭐ Nổi bật" k="highlights" type="textarea"/></>}
         {type==="i"&&<><Fl><F label="Người liên quan" k="refName"/><F label="Ngày" k="date" type="date"/></Fl><Fl><S label="Hình thức" k="type" opts={[["call","📞 Gọi điện"],["message","💬 Tin nhắn"],["meeting","🤝 Gặp mặt"]]}/><F label="Người thực hiện" k="by"/></Fl><F label="Nội dung" k="content" type="textarea"/></>}
         {type==="f"&&<><div style={{background:"#f0fdf4",borderRadius:10,padding:12,marginBottom:14,fontSize:14,color:"#16a34a",fontWeight:600,border:"1px solid #bbf7d0"}}>Đợt 1: 50% trước khoá → Đợt 2: 50% sau 1 tháng</div><F label="Họ tên" k="name"/><Fl><S label="Lớp" k="cls" opts={cls2.map(c=>c.id)}/><F label="Tổng học phí" k="total" type="number"/></Fl><Fl><F label="Hạn đợt 2" k="d2d"/><S label="Trạng thái" k="st" opts={[["paid","Đã đóng"],["pending","Chờ đóng"],["overdue","Quá hạn"]]}/></Fl></>}
- 
+
         <div style={{display:"flex",gap:10,marginTop:mob?16:22}}>
           <button style={{flex:1,padding:mob?12:14,background:"#16a34a",color:"#fff",border:"none",borderRadius:12,fontSize:mob?16:17,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}} onClick={()=>{
             const data={...d.current};
@@ -80,7 +86,7 @@ function ModalForm({type,initial,isNew,onSave,onClose,cls2,teachers,isAdmin,user
     </div>
   );
 }
- 
+
 // ── APP ──
 export default function App(){
   const[user,setUser]=useState(null);const[lu,setLu]=useState("");const[lp,setLp]=useState("");const[le,setLe]=useState("");
@@ -89,33 +95,35 @@ export default function App(){
   const[rpt,setRpt]=useState([]);const[leads,setLeads]=useState([]);const[inter,setInter]=useState([]);
   const[trials,setTrials]=useState([]);const[contracts,setContracts]=useState([]);const[hsk,setHsk]=useState([]);
   const[modal,setModal]=useState(null);const[q,setQ]=useState("");const[dtab,setDtab]=useState("kpi");const[ok,setOk]=useState(false);
-  const[showMenu,setShowMenu]=useState(false);
- 
+  const[showMenu,setShowMenu]=useState(false);const[saveErr,setSaveErr]=useState("");
+
   useEffect(()=>{
-    const h=()=>setMob(window.innerWidth<768);
-    window.addEventListener("resize",h);
-    return()=>window.removeEventListener("resize",h);
+    let raf=0;
+    const h=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>setMob(window.innerWidth<768))};
+    window.addEventListener("resize",h,{passive:true});
+    return()=>{cancelAnimationFrame(raf);window.removeEventListener("resize",h)};
   },[]);
- 
+
   useEffect(()=>{(async()=>{
-    setStu(await loadT("students"));setCls2(await loadT("classes"));setFin(await loadT("finance"));
-    setRpt(await loadT("reports"));setLeads(await loadT("leads"));setInter(await loadT("interactions"));
-    setTrials(await loadT("trials"));setContracts(await loadT("contracts"));setHsk(await loadT("hsk_exams"));
+    const [students,classes,finance,reports,leadRows,interactions,trialRows,contractRows,hskRows]=await Promise.all([
+      loadT("students"),loadT("classes"),loadT("finance"),loadT("reports"),loadT("leads"),loadT("interactions"),loadT("trials"),loadT("contracts"),loadT("hsk_exams")
+    ]);
+    setStu(students);setCls2(classes);setFin(finance);setRpt(reports);setLeads(leadRows);setInter(interactions);setTrials(trialRows);setContracts(contractRows);setHsk(hskRows);
     const su=localStorage.getItem("ht_user");if(su)setUser(JSON.parse(su));setOk(true);
   })()},[]);
- 
+
   const tbl={s:"students",l:"leads",tr:"trials",ct:"contracts",hk:"hsk_exams",r:"reports",i:"interactions",f:"finance"};
   const stx={s:[stu,setStu],l:[leads,setLeads],tr:[trials,setTrials],ct:[contracts,setContracts],hk:[hsk,setHsk],r:[rpt,setRpt],i:[inter,setInter],f:[fin,setFin]};
-  const doSave=async(type,data,isNew)=>{const[arr,setter]=stx[type];if(isNew){setter(type==="r"||type==="i"?[data,...arr]:[...arr,data]);await addRow(tbl[type],data)}else{setter(arr.map(x=>x.id===data.id?data:x));await updateRow(tbl[type],data)}};
-  const doDel=async(type,id)=>{const[arr,setter]=stx[type];setter(arr.filter(x=>x.id!==id));await deleteRow(tbl[type],id)};
- 
+  const doSave=async(type,data,isNew)=>{setSaveErr("");const[arr,setter]=stx[type];const prev=arr;try{if(isNew){setter(type==="r"||type==="i"?[data,...arr]:[...arr,data]);await addRow(tbl[type],data)}else{setter(arr.map(x=>x.id===data.id?data:x));await updateRow(tbl[type],data)}}catch(e){setter(prev);setSaveErr("Không lưu được dữ liệu. Kiểm tra Supabase/RLS/schema rồi thử lại.");console.error(e)}};
+  const doDel=async(type,id)=>{setSaveErr("");const[arr,setter]=stx[type];const prev=arr;try{setter(arr.filter(x=>x.id!==id));await deleteRow(tbl[type],id)}catch(e){setter(prev);setSaveErr("Không xoá được dữ liệu. Kiểm tra Supabase/RLS/schema rồi thử lại.");console.error(e)}};
+
   const login=()=>{const u=USERS.find(u=>u.user===lu&&u.pass===lp);if(u){setUser(u);localStorage.setItem("ht_user",JSON.stringify(u));setLe("")}else setLe("Sai tài khoản hoặc mật khẩu")};
   const logout=()=>{setUser(null);localStorage.removeItem("ht_user");setPg("home")};
   const isAdmin=user?.role==="admin";
   const canSee=c=>isAdmin||(user?.cls||"").split(",").includes(c);
- 
+
   if(!ok)return<div style={{display:"flex",height:"100vh",alignItems:"center",justifyContent:"center",fontFamily:"system-ui",fontSize:18}}>Đang kết nối...</div>;
- 
+
   // ── ĐĂNG NHẬP ──
   if(!user)return(
     <div style={{display:"flex",height:"100vh",alignItems:"center",justifyContent:"center",background:"linear-gradient(135deg,#f0fdf4,#ecfdf5)",fontFamily:"system-ui",padding:mob?16:0}}>
@@ -130,36 +138,50 @@ export default function App(){
       </div>
     </div>
   );
- 
+
   // ── DỮ LIỆU ──
-  const act=stu.filter(s=>s.status==="Đang học"),ov=fin.filter(f=>f.st==="overdue"),pend=fin.filter(f=>f.st==="pending");
-  const ranked=[...stu].filter(s=>s.status==="Đang học").sort((a,b)=>b.score-a.score);
-  const teachers=[...new Set(cls2.map(c=>c.teacher))];
-  const expiring=contracts.filter(c=>{const dl=daysLeft(c.end);return dl>0&&dl<=30});
-  const expired=contracts.filter(c=>daysLeft(c.end)<=0&&c.status!=="renewed");
-  const upTrials=trials.filter(t=>t.status==="scheduled"),needFU=trials.filter(t=>t.result==="thinking");
-  const hskP=hsk.filter(h=>h.passed==="yes").length,hskTt=hsk.filter(h=>h.status!=="registered").length,hskRate=hskTt>0?Math.round(hskP/hskTt*100):0;
-  const collected=fin.reduce((a,f)=>a+(f.d1||0)+(f.st==="paid"?(f.d2||0):0),0);
-  const srcData=["Facebook","TikTok","Giới thiệu","Walk-in","Website"].map(s=>({name:s,v:[...stu,...leads].filter(x=>x.source===s).length})).filter(d=>d.v>0);
-  const funnelData=[{s:"Hỏi thăm",v:leads.filter(l=>l.stage!=="lost").length},{s:"Học thử",v:leads.filter(l=>l.stage==="trial"||l.stage==="registered").length},{s:"Đăng ký",v:leads.filter(l=>l.stage==="registered").length},{s:"Đang học",v:act.length}];
-  const payPie=[{n:"Đủ",v:fin.filter(f=>f.st==="paid").length},{n:"Chờ",v:pend.length},{n:"Nợ",v:ov.length}];
-  const scoreDist=[{r:"<5",n:stu.filter(s=>s.score<5).length},{r:"5-6.5",n:stu.filter(s=>s.score>=5&&s.score<6.5).length},{r:"6.5-8",n:stu.filter(s=>s.score>=6.5&&s.score<8).length},{r:"8-9",n:stu.filter(s=>s.score>=8&&s.score<9).length},{r:"9+",n:stu.filter(s=>s.score>=9).length}];
- 
+  const query=q.trim().toLowerCase();
+  const {act,ov,pend,ranked,teachers,expiring,expired,upTrials,needFU,hskRate,collected,srcData,funnelData,payPie,scoreDist}=useMemo(()=>{
+    const active=stu.filter(s=>s.status==="Đang học");
+    const overdue=fin.filter(f=>f.st==="overdue");
+    const pending=fin.filter(f=>f.st==="pending");
+    const hskPassed=hsk.filter(h=>h.passed==="yes").length;
+    const hskTested=hsk.filter(h=>h.status!=="registered").length;
+    const sources=["Facebook","TikTok","Giới thiệu","Walk-in","Website"];
+    return {
+      act:active,
+      ov:overdue,
+      pend:pending,
+      ranked:[...active].sort((a,b)=>(b.score||0)-(a.score||0)),
+      teachers:[...new Set(cls2.map(c=>c.teacher).filter(Boolean))],
+      expiring:contracts.filter(c=>{const dl=daysLeft(c.end);return dl>0&&dl<=30}),
+      expired:contracts.filter(c=>daysLeft(c.end)<=0&&c.status!=="renewed"),
+      upTrials:trials.filter(t=>t.status==="scheduled"),
+      needFU:trials.filter(t=>t.result==="thinking"),
+      hskRate:hskTested>0?Math.round(hskPassed/hskTested*100):0,
+      collected:fin.reduce((a,f)=>a+(f.d1||0)+(f.st==="paid"?(f.d2||0):0),0),
+      srcData:sources.map(s=>({name:s,v:[...stu,...leads].filter(x=>x.source===s).length})).filter(d=>d.v>0),
+      funnelData:[{s:"Hỏi thăm",v:leads.filter(l=>l.stage!=="lost").length},{s:"Học thử",v:leads.filter(l=>l.stage==="trial"||l.stage==="registered").length},{s:"Đăng ký",v:leads.filter(l=>l.stage==="registered").length},{s:"Đang học",v:active.length}],
+      payPie:[{n:"Đủ",v:fin.filter(f=>f.st==="paid").length},{n:"Chờ",v:pending.length},{n:"Nợ",v:overdue.length}],
+      scoreDist:[{r:"<5",n:stu.filter(s=>(s.score||0)<5).length},{r:"5-6.5",n:stu.filter(s=>(s.score||0)>=5&&(s.score||0)<6.5).length},{r:"6.5-8",n:stu.filter(s=>(s.score||0)>=6.5&&(s.score||0)<8).length},{r:"8-9",n:stu.filter(s=>(s.score||0)>=8&&(s.score||0)<9).length},{r:"9+",n:stu.filter(s=>(s.score||0)>=9).length}]
+    }
+  },[stu,fin,cls2,contracts,trials,hsk,leads]);
+
   const B=(t,c)=>{const m={g:["#dcfce7","#16a34a"],r:["#fef2f2","#dc2626"],y:["#fefce8","#ca8a04"],b:["#eff6ff","#2563eb"],gr:["#f3f4f6","#6b7280"],p:["#f3e8ff","#7c3aed"],o:["#fff7ed","#ea580c"]};const[bg,fg]=m[c]||m.gr;return<span style={{display:"inline-block",padding:"4px 13px",borderRadius:20,fontSize:13,fontWeight:700,background:bg,color:fg}}>{t}</span>};
   const CC=({title,children,h=190})=><div className="cd"><div style={{fontWeight:700,fontSize:16,marginBottom:12}}>{title}</div><ResponsiveContainer width="100%" height={h}>{children}</ResponsiveContainer></div>;
   const om=(t,d,n)=>setModal({t,d,n});
- 
+
   const adminMenu=[{id:"home",l:"Tổng quan",i:"📊"},{id:"leads",l:"Khách mới",i:"🎯"},{id:"trials",l:"Học thử",i:"📚"},{id:"stu",l:"Học viên",i:"👨‍🎓"},{id:"contracts",l:"Hợp đồng",i:"📄"},{id:"hsk",l:"HSK",i:"🎓"},{id:"rpt",l:"Báo cáo",i:"📋"},{id:"log",l:"Lịch sử",i:"💬"},{id:"fin",l:"Tài chính",i:"💰"},{id:"charts",l:"Biểu đồ",i:"📈"}];
   const teacherMenu=[{id:"home",l:"Tổng quan",i:"📊"},{id:"stu",l:"Học viên",i:"👨‍🎓"},{id:"rpt",l:"Báo cáo",i:"📋"},{id:"hsk",l:"HSK",i:"🎓"}];
   const menu=isAdmin?adminMenu:teacherMenu;
- 
+
   // Mobile bottom nav - show only 5 main items
   const mobNav=isAdmin?[{id:"home",i:"📊",l:"Tổng quan"},{id:"leads",i:"🎯",l:"Khách"},{id:"stu",i:"👨‍🎓",l:"HV"},{id:"rpt",i:"📋",l:"Báo cáo"},{id:"more",i:"☰",l:"Thêm"}]
     :[{id:"home",i:"📊",l:"Tổng quan"},{id:"stu",i:"👨‍🎓",l:"HV"},{id:"rpt",i:"📋",l:"Báo cáo"},{id:"hsk",i:"🎓",l:"HSK"}];
   const moreMenu=adminMenu.filter(m=>!["home","leads","stu","rpt"].includes(m.id));
- 
+
   const grd=(cols)=>mob?`repeat(${Math.min(cols,2)},1fr)`:`repeat(${cols},1fr)`;
- 
+
   return(
     <div style={{fontFamily:"system-ui,sans-serif",display:"flex",flexDirection:mob?"column":"row",height:"100vh",background:"#f8faf8",color:"#1a1a1a",overflow:"hidden"}}>
       <style>{`
@@ -185,7 +207,7 @@ export default function App(){
         .bot-item span:first-child{font-size:20px}
         .more-menu{position:absolute;bottom:60px;right:8px;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.15);padding:8px;width:200px;z-index:50}
       `}</style>
- 
+
       {/* SIDEBAR - chỉ hiện trên desktop */}
       {!mob&&<div style={{width:220,background:"#fff",borderRight:"1px solid #e5e7eb",display:"flex",flexDirection:"column",flexShrink:0}}>
         <div style={{padding:"16px 14px",borderBottom:"1px solid #e5e7eb",display:"flex",alignItems:"center",gap:10}}>
@@ -202,7 +224,7 @@ export default function App(){
           </div>
         </div>
       </div>}
- 
+
       {/* NỘI DUNG */}
       <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
         {/* TOPBAR */}
@@ -215,14 +237,15 @@ export default function App(){
             {mob&&<button onClick={logout} style={{fontSize:12,color:"#dc2626",background:"none",border:"none",cursor:"pointer",fontWeight:600}}>Thoát</button>}
           </div>
         </div>
- 
+
         {/* SEARCH on mobile */}
         {mob&&<div style={{padding:"8px 12px",background:"#fff",borderBottom:"1px solid #f3f4f6"}}>
           <input style={{padding:"9px 14px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:15,outline:"none",width:"100%",fontFamily:"inherit"}} placeholder="🔍 Tìm kiếm..." value={q} onChange={e=>setQ(e.target.value)}/>
         </div>}
- 
+
         <div style={{flex:1,overflow:"auto",padding:mob?12:20}}>
- 
+          {saveErr&&<div className="al" style={{background:"#fef2f2",border:"1px solid #fecaca",color:"#dc2626",fontWeight:600,marginBottom:12}}>{saveErr}</div>}
+
           {/* TỔNG QUAN */}
           {pg==="home"&&<div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}>
@@ -249,7 +272,7 @@ export default function App(){
               <CC title="📊 Chuyên cần (%)"><LineChart data={attendTrend}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="w" fontSize={13}/><YAxis domain={[80,100]} fontSize={13}/><Tooltip/><Line type="monotone" dataKey="v" name="%" stroke="#16a34a" strokeWidth={2.5} dot={{fill:"#16a34a",r:4}}/></LineChart></CC>
             </div>}
           </div>}
- 
+
           {/* BẢNG DỮ LIỆU - pattern chung cho các trang */}
           {pg==="leads"&&isAdmin&&<div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}><h2 style={{fontSize:mob?20:24,fontWeight:800}}>🎯 Khách tiềm năng</h2><button className="btn btn-p" onClick={()=>om("l",{id:"LD"+Date.now(),name:"",phone:"",source:"Facebook",stage:"inquiry",interest:"HSK 1",note:"",created:today,lastContact:today},1)}>+ Thêm</button></div>
@@ -264,26 +287,26 @@ export default function App(){
                 <button className="ib" style={{color:"#dc2626"}} onClick={()=>{if(confirm("Xoá?"))doDel("l",l.id)}}>🗑️</button>
               </div></td></tr>)}</tbody></table></div></div>
           </div>}
- 
+
           {pg==="stu"&&<div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}><h2 style={{fontSize:mob?20:24,fontWeight:800}}>👨‍🎓 Học viên ({stu.filter(s=>canSee(s.cls)).length})</h2>{isAdmin&&<button className="btn btn-p" onClick={()=>om("s",{id:"HV"+Date.now(),name:"",phone:"",cls:cls2[0]?.id||"",level:"HSK 1",status:"Đang học",score:0,attend:90,source:"Facebook"},1)}>+ Thêm</button>}</div>
-            <div className="tbl-wrap"><div className="cd" style={{padding:0}}><table><thead><tr>{["STT","Học viên","Trình độ","Lớp","Điểm","CC","Nguồn","Trạng thái",...(isAdmin?[""]:[])] .map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{stu.filter(s=>(!q||s.name.toLowerCase().includes(q.toLowerCase()))&&canSee(s.cls)).map((s,i)=><tr key={s.id}><td style={{color:"#9ca3af"}}>{i+1}</td><td><div style={{fontWeight:600}}>{s.name}</div><div style={{color:"#9ca3af",fontSize:13}}>{s.phone}</div></td><td>{B(s.level,"b")}</td><td>{s.cls}</td><td style={{fontWeight:800,color:s.score>=8?"#16a34a":s.score>=6.5?"#ca8a04":"#dc2626",fontSize:18}}>{s.score}</td><td style={{color:s.attend>=90?"#16a34a":"#ca8a04"}}>{s.attend}%</td><td>{B(s.source,"gr")}</td><td>{B(s.status,s.status==="Đang học"?"g":s.status==="Tạm nghỉ"?"y":"gr")}</td>
+            <div className="tbl-wrap"><div className="cd" style={{padding:0}}><table><thead><tr>{["STT","Học viên","Trình độ","Lớp","Điểm","CC","Nguồn","Trạng thái",...(isAdmin?[""]:[])] .map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{stu.filter(s=>(!q||s.name.toLowerCase().includes(query))&&canSee(s.cls)).map((s,i)=><tr key={s.id}><td style={{color:"#9ca3af"}}>{i+1}</td><td><div style={{fontWeight:600}}>{s.name}</div><div style={{color:"#9ca3af",fontSize:13}}>{s.phone}</div></td><td>{B(s.level,"b")}</td><td>{s.cls}</td><td style={{fontWeight:800,color:s.score>=8?"#16a34a":s.score>=6.5?"#ca8a04":"#dc2626",fontSize:18}}>{s.score}</td><td style={{color:s.attend>=90?"#16a34a":"#ca8a04"}}>{s.attend}%</td><td>{B(s.source,"gr")}</td><td>{B(s.status,s.status==="Đang học"?"g":s.status==="Tạm nghỉ"?"y":"gr")}</td>
               {isAdmin&&<td><button className="ib" onClick={()=>om("s",{...s},0)}>✏️</button><button className="ib" style={{color:"#dc2626"}} onClick={()=>{if(confirm("Xoá?"))doDel("s",s.id)}}>🗑️</button></td>}</tr>)}</tbody></table></div></div>
           </div>}
- 
+
           {pg==="trials"&&isAdmin&&<div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}><h2 style={{fontSize:mob?20:24,fontWeight:800}}>📚 Học thử</h2><button className="btn btn-p" onClick={()=>om("tr",{id:"TL"+Date.now(),name:"",phone:"",source:"Facebook",date:today,time:"18:00",cls:cls2[0]?.id||"",teacher:teachers[0]||"",status:"scheduled",result:"",followUp:"",note:""},1)}>+ Xếp lịch</button></div>
             {needFU.length>0&&<div className="al" style={{background:"#fff7ed",border:"1px solid #fed7aa",color:"#ea580c",fontWeight:600}}>🔔 Cần nhắc: {needFU.map(t=>t.name).join(", ")}</div>}
             <div className="tbl-wrap"><div className="cd" style={{padding:0}}><table><thead><tr>{["Họ tên","Ngày giờ","Lớp","Trạng thái","Kết quả","Nhắc lại",""].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{trials.map(t=><tr key={t.id}><td><div style={{fontWeight:600}}>{t.name}</div><div style={{color:"#9ca3af",fontSize:13}}>{t.source}</div></td><td>{t.date} {t.time}</td><td>{t.cls}</td><td>{{scheduled:B("Đã xếp","b"),completed:B("Đã học","g"),"no-show":B("Không đến","r")}[t.status]||B(t.status,"gr")}</td><td>{t.result?{enrolled:B("Đã ĐK","g"),thinking:B("Suy nghĩ","y"),"not-interested":B("Không QT","gr")}[t.result]:"—"}</td><td style={{color:t.followUp&&daysLeft(t.followUp)<=1?"#dc2626":"#9ca3af"}}>{t.followUp||"—"}</td>
               <td><div style={{display:"flex",gap:4}}>{t.status==="scheduled"&&<button className="btn btn-sm btn-p" onClick={()=>{setTrials(trials.map(x=>x.id===t.id?{...x,status:"completed"}:x));updateRow("trials",{...t,status:"completed"})}}>✓</button>}<button className="ib" onClick={()=>om("tr",{...t},0)}>✏️</button></div></td></tr>)}</tbody></table></div></div>
           </div>}
- 
+
           {pg==="contracts"&&isAdmin&&<div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}><h2 style={{fontSize:mob?20:24,fontWeight:800}}>📄 Hợp đồng</h2><button className="btn btn-p" onClick={()=>om("ct",{id:"HD"+Date.now(),name:"",cls:cls2[0]?.id||"",start:today,end:"",duration:"6 tháng",fee:0,status:"active",note:""},1)}>+ Tạo</button></div>
             <div className="tbl-wrap"><div className="cd" style={{padding:0}}><table><thead><tr>{["Học viên","Lớp","Bắt đầu","Kết thúc","Học phí","Trạng thái","Còn lại",""].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{contracts.map(c=>{const dl=daysLeft(c.end);const rs=c.status==="renewed"?"renewed":dl<=0?"expired":dl<=30?"expiring":"active";return<tr key={c.id}><td style={{fontWeight:600}}>{c.name}</td><td>{B(c.cls,"b")}</td><td>{c.start}</td><td>{c.end}</td><td style={{fontWeight:700,color:"#16a34a"}}>{vnd(c.fee)}</td><td>{{active:B("Hiệu lực","g"),expiring:B("Sắp hết","y"),expired:B("Hết hạn","r"),renewed:B("Gia hạn","b")}[rs]}</td><td style={{fontWeight:700,color:dl<=0?"#dc2626":dl<=30?"#ca8a04":"#16a34a"}}>{dl<=0?"Hết":dl+"d"}</td>
               <td>{(rs==="expiring"||rs==="expired")&&<button className="btn btn-sm btn-p" onClick={()=>{const nc={...c,status:"renewed"};setContracts(contracts.map(x=>x.id===c.id?nc:x));updateRow("contracts",nc)}}>↻</button>}<button className="ib" onClick={()=>om("ct",{...c},0)}>✏️</button></td></tr>})}</tbody></table></div></div>
           </div>}
- 
+
           {pg==="hsk"&&<div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}><h2 style={{fontSize:mob?20:24,fontWeight:800}}>🎓 Thi HSK</h2>{isAdmin&&<button className="btn btn-p" onClick={()=>om("hk",{id:"HSK"+Date.now(),name:"",level:"HSK 1",examDate:"",score:0,passed:"",status:"registered"},1)}>+ ĐK thi</button>}</div>
             <div style={{display:"grid",gridTemplateColumns:grd(2),gap:12,marginBottom:14}}>
@@ -292,7 +315,7 @@ export default function App(){
             </div>
             <div className="tbl-wrap"><div className="cd" style={{padding:0}}><table><thead><tr>{["Học viên","Trình độ","Ngày thi","Điểm","Kết quả",...(isAdmin?[""]:[])] .map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{hsk.map(h=><tr key={h.id}><td style={{fontWeight:600}}>{h.name}</td><td>{B(h.level,"p")}</td><td>{h.examDate}</td><td style={{fontWeight:700,fontSize:18}}>{h.score||"—"}</td><td>{h.passed==="yes"?B("ĐẠT","g"):h.passed==="no"?B("Chưa đạt","r"):B("Chưa thi","b")}</td>{isAdmin&&<td><button className="ib" onClick={()=>om("hk",{...h},0)}>✏️</button></td>}</tr>)}</tbody></table></div></div>
           </div>}
- 
+
           {pg==="rpt"&&<div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}><h2 style={{fontSize:mob?20:24,fontWeight:800}}>📋 Báo cáo buổi học</h2><button className="btn btn-p" onClick={()=>om("r",{id:"RP"+Date.now(),date:today,teacher:isAdmin?(teachers[0]||""):user.name,cls:cls2[0]?.id||"",present:0,absent:0,absentNames:"",lesson:"",homework:"",flags:"",highlights:""},1)}>+ Tạo</button></div>
             {rpt.filter(r=>isAdmin||r.teacher===user.name).map(r=><div key={r.id} style={{border:"1px solid #e5e7eb",borderRadius:14,padding:mob?14:18,marginBottom:10}}>
@@ -303,18 +326,18 @@ export default function App(){
               {r.highlights&&<div style={{background:"#f0fdf4",borderRadius:8,padding:"8px 14px",marginTop:8,fontSize:mob?13:15,color:"#16a34a"}}>⭐ {r.highlights}</div>}
             </div>)}
           </div>}
- 
+
           {pg==="log"&&isAdmin&&<div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}><h2 style={{fontSize:mob?20:24,fontWeight:800}}>💬 Lịch sử tương tác</h2><button className="btn btn-p" onClick={()=>om("i",{id:"IT"+Date.now(),ref:"",refName:"",date:today,type:"call",content:"",by:"Admin"},1)}>+ Ghi nhận</button></div>
             {inter.map(it=><div key={it.id} style={{display:"flex",gap:12,padding:"12px 0",borderBottom:"1px solid #f3f4f6"}}><div style={{width:12,height:12,borderRadius:"50%",background:it.type==="call"?"#16a34a":it.type==="message"?"#2563eb":"#ea580c",marginTop:6,flexShrink:0}}/><div><div style={{fontSize:mob?14:16}}><strong>{it.refName}</strong> <span style={{color:"#9ca3af",fontSize:mob?12:14}}>{it.date}</span> {B(it.type==="call"?"📞 Gọi":it.type==="message"?"💬 Nhắn":"🤝 Gặp",it.type==="call"?"g":it.type==="message"?"b":"o")}</div><div style={{fontSize:mob?14:16,color:"#374151",marginTop:4}}>{it.content}</div></div></div>)}
           </div>}
- 
+
           {pg==="fin"&&isAdmin&&<div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}><h2 style={{fontSize:mob?20:24,fontWeight:800}}>💰 Tài chính 50/50</h2><button className="btn btn-p" onClick={()=>om("f",{id:"HP"+Date.now(),name:"",cls:cls2[0]?.id||"",total:0,d1:0,d2:0,d2d:"",st:"pending"},1)}>+ Thêm</button></div>
             <div className="tbl-wrap"><div className="cd" style={{padding:0}}><table><thead><tr>{["Học viên","Lớp","Tổng","Đợt 1","Đợt 2","Hạn","TT",""].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{fin.map(f=><tr key={f.id}><td style={{fontWeight:600}}>{f.name}</td><td>{B(f.cls,"b")}</td><td style={{fontWeight:700,color:"#16a34a"}}>{vnd(f.total)}</td><td>{vnd(f.d1)}</td><td style={{fontWeight:600}}>{vnd(f.d2)}</td><td style={{color:f.st==="overdue"?"#dc2626":"#9ca3af"}}>{f.d2d}</td><td>{f.st==="paid"?B("Đã đóng","g"):f.st==="pending"?B("Chờ","y"):B("Quá hạn","r")}</td>
               <td><div style={{display:"flex",gap:4}}>{f.st!=="paid"&&<button className="btn btn-p btn-sm" onClick={()=>{setFin(fin.map(x=>x.id===f.id?{...x,st:"paid"}:x));updateRow("finance",{...f,st:"paid"})}}>✓</button>}<button className="ib" onClick={()=>om("f",{...f},0)}>✏️</button></div></td></tr>)}</tbody></table></div></div>
           </div>}
- 
+
           {pg==="charts"&&isAdmin&&<div>
             <h2 style={{fontSize:mob?20:24,fontWeight:800,marginBottom:14}}>📈 Biểu đồ tổng hợp</h2>
             <div style={{display:"grid",gridTemplateColumns:grd(2),gap:12}}>
@@ -326,7 +349,7 @@ export default function App(){
           </div>}
         </div>
       </div>
- 
+
       {/* BOTTOM NAV - chỉ hiện trên điện thoại */}
       {mob&&<div className="bot-nav">
         {mobNav.map(m=><div key={m.id} className={`bot-item ${pg===m.id?"a":""}`} onClick={()=>{
@@ -337,7 +360,7 @@ export default function App(){
           <div className="ni" onClick={logout} style={{padding:"10px 12px",fontSize:15,color:"#dc2626"}}>🚪 Đăng xuất</div>
         </div>}
       </div>}
- 
+
       {/* MODAL */}
       {modal&&<ModalForm type={modal.t} initial={modal.d} isNew={modal.n} cls2={cls2} teachers={teachers} isAdmin={isAdmin} userName={user.name} mob={mob}
         onSave={async d=>{await doSave(modal.t,d,modal.n);setModal(null)}} onClose={()=>setModal(null)}/>}
