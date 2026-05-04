@@ -1,21 +1,22 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, AreaChart, Area } from "recharts";
-import { supabase } from "./supabase";
+import { supabase, hasSupabase } from "./supabase";
 
 // ── DB ──
 const FM={leads:{lastContact:"last_contact"},reports:{absentNames:"absent_names"},interactions:{refName:"ref_name",by:"by_user"},trials:{date:"trial_date",time:"trial_time",followUp:"follow_up"},contracts:{start:"start_date",end:"end_date"},hsk_exams:{examDate:"exam_date"}};
 function toDb(t,o){const m=FM[t];if(!m)return{...o};const r={};for(const[k,v]of Object.entries(o))r[m[k]||k]=v;return r}
 function toApp(t,o){const m=FM[t];if(!m)return{...o};const rm={};for(const[k,v]of Object.entries(m))rm[v]=k;const r={};for(const[k,v]of Object.entries(o))r[rm[k]||k]=v;return r}
 async function loadT(t){
+  if(!hasSupabase || !supabase) return [];
   try{
     const{data,error}=await supabase.from(t).select("*");
     if(error) throw error;
     return(data||[]).map(r=>toApp(t,r));
   }catch(e){console.warn(`[${t}] load failed`,e);return[]}
 }
-async function addRow(t,row){const d=toDb(t,row);delete d.created_at;const{error}=await supabase.from(t).insert([d]);if(error)throw error}
-async function updateRow(t,row){const d=toDb(t,row);delete d.created_at;const{error}=await supabase.from(t).update(d).eq("id",row.id);if(error)throw error}
-async function deleteRow(t,id){const{error}=await supabase.from(t).delete().eq("id",id);if(error)throw error}
+async function addRow(t,row){if(!hasSupabase || !supabase) throw new Error("Supabase env variables are missing");const d=toDb(t,row);delete d.created_at;const{error}=await supabase.from(t).insert([d]);if(error)throw error}
+async function updateRow(t,row){if(!hasSupabase || !supabase) throw new Error("Supabase env variables are missing");const d=toDb(t,row);delete d.created_at;const{error}=await supabase.from(t).update(d).eq("id",row.id);if(error)throw error}
+async function deleteRow(t,id){if(!hasSupabase || !supabase) throw new Error("Supabase env variables are missing");const{error}=await supabase.from(t).delete().eq("id",id);if(error)throw error}
 
 const vnd=n=>new Intl.NumberFormat("vi-VN").format(n)+"đ";
 const today=new Date().toISOString().slice(0,10);
@@ -122,7 +123,7 @@ export default function App(){
   const isAdmin=user?.role==="admin";
   const canSee=c=>isAdmin||(user?.cls||"").split(",").includes(c);
 
-  if(!ok)return<div style={{display:"flex",height:"100vh",alignItems:"center",justifyContent:"center",fontFamily:"system-ui",fontSize:18}}>Đang kết nối...</div>;
+  if(!ok)return<div style={{display:"flex",height:"100vh",alignItems:"center",justifyContent:"center",fontFamily:"system-ui",fontSize:18,background:"#05070b",color:"#e5e7eb"}}>Đang khởi động...</div>;
 
   // ── ĐĂNG NHẬP · TECH HERO ──
   if(!user)return(
@@ -216,27 +217,21 @@ export default function App(){
   return(
     <div className="app-shell" style={{fontFamily:"Inter, ui-sans-serif, system-ui, sans-serif",display:"flex",flexDirection:mob?"column":"row",height:"100vh",background:"#05070b",color:"#e5e7eb",overflow:"hidden"}}>
       <style>{`
-        *{box-sizing:border-box;margin:0;padding:0}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
-        .ni{display:flex;align-items:center;gap:9px;padding:11px 14px;border-radius:10px;cursor:pointer;font-size:15px;font-weight:500;color:#6b7280;transition:all .12s}
-        .ni:hover{background:#f0fdf4;color:#16a34a}.ni.a{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-weight:700}
-        .cd{background:#fff;border-radius:16px;padding:${mob?14:20}px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #e5e7eb}
-        .btn{display:inline-flex;align-items:center;gap:5px;padding:10px 20px;border-radius:10px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit}
-        .btn-p{background:#16a34a;color:#fff}.btn-sm{padding:7px 14px;font-size:13px}
-        .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-        table{width:100%;border-collapse:collapse;min-width:${mob?"600px":"auto"}}
-        th{padding:${mob?"10px":"13px 16px"};text-align:left;font-size:${mob?11:13}px;font-weight:700;color:#9ca3af;text-transform:uppercase;background:#f9fafb;border-bottom:1px solid #e5e7eb;white-space:nowrap}
-        td{padding:${mob?"10px":"13px 16px"};font-size:${mob?14:15}px;border-bottom:1px solid #f3f4f6;white-space:nowrap}
-        tr:hover td{background:#f0fdf4}
-        .ib{cursor:pointer;padding:6px 8px;border-radius:8px;border:none;background:none;color:#9ca3af;font-size:16px}.ib:hover{color:#16a34a;background:#f0fdf4}
-        .pb{height:8px;background:#f3f4f6;border-radius:4px;overflow:hidden}.pf{height:100%;border-radius:4px}
-        .tab{padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;color:#6b7280;border:none;background:none;font-family:inherit}.tab.a{background:#16a34a;color:#fff}
-        .al{border-radius:10px;padding:12px;margin-bottom:8px;font-size:14px}
-        .fb{height:38px;border-radius:8px;display:flex;align-items:center;padding:0 14px;color:#fff;font-weight:700;font-size:15px;margin-bottom:6px}
-        .bot-nav{display:flex;background:#fff;border-top:1px solid #e5e7eb;padding:6px 0;position:relative}
-        .bot-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;cursor:pointer;font-size:10px;color:#6b7280;font-weight:500}
-        .bot-item.a{color:#16a34a;font-weight:700}
-        .bot-item span:first-child{font-size:20px}
-        .more-menu{position:absolute;bottom:60px;right:8px;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.15);padding:8px;width:200px;z-index:50}
+        *{box-sizing:border-box;margin:0;padding:0}::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:rgba(148,163,184,.38);border-radius:999px}
+        .app-shell{position:relative;background:#05070b}
+        .app-shell:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 4%,rgba(122,240,191,.16),transparent 32%),radial-gradient(circle at 70% 0%,rgba(56,189,248,.10),transparent 28%),linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:auto,auto,54px 54px,54px 54px}
+        .ni{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:14px;cursor:pointer;font-size:14px;font-weight:650;color:#94a3b8;transition:all .16s;border:1px solid transparent}
+        .ni:hover{background:rgba(255,255,255,.055);color:#f8fafc;border-color:rgba(255,255,255,.08)}.ni.a{background:linear-gradient(135deg,rgba(122,240,191,.20),rgba(34,211,238,.10));color:#f8fafc;font-weight:800;border-color:rgba(122,240,191,.24);box-shadow:0 12px 32px rgba(0,0,0,.18)}
+        .cd{background:linear-gradient(180deg,rgba(255,255,255,.078),rgba(255,255,255,.035));border-radius:22px;padding:${mob?14:20}px;box-shadow:0 20px 70px rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.105);backdrop-filter:blur(18px);color:#e5e7eb}
+        .cd strong{color:#f8fafc}.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:14px;border:1px solid rgba(255,255,255,.10);cursor:pointer;font-size:14px;font-weight:750;font-family:inherit;transition:.16s}
+        .btn-p{background:linear-gradient(135deg,#ecfff6,#7af0bf 45%,#22d3ee);color:#04110b;border:none;box-shadow:0 14px 36px rgba(122,240,191,.15)}.btn-sm{padding:7px 13px;font-size:13px}
+        .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:22px}table{width:100%;border-collapse:collapse;min-width:${mob?"600px":"auto"}}
+        th{padding:${mob?"10px":"13px 16px"};text-align:left;font-size:${mob?11:12}px;font-weight:800;color:#64748b;text-transform:uppercase;background:rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.075);white-space:nowrap;letter-spacing:.7px}
+        td{padding:${mob?"10px":"13px 16px"};font-size:${mob?14:15}px;border-bottom:1px solid rgba(255,255,255,.055);white-space:nowrap;color:#cbd5e1}tr:hover td{background:rgba(122,240,191,.055)}
+        .ib{cursor:pointer;padding:6px 8px;border-radius:10px;border:1px solid transparent;background:transparent;color:#94a3b8;font-size:16px}.ib:hover{color:#7af0bf;background:rgba(122,240,191,.08);border-color:rgba(122,240,191,.14)}
+        .pb{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}.pf{height:100%;border-radius:999px}.tab{padding:8px 16px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:750;color:#94a3b8;border:1px solid transparent;background:transparent;font-family:inherit}.tab.a{background:#f8fafc;color:#020617}
+        .al{border-radius:16px;padding:12px;margin-bottom:8px;font-size:14px}.fb{height:38px;border-radius:12px;display:flex;align-items:center;padding:0 14px;color:#03120b;font-weight:850;font-size:14px;margin-bottom:8px}
+        .bot-nav{display:flex;background:rgba(2,6,23,.92);border-top:1px solid rgba(255,255,255,.10);padding:6px 0;position:relative;backdrop-filter:blur(18px)}.bot-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;cursor:pointer;font-size:10px;color:#94a3b8;font-weight:600}.bot-item.a{color:#7af0bf;font-weight:800}.bot-item span:first-child{font-size:20px}.more-menu{position:absolute;bottom:60px;right:8px;background:#071018;border:1px solid rgba(255,255,255,.12);border-radius:18px;box-shadow:0 18px 70px rgba(0,0,0,.5);padding:8px;width:200px;z-index:50}
       `}</style>
 
       {/* SIDEBAR - chỉ hiện trên desktop */}
@@ -275,6 +270,7 @@ export default function App(){
         </div>}
 
         <div style={{flex:1,overflow:"auto",padding:mob?14:24,position:"relative",zIndex:1}}>
+          {!hasSupabase&&<div className="al" style={{background:"rgba(251,191,36,.10)",border:"1px solid rgba(251,191,36,.28)",color:"#fde68a",fontWeight:700,marginBottom:12}}>⚠️ Chưa gắn Supabase Environment Variables trên Vercel. Web vẫn mở được, nhưng chưa lưu/đọc database.</div>}
           {saveErr&&<div className="al" style={{background:"#fef2f2",border:"1px solid #fecaca",color:"#dc2626",fontWeight:600,marginBottom:12}}>{saveErr}</div>}
 
           {/* TỔNG QUAN */}
