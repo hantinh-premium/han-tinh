@@ -1,167 +1,894 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, CartesianGrid
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  CartesianGrid,
 } from "recharts";
 import { supabase } from "./supabase";
 import {
-  LayoutDashboard, Target, BookOpen, Users, FileText, GraduationCap,
-  ClipboardList, MessageSquare, Wallet, BarChart3, Plus, Pencil, Trash2,
-  Search, Check, LogOut, X, ChevronRight, TrendingUp, Save, Menu,
+  LayoutDashboard,
+  Target,
+  BookOpen,
+  Users,
+  FileText,
+  GraduationCap,
+  ClipboardList,
+  MessageSquare,
+  Wallet,
+  BarChart3,
+  Plus,
+  Pencil,
+  Trash2,
+  Search,
+  Check,
+  LogOut,
+  X,
+  ChevronRight,
+  TrendingUp,
+  Save,
+  Menu,
+  Sparkles,
+  ShieldCheck,
+  Network,
+  Coins,
+  Activity,
+  ArrowUpRight,
 } from "lucide-react";
- 
-function decodeText(value) {
-  if (typeof value !== "string") return value;
-  let str = value;
-  for (let i = 0; i < 5; i++) {
-    const before = str;
-    try { if (/%[0-9A-Fa-f]{2}/.test(str)) str = decodeURIComponent(str); } catch {}
-    str = str.replace(/\\\\u([0-9A-Fa-f]{4})/g, "\\u$1");
-    str = str.replace(/\\u([0-9A-Fa-f]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-    str = str.replace(/\\U([0-9A-Fa-f]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-    str = str.replace(/u(00[0-9A-Fa-f]{2}|01[0-9A-Fa-f]{2}|1[0-9A-Fa-f]{3})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-    str = str.replace(/U(00[0-9A-Fa-f]{2}|01[0-9A-Fa-f]{2}|1[0-9A-Fa-f]{3})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-    if (str === before) break;
-  }
-  return str;
-}
-const T = (s) => decodeText(s);
-const L = { tq: T("T%E1%BB%95ng%20quan"), km: T("Kh%C3%A1ch%20m%E1%BB%9Bi"), ht: T("H%E1%BB%8Dc%20th%E1%BB%AD"), hv: T("H%E1%BB%8Dc%20vi%C3%AAn"), hd: T("H%E1%BB%A3p%20%C4%91%E1%BB%93ng"), bc: T("B%C3%A1o%20c%C3%A1o"), ls: T("L%E1%BB%8Bch%20s%E1%BB%AD"), tc: T("T%C3%A0i%20ch%C3%ADnh"), bd: T("Bi%E1%BB%83u%20%C4%91%E1%BB%93"), ktn: T("Kh%C3%A1ch%20ti%E1%BB%81m%20n%C4%83ng"), htinh: T("H%C3%A1n%20Tinh"), dnhap: T("%C4%90%C4%83ng%20nh%E1%BA%ADp"), dnht: T("%C4%90%C4%83ng%20nh%E1%BA%ADp%20h%E1%BB%87%20th%E1%BB%91ng"), tkh: T("T%C3%A0i%20kho%E1%BA%A3n"), mk: T("M%E1%BA%ADt%20kh%E1%BA%A9u"), saitk: T("Sai%20t%C3%A0i%20kho%E1%BA%A3n%20ho%E1%BA%B7c%20m%E1%BA%ADt%20kh%E1%BA%A9u"), them: T("Th%C3%AAm"), themmoi: T("Th%C3%AAm%20m%E1%BB%9Bi"), sua: T("Ch%E1%BB%89nh%20s%E1%BB%ADa"), luu: T("L%C6%B0u"), huy: T("Hu%E1%BB%B7"), xlich: T("X%E1%BA%BFp%20l%E1%BB%8Bch"), tao: T("T%E1%BA%A1o"), thoat: T("Tho%C3%A1t"), xoa: T("Xo%C3%A1%3F"), dk: T("%C4%90K"), gh: T("Gia%20h%E1%BA%A1n"), dthu: T("%C4%90%C3%A3%20thu"), nohp: T("N%E1%BB%A3%20HP"), cnhac: T("C%E1%BA%A7n%20nh%E1%BA%AFc"), hvlt: T("HV%20l%E1%BB%9Bp%20t%C3%B4i"), dtb: T("%C4%90i%E1%BB%83m%20TB"), ccan: T("Chuy%C3%AAn%20c%E1%BA%A7n"), hskdo: T("HSK%20%C4%91%E1%BB%97"), cthu: T("C%E1%BA%A7n%20thu"), gday: T("G%E1%BA%A7n%20%C4%91%C3%A2y"), cxl: T("c%E1%BA%A7n%20x%E1%BB%AD%20l%C3%BD"), chiso: T("Ch%E1%BB%89%20s%E1%BB%91"), pheu: T("Ph%E1%BB%85u"), xhg: T("Xu%20h%C6%B0%E1%BB%9Bng"), dthu2: T("Doanh%20thu"), thtoan: T("Thanh%20to%C3%A1n"), kqua: T("K%E1%BA%BFt%20qu%E1%BA%A3"), tyle: T("T%E1%BB%B7%20l%E1%BB%87"), nguon: T("Ngu%E1%BB%93n"), diem: T("%C4%90i%E1%BB%83m"), ten: T("T%C3%AAn"), sdt: T("S%C4%90T"), nguonh: T("Ngu%E1%BB%93n"), lop: T("L%E1%BB%9Bp"), diemh: T("%C4%90i%E1%BB%83m"), ngay: T("Ng%C3%A0y"), ngaythuong: T("ng%C3%A0y"), han: T("H%E1%BA%A1n"), tong: T("T%E1%BB%95ng"), con: T("C%C3%B2n"), phi: T("Ph%C3%AD"), nhac: T("Nh%E1%BA%AFc"), gd: T("G%C4%90"), hoten: T("H%E1%BB%8D%20t%C3%AAn"), nguonf: T("Ngu%E1%BB%93n"), qtam: T("Quan%20t%C3%A2m"), gdoan: T("Giai%20%C4%91o%E1%BA%A1n"), gchu: T("Ghi%20ch%C3%BA"), tdo: T("Tr%C3%ACnh%20%C4%91%E1%BB%99"), tthai: T("Tr%E1%BA%A1ng%20th%C3%A1i"), than: T("Th%E1%BB%9Di%20h%E1%BA%A1n"), bdau: T("B%E1%BA%AFt%20%C4%91%E1%BA%A7u"), kthuc: T("K%E1%BA%BFt%20th%C3%BAc"), hphi: T("H%E1%BB%8Dc%20ph%C3%AD"), nthi: T("Ng%C3%A0y%20thi"), cthi: T("Ch%C6%B0a%20thi"), dat: T("%C4%90%E1%BA%A0T"), cdat: T("Ch%C6%B0a%20%C4%91%E1%BA%A1t"), comat: T("C%C3%B3%20m%E1%BA%B7t"), vang: T("V%E1%BA%AFng"), hvvang: T("HV%20v%E1%BA%AFng"), bhoc: T("B%C3%A0i%20h%E1%BB%8Dc"), chuy: T("Ch%C3%BA%20%C3%BD"), nbat: T("N%E1%BB%95i%20b%E1%BA%ADt"), ndung: T("N%E1%BB%99i%20dung"), nguoi: T("Ng%C6%B0%E1%BB%9Di"), loai: T("Lo%E1%BA%A1i"), boi: T("B%E1%BB%9Fi"), tphi: T("T%E1%BB%95ng%20ph%C3%AD"), hdot2: T("H%E1%BA%A1n%20%C4%91%E1%BB%A3t%202"), nlai: T("Nh%E1%BA%AFc%20l%E1%BA%A1i"), hvien: T("H%E1%BB%8Dc%20vi%C3%AAn"), gio: T("Gi%E1%BB%9D"), htham: T("H%E1%BB%8Fi%20th%C4%83m"), hthu: T("H%E1%BB%8Dc%20th%E1%BB%AD"), dadk: T("%C4%90%C3%A3%20%C4%90K"), mat: T("M%E1%BA%A5t"), dhoc: T("%C4%90ang%20h%E1%BB%8Dc"), tnghi: T("T%E1%BA%A1m%20ngh%E1%BB%89"), nghih: T("Ngh%E1%BB%89%20h%E1%BB%8Dc"), dxep: T("%C4%90%C3%A3%20x%E1%BA%BFp"), dahoc: T("%C4%90%C3%A3%20h%E1%BB%8Dc"), kden: T("Kh%C3%B4ng%20%C4%91%E1%BA%BFn"), snghi: T("Suy%20ngh%C4%A9"), kqt: T("Kh%C3%B4ng%20QT"), ddong: T("%C4%90%C3%A3%20%C4%91%C3%B3ng"), cho: T("Ch%E1%BB%9D"), qhan: T("Qu%C3%A1%20h%E1%BA%A1n"), "3t": T("3%20th%C3%A1ng"), "6t": T("6%20th%C3%A1ng"), "12t": T("12%20th%C3%A1ng"), "18t": T("18%20th%C3%A1ng"), gthieu: T("Gi%E1%BB%9Bi%20thi%E1%BB%87u"), goi: T("G%E1%BB%8Di"), nhan: T("Nh%E1%BA%AFn"), gap: T("G%E1%BA%B7p"), bhoi: T("H%E1%BB%8Fi"), bthu: T("Th%E1%BB%AD"), bxep: T("X%E1%BA%BFp"), bxong: T("Xong"), bkd: T("K%C4%90"), bnghi: T("Ngh%C4%A9"), bkqt: T("KQT"), bsap: T("S%E1%BA%AFp"), bhet: T("H%E1%BA%BFt"), btruot: T("Tr%C6%B0%E1%BB%A3t"), bchua: T("Ch%C6%B0a"), bdu: T("%C4%90%E1%BB%A7"), bno: T("N%E1%BB%A3"), bdatl: T("%C4%90%E1%BA%A1t"), cohoa: T("C%C3%B4%20Hoa"), tlong: T("Th%E1%BA%A7y%20Long"), cowang: T("C%C3%B4%20Wang%20Li"), tnam: T("Th%E1%BA%A7y%20Nam"), tkiem: T("T%C3%ACm%20ki%E1%BA%BFm..."), dong: T("%C4%91") };
-const FM = { leads: { lastContact: "last_contact" }, reports: { absentNames: "absent_names" }, interactions: { refName: "ref_name", by: "by_user" }, trials: { date: "trial_date", time: "trial_time", followUp: "follow_up" }, contracts: { start: "start_date", end: "end_date" }, hsk_exams: { examDate: "exam_date" } };
-function toDb(t, o) { const m = FM[t]; if (!m) return { ...o }; const r = {}; for (const [k, v] of Object.entries(o || {})) r[m[k] || k] = typeof v === "string" ? decodeText(v) : v; return r; }
-function toApp(t, o) { const m = FM[t]; const rm = {}; if (m) for (const [k, v] of Object.entries(m)) rm[v] = k; const r = {}; for (const [k, v] of Object.entries(o || {})) r[rm[k] || k] = typeof v === "string" ? decodeText(v) : v; return r; }
-async function loadT(t) { try { const { data } = await supabase.from(t).select("*"); return (data || []).map((r) => toApp(t, r)); } catch { return []; } }
-async function addRow(t, row) { const d = toDb(t, row); delete d.created_at; await supabase.from(t).insert([d]); }
-async function updateRow(t, row) { const d = toDb(t, row); delete d.created_at; await supabase.from(t).update(d).eq("id", row.id); }
-async function deleteRow(t, id) { await supabase.from(t).delete().eq("id", id); }
-const vnd = (n) => new Intl.NumberFormat("vi-VN").format(n || 0) + L.dong;
+
+const BRAND = {
+  bg: "#05050B",
+  panel: "rgba(12, 10, 22, 0.72)",
+  panel2: "rgba(18, 14, 31, 0.88)",
+  line: "rgba(255,255,255,.08)",
+  text: "#F7F3FF",
+  muted: "#8A829A",
+  dim: "#5B536C",
+  pink: "#FF6EA8",
+  pink2: "#FF9AC8",
+  violet: "#8B5CF6",
+  cyan: "#7DD3FC",
+  green: "#34D399",
+  amber: "#FBBF24",
+  red: "#FB7185",
+};
+
+const A = BRAND.pink;
+const A2 = "#D946EF";
+const FN = "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const today = new Date().toISOString().slice(0, 10);
-const A = "#10B981"; const A2 = "#059669"; const CX = ["#10B981", "#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#06B6D4", "#F97316"];
-const daysLeft = (d) => { if (!d) return 0; const t = new Date(d).getTime(); return Number.isFinite(t) ? Math.ceil((t - Date.now()) / 86400000) : 0; };
-const FN = "Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
-const USERS = [{ user: "admin", pass: "hantinh2026", role: "admin", name: "Admin", cls: "all" }, { user: "cohoa", pass: "gv2026", role: "teacher", name: L.cohoa, cls: "CN-A1" }, { user: "thaylong", pass: "gv2026", role: "teacher", name: L.tlong, cls: "CN-A3,CN-B2" }, { user: "cowang", pass: "gv2026", role: "teacher", name: L.cowang, cls: "CN-A2" }, { user: "thaynam", pass: "gv2026", role: "teacher", name: L.tnam, cls: "CN-B1" }];
-const monthTrend = [{ m: "T12", rev: 42, lead: 8, enroll: 2 }, { m: "T1", rev: 48, lead: 12, enroll: 4 }, { m: "T2", rev: 52, lead: 10, enroll: 3 }, { m: "T3", rev: 58, lead: 15, enroll: 5 }, { m: "T4", rev: 65, lead: 11, enroll: 3 }, { m: "T5", rev: 72, lead: 14, enroll: 5 }];
-const attendTrend = [{ w: "T1", v: 88 }, { w: "T2", v: 91 }, { w: "T3", v: 85 }, { w: "T4", v: 93 }, { w: "T5", v: 90 }, { w: "T6", v: 87 }, { w: "T7", v: 92 }, { w: "T8", v: 94 }];
- 
-function Spark({ data, w = 80, h = 28 }) { if (!data || data.length < 2) return null; const mn = Math.min(...data), mx = Math.max(...data), rg = mx - mn || 1; const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - 2 - ((v - mn) / rg) * (h - 4)}`).join(" "); return <svg width={w} height={h} style={{ display: "block" }}><defs><linearGradient id="_sg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor={A} stopOpacity=".4" /><stop offset="100%" stopColor={A} /></linearGradient></defs><polyline points={pts} fill="none" stroke="url(#_sg)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>; }
-function Tip({ active, payload, label }) { if (!active || !payload?.length) return null; return (<div style={{ background: "rgba(10,10,18,.95)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 10, padding: "10px 14px", fontSize: 12, fontFamily: FN, backdropFilter: "blur(20px)", boxShadow: "0 8px 32px rgba(0,0,0,.5)" }}><div style={{ color: "#888", fontSize: 10, fontWeight: 600, marginBottom: 4, textTransform: "uppercase", letterSpacing: ".06em" }}>{decodeText(label)}</div>{payload.map((p, i) => <div key={i} style={{ color: "#F0F0F0", fontWeight: 600 }}>{decodeText(p.name)}: <span style={{ color: p.color || A }}>{p.value}</span></div>)}</div>); }
-function Bd({ t, v }) { const m = { ok: ["rgba(16,185,129,.15)", "#34D399"], er: ["rgba(239,68,68,.12)", "#F87171"], wa: ["rgba(251,191,36,.1)", "#FBBF24"], in: ["rgba(96,165,250,.1)", "#60A5FA"], mu: ["rgba(255,255,255,.05)", "#71717A"], pu: ["rgba(167,139,250,.1)", "#A78BFA"], or: ["rgba(251,146,60,.1)", "#FB923C"] }; const [bg, fg] = m[v] || m.mu; return <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 999, fontSize: 11, fontWeight: 600, background: bg, color: fg, border: `1px solid ${fg}22`, lineHeight: "16px" }}>{decodeText(t)}</span>; }
- 
-function ModalForm({ type, initial, isNew, onSave, onClose, cls2, teachers, isAdmin, userName, mob }) {
-  const d = useRef({ ...initial });
-  const is = { padding: "10px 14px", border: "1px solid rgba(255,255,255,.08)", borderRadius: 10, fontSize: 14, outline: "none", width: "100%", fontFamily: FN, background: "rgba(255,255,255,.03)", color: "#F0F0F0", transition: "border-color .2s,box-shadow .2s" };
-  const fo = (e) => { e.target.style.borderColor = A; e.target.style.boxShadow = `0 0 0 2px ${A}33`; }; const bl = (e) => { e.target.style.borderColor = "rgba(255,255,255,.08)"; e.target.style.boxShadow = "none"; };
-  const F = ({ label, k, type: t }) => (<div style={{ flex: 1, marginBottom: 14 }}><label style={{ display: "block", fontSize: 12, color: "#666", fontWeight: 500, marginBottom: 6, letterSpacing: ".02em" }}>{label}</label>{t === "textarea" ? <textarea style={{ ...is, minHeight: 60, resize: "vertical" }} defaultValue={d.current[k] || ""} onFocus={fo} onBlur={bl} onChange={(e) => { d.current[k] = e.target.value; }} /> : t === "date" ? <input style={is} type="date" defaultValue={d.current[k] || ""} onFocus={fo} onBlur={bl} onChange={(e) => { d.current[k] = e.target.value; }} /> : t === "number" ? <input style={is} type="number" defaultValue={d.current[k] || 0} onFocus={fo} onBlur={bl} onChange={(e) => { d.current[k] = parseFloat(e.target.value) || 0; }} /> : <input style={is} defaultValue={d.current[k] || ""} onFocus={fo} onBlur={bl} onChange={(e) => { d.current[k] = e.target.value; }} />}</div>);
-  const S = ({ label, k, opts }) => (<div style={{ flex: 1, marginBottom: 14 }}><label style={{ display: "block", fontSize: 12, color: "#666", fontWeight: 500, marginBottom: 6, letterSpacing: ".02em" }}>{label}</label><select style={{ ...is, appearance: "auto" }} defaultValue={d.current[k] || ""} onChange={(e) => { d.current[k] = e.target.value; }}>{opts.map((o) => Array.isArray(o) ? <option key={o[0]} value={o[0]}>{o[1]}</option> : <option key={o}>{o}</option>)}</select></div>);
-  const R = ({ children }) => <div style={{ display: "flex", gap: 10 }}>{children}</div>;
-  const src = ["Facebook", "TikTok", L.gthieu, "Walk-in", "Website"]; const lv = ["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5", "HSK 6"];
-  return (<div className="_mo" onClick={onClose}><div className={"_mp" + (mob ? " _mm" : "")} onClick={(e) => e.stopPropagation()}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, paddingBottom: 16, borderBottom: "1px solid rgba(255,255,255,.06)" }}><span style={{ fontSize: 16, fontWeight: 600, color: "#F0F0F0" }}>{isNew ? L.themmoi : L.sua}</span><button className="_xb" onClick={onClose}><X size={14} /></button></div>
-    {type === "l" && <><R><F label={L.hoten} k="name" /><F label={L.sdt} k="phone" /></R><R><S label={L.nguonh} k="source" opts={src} /><S label={L.qtam} k="interest" opts={lv.slice(0, 5)} /></R><S label={L.gdoan} k="stage" opts={[["inquiry", L.htham], ["trial", L.hthu], ["registered", L.dadk], ["lost", L.mat]]} /><F label={L.gchu} k="note" type="textarea" /></>}
-    {type === "s" && <><R><F label={L.hoten} k="name" /><F label={L.sdt} k="phone" /></R><R><S label={L.lop} k="cls" opts={cls2.map((c) => c.id)} /><S label={L.tdo} k="level" opts={lv} /></R><R><F label={L.diemh} k="score" type="number" /><F label="CC %" k="attend" type="number" /></R><R><S label={L.nguonh} k="source" opts={src} /><S label={L.tthai} k="status" opts={[L.dhoc, L.tnghi, L.nghih]} /></R></>}
-    {type === "tr" && <><R><F label={L.hoten} k="name" /><F label={L.sdt} k="phone" /></R><R><F label={L.ngay} k="date" type="date" /><F label={L.gio} k="time" /></R><R><S label={L.lop} k="cls" opts={cls2.map((c) => c.id)} /><S label="GV" k="teacher" opts={teachers} /></R><R><S label="TT" k="status" opts={[["scheduled", L.dxep], ["completed", L.dahoc], ["no-show", L.kden]]} /><S label="KQ" k="result" opts={[["", "--"], ["enrolled", L.dadk], ["thinking", L.snghi], ["not-interested", L.kqt]]} /></R><F label={L.nlai} k="followUp" type="date" /></>}
-    {type === "ct" && <><F label={L.hvien} k="name" /><R><S label={L.lop} k="cls" opts={cls2.map((c) => c.id)} /><S label={L.than} k="duration" opts={[L["3t"], L["6t"], L["12t"], L["18t"]]} /></R><R><F label={L.bdau} k="start" type="date" /><F label={L.kthuc} k="end" type="date" /></R><F label={L.hphi} k="fee" type="number" /></>}
-    {type === "hk" && <><F label={L.hvien} k="name" /><R><S label="Level" k="level" opts={lv} /><F label={L.nthi} k="examDate" type="date" /></R><R><F label={L.diemh} k="score" type="number" /><S label="KQ" k="passed" opts={[["", L.cthi], ["yes", L.dat], ["no", L.cdat]]} /></R></>}
-    {type === "r" && <><R><F label={L.ngay} k="date" type="date" />{isAdmin ? <S label="GV" k="teacher" opts={teachers} /> : <div style={{ flex: 1 }}><label style={{ display: "block", fontSize: 12, color: "#666", fontWeight: 500, marginBottom: 6 }}>GV</label><input style={{ ...is, opacity: .5 }} value={userName} disabled /></div>}<S label={L.lop} k="cls" opts={cls2.map((c) => c.id)} /></R><R><F label={L.comat} k="present" type="number" /><F label={L.vang} k="absent" type="number" /></R><F label={L.hvvang} k="absentNames" /><F label={L.bhoc} k="lesson" type="textarea" /><F label="BTVN" k="homework" type="textarea" /><F label={L.chuy} k="flags" type="textarea" /><F label={L.nbat} k="highlights" type="textarea" /></>}
-    {type === "i" && <><R><F label={L.nguoi} k="refName" /><F label={L.ngay} k="date" type="date" /></R><R><S label={L.loai} k="type" opts={[["call", L.goi], ["message", L.nhan], ["meeting", L.gap]]} /><F label={L.boi} k="by" /></R><F label={L.ndung} k="content" type="textarea" /></>}
-    {type === "f" && <><F label={L.hoten} k="name" /><R><S label={L.lop} k="cls" opts={cls2.map((c) => c.id)} /><F label={L.tphi} k="total" type="number" /></R><R><F label={L.hdot2} k="d2d" /><S label="TT" k="st" opts={[["paid", L.ddong], ["pending", L.cho], ["overdue", L.qhan]]} /></R></>}
-    <div style={{ display: "flex", gap: 8, marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,.06)" }}><button className="_ba" style={{ flex: 1, justifyContent: "center" }} onClick={() => { const data = { ...d.current }; if (type === "f" && data.total) { data.d1 = Math.round(data.total / 2); data.d2 = Math.round(data.total / 2); } if (type === "hk") data.status = data.passed === "yes" ? "passed" : data.passed === "no" ? "failed" : "registered"; onSave(data); }}><Save size={13} />{L.luu}</button><button className="_bg" onClick={onClose}>{L.huy}</button></div></div></div>);
+const CX = [BRAND.pink, BRAND.violet, BRAND.cyan, BRAND.green, BRAND.amber, BRAND.red, "#F97316"];
+
+const USERS = [
+  { user: "admin", pass: "hantinh2026", role: "admin", name: "Admin", cls: "all" },
+  { user: "cohoa", pass: "gv2026", role: "teacher", name: "Cô Hoa", cls: "CN-A1" },
+  { user: "thaylong", pass: "gv2026", role: "teacher", name: "Thầy Long", cls: "CN-A3,CN-B2" },
+  { user: "cowang", pass: "gv2026", role: "teacher", name: "Cô Wang Li", cls: "CN-A2" },
+  { user: "thaynam", pass: "gv2026", role: "teacher", name: "Thầy Nam", cls: "CN-B1" },
+];
+
+const LABEL = {
+  home: "Tổng quan",
+  leads: "Khách mới",
+  trials: "Học thử",
+  students: "Học viên",
+  contracts: "Hợp đồng",
+  hsk: "HSK",
+  reports: "Báo cáo",
+  log: "Lịch sử",
+  finance: "Tài chính",
+  charts: "Biểu đồ",
+  login: "Đăng nhập hệ thống",
+  account: "Tài khoản",
+  pass: "Mật khẩu",
+  wrong: "Sai tài khoản hoặc mật khẩu",
+  add: "Thêm",
+  new: "Thêm mới",
+  edit: "Chỉnh sửa",
+  save: "Lưu",
+  cancel: "Huỷ",
+  create: "Tạo",
+  schedule: "Xếp lịch",
+  logout: "Thoát",
+  delete: "Xoá?",
+  search: "Tìm kiếm...",
+  activeStudents: "HV đang học",
+  revenue: "Doanh thu",
+  debt: "Nợ HP",
+  follow: "Cần nhắc",
+  collect: "Cần thu",
+  recent: "Gần đây",
+  source: "Nguồn",
+  funnel: "Phễu",
+  trend: "Xu hướng",
+  index: "Chỉ số",
+  conversion: "Chuyển đổi",
+  attendance: "Chuyên cần",
+  result: "Kết quả",
+  rate: "Tỷ lệ",
+  paid: "Đã đóng",
+  pending: "Chờ",
+  overdue: "Quá hạn",
+  name: "Họ tên",
+  phone: "SĐT",
+  class: "Lớp",
+  level: "Trình độ",
+  score: "Điểm",
+  status: "Trạng thái",
+  note: "Ghi chú",
+  date: "Ngày",
+  time: "Giờ",
+  teacher: "GV",
+  start: "Bắt đầu",
+  end: "Kết thúc",
+  fee: "Học phí",
+  duration: "Thời hạn",
+  reminder: "Nhắc",
+  present: "Có mặt",
+  absent: "Vắng",
+  lesson: "Bài học",
+  homework: "BTVN",
+  flags: "Chú ý",
+  highlights: "Nổi bật",
+  content: "Nội dung",
+};
+
+const FM = {
+  leads: { lastContact: "last_contact" },
+  reports: { absentNames: "absent_names" },
+  interactions: { refName: "ref_name", by: "by_user" },
+  trials: { date: "trial_date", time: "trial_time", followUp: "follow_up" },
+  contracts: { start: "start_date", end: "end_date" },
+  hsk_exams: { examDate: "exam_date" },
+};
+
+function toDb(t, o) {
+  const m = FM[t];
+  if (!m) return { ...o };
+  const r = {};
+  Object.entries(o || {}).forEach(([k, v]) => (r[m[k] || k] = v));
+  return r;
 }
- 
-export default function App() {
-  const [user, setUser] = useState(null); const [lu, setLu] = useState(""); const [lp, setLp] = useState(""); const [le, setLe] = useState("");
-  const [pg, setPg] = useState("home"); const [mob, setMob] = useState(window.innerWidth < 768);
-  const [stu, setStu] = useState([]); const [cls2, setCls2] = useState([]); const [fin, setFin] = useState([]); const [rpt, setRpt] = useState([]); const [leads, setLeads] = useState([]); const [inter, setInter] = useState([]); const [trials, setTrials] = useState([]); const [contracts, setContracts] = useState([]); const [hsk, setHsk] = useState([]);
-  const [modal, setModal] = useState(null); const [q, setQ] = useState(""); const [dtab, setDtab] = useState("kpi"); const [ok, setOk] = useState(false); const [showMenu, setShowMenu] = useState(false);
-  useEffect(() => { if (document.getElementById("_htf")) return; const pc = document.createElement("link"); pc.rel = "preconnect"; pc.href = "https://fonts.googleapis.com"; document.head.appendChild(pc); const pc2 = document.createElement("link"); pc2.rel = "preconnect"; pc2.href = "https://fonts.gstatic.com"; pc2.crossOrigin = "anonymous"; document.head.appendChild(pc2); const lk = document.createElement("link"); lk.id = "_htf"; lk.rel = "stylesheet"; lk.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"; document.head.appendChild(lk); }, []);
-  useEffect(() => { const h = () => setMob(window.innerWidth < 768); window.addEventListener("resize", h); return () => window.removeEventListener("resize", h); }, []);
-  useEffect(() => { (async () => { const [s, c, f, r, l, i, t, ct, h] = await Promise.all([loadT("students"), loadT("classes"), loadT("finance"), loadT("reports"), loadT("leads"), loadT("interactions"), loadT("trials"), loadT("contracts"), loadT("hsk_exams")]); setStu(s); setCls2(c); setFin(f); setRpt(r); setLeads(l); setInter(i); setTrials(t); setContracts(ct); setHsk(h); const su = localStorage.getItem("ht_user"); if (su) setUser(JSON.parse(su)); setOk(true); })(); }, []);
-  const tbl = { s: "students", l: "leads", tr: "trials", ct: "contracts", hk: "hsk_exams", r: "reports", i: "interactions", f: "finance" };
-  const stx = { s: [stu, setStu], l: [leads, setLeads], tr: [trials, setTrials], ct: [contracts, setContracts], hk: [hsk, setHsk], r: [rpt, setRpt], i: [inter, setInter], f: [fin, setFin] };
-  const doSave = async (type, data, isNew) => { const [arr, setter] = stx[type]; if (isNew) { setter(type === "r" || type === "i" ? [data, ...arr] : [...arr, data]); await addRow(tbl[type], data); } else { setter(arr.map((x) => x.id === data.id ? data : x)); await updateRow(tbl[type], data); } };
-  const doDel = async (type, id) => { const [arr, setter] = stx[type]; setter(arr.filter((x) => x.id !== id)); await deleteRow(tbl[type], id); };
-  const login = () => { const u = USERS.find((u) => u.user === lu && u.pass === lp); if (u) { setUser(u); localStorage.setItem("ht_user", JSON.stringify(u)); setLe(""); } else setLe(L.saitk); };
-  const logout = () => { setUser(null); localStorage.removeItem("ht_user"); setPg("home"); };
-  const isAdmin = user?.role === "admin"; const canSee = (c) => isAdmin || (user?.cls || "").split(",").includes(c);
- 
-  if (!ok) return <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", fontFamily: FN, background: "#06060A", color: "#555", gap: 8, fontSize: 13 }}><div style={{ width: 16, height: 16, border: "2px solid #1a1a2e", borderTopColor: A, borderRadius: "50%", animation: "_sp .5s linear infinite" }} /><span style={{ letterSpacing: ".04em" }}>Loading</span></div>;
-  if (!user) return (<div style={{ fontFamily: FN, minHeight: "100vh", background: "#06060A", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, position: "relative", overflow: "hidden" }}><style>{`@keyframes _sp{to{transform:rotate(360deg)}}@keyframes _glow{0%,100%{opacity:.5}50%{opacity:.8}}`}</style><div style={{ position: "absolute", width: 600, height: 600, borderRadius: "50%", background: `radial-gradient(circle, ${A}15 0%, transparent 70%)`, top: "50%", left: "50%", transform: "translate(-50%,-50%)", animation: "_glow 5s ease-in-out infinite", pointerEvents: "none" }} /><div style={{ width: mob ? "100%" : 400, background: "rgba(12,12,20,.9)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 16, padding: mob ? 28 : 44, position: "relative", backdropFilter: "blur(40px)", boxShadow: "0 30px 100px rgba(0,0,0,.5)" }}><div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg, ${A}, ${A2})`, display: "flex", alignItems: "center", justifyContent: "center", color: "#000", fontSize: 20, fontWeight: 800, margin: "0 auto 24px", boxShadow: `0 0 40px ${A}40` }}>H</div><div style={{ fontSize: 24, fontWeight: 700, color: "#F0F0F0", textAlign: "center", marginBottom: 6, letterSpacing: "-.03em" }}>{L.htinh} Premium</div><div style={{ color: "#555", fontSize: 13, textAlign: "center", marginBottom: 36 }}>{L.dnht}</div><input className="_in" placeholder={L.tkh} value={lu} onChange={(e) => setLu(e.target.value)} onKeyDown={(e) => e.key === "Enter" && login()} /><input className="_in" placeholder={L.mk} type="password" value={lp} onChange={(e) => setLp(e.target.value)} onKeyDown={(e) => e.key === "Enter" && login()} />{le && <div style={{ color: "#F87171", fontSize: 12, marginBottom: 8, textAlign: "center" }}>{le}</div>}<button className="_ba" style={{ width: "100%", justifyContent: "center", height: 46, fontSize: 14 }} onClick={login}>{L.dnhap}</button></div></div>);
- 
-  const query = q.trim().toLowerCase(); const act = stu.filter((s) => s.status === L.dhoc); const ov = fin.filter((f) => f.st === "overdue"); const pend = fin.filter((f) => f.st === "pending"); const ranked = [...act].sort((a, b) => (b.score || 0) - (a.score || 0)); const teachers = [...new Set(cls2.map((c) => c.teacher).filter(Boolean))]; const needFU = trials.filter((t) => t.result === "thinking"); const hskP = hsk.filter((h) => h.passed === "yes").length; const hskTt = hsk.filter((h) => h.status !== "registered").length; const hskRate = hskTt > 0 ? Math.round((hskP / hskTt) * 100) : 0; const collected = fin.reduce((a, f) => a + (f.d1 || 0) + (f.st === "paid" ? (f.d2 || 0) : 0), 0);
-  const srcData = ["Facebook", "TikTok", L.gthieu, "Walk-in", "Website"].map((s) => ({ name: s, v: [...stu, ...leads].filter((x) => x.source === s).length })).filter((d) => d.v > 0);
-  const funnelData = [{ s: L.bhoi, v: leads.filter((l) => l.stage !== "lost").length }, { s: L.bthu, v: leads.filter((l) => l.stage === "trial" || l.stage === "registered").length }, { s: L.dk, v: leads.filter((l) => l.stage === "registered").length }, { s: L.dhoc, v: act.length }];
-  const payPie = [{ n: L.bdu, v: fin.filter((f) => f.st === "paid").length }, { n: L.cho, v: pend.length }, { n: L.bno, v: ov.length }];
-  const scoreDist = [{ r: "<5", n: stu.filter((s) => (s.score || 0) < 5).length }, { r: "5-6.5", n: stu.filter((s) => (s.score || 0) >= 5 && s.score < 6.5).length }, { r: "6.5-8", n: stu.filter((s) => (s.score || 0) >= 6.5 && s.score < 8).length }, { r: "8-9", n: stu.filter((s) => (s.score || 0) >= 8 && s.score < 9).length }, { r: "9+", n: stu.filter((s) => (s.score || 0) >= 9).length }];
-  const om = (t, d, n) => setModal({ t, d, n }); const gc = (c) => mob ? "1fr" : `repeat(${c},1fr)`;
-  const Ch = ({ title, children, h = 180 }) => <div className="_c"><div style={{ fontSize: 10, fontWeight: 600, color: "#555", marginBottom: 14, textTransform: "uppercase", letterSpacing: ".08em" }}>{title}</div><ResponsiveContainer width="100%" height={h}>{children}</ResponsiveContainer></div>;
-  const sb = (s) => ({ Facebook: "in", TikTok: "pu", [L.gthieu]: "ok", "Walk-in": "or", Website: "wa" })[s] || "mu";
-  const stB = (s) => ({ inquiry: [L.bhoi, "in"], trial: [L.bthu, "wa"], registered: [L.dk, "ok"], lost: [L.mat, "mu"] })[s] || [decodeText(s), "mu"];
-  const adminMenu = [{ id: "home", l: L.tq, ic: LayoutDashboard }, { id: "leads", l: L.km, ic: Target }, { id: "trials", l: L.ht, ic: BookOpen }, { id: "stu", l: L.hv, ic: Users }, { id: "contracts", l: L.hd, ic: FileText }, { id: "hsk", l: "HSK", ic: GraduationCap }, { id: "rpt", l: L.bc, ic: ClipboardList }, { id: "log", l: L.ls, ic: MessageSquare }, { id: "fin", l: L.tc, ic: Wallet }, { id: "charts", l: L.bd, ic: BarChart3 }];
-  const teacherMenu = [{ id: "home", l: L.tq, ic: LayoutDashboard }, { id: "stu", l: L.hv, ic: Users }, { id: "rpt", l: L.bc, ic: ClipboardList }, { id: "hsk", l: "HSK", ic: GraduationCap }];
-  const menu = isAdmin ? adminMenu : teacherMenu;
-  const mobNav = isAdmin ? [{ id: "home", ic: LayoutDashboard, l: "Home" }, { id: "leads", ic: Target, l: "Khach" }, { id: "stu", ic: Users, l: "HV" }, { id: "rpt", ic: ClipboardList, l: "BC" }, { id: "more", ic: Menu, l: "More" }] : [{ id: "home", ic: LayoutDashboard, l: "Home" }, { id: "stu", ic: Users, l: "HV" }, { id: "rpt", ic: ClipboardList, l: "BC" }, { id: "hsk", ic: GraduationCap, l: "HSK" }];
-  const moreMenu = adminMenu.filter((m) => !["home", "leads", "stu", "rpt"].includes(m.id));
- 
-  return (<div style={{ fontFamily: FN, display: "flex", flexDirection: mob ? "column" : "row", height: "100vh", background: "#06060A", color: "#F0F0F0", overflow: "hidden", position: "relative" }}>
-    <div style={{ position: "fixed", top: "-20%", right: "-10%", width: "50vw", height: "50vw", borderRadius: "50%", background: `radial-gradient(circle, ${A}08 0%, transparent 60%)`, pointerEvents: "none", zIndex: 0 }} />
-    <div style={{ position: "fixed", bottom: "-30%", left: "-15%", width: "60vw", height: "60vw", borderRadius: "50%", background: "radial-gradient(circle, rgba(59,130,246,.04) 0%, transparent 60%)", pointerEvents: "none", zIndex: 0 }} />
-    <style>{`@keyframes _sp{to{transform:rotate(360deg)}}@keyframes _fi{from{opacity:0}to{opacity:1}}@keyframes _si{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}@keyframes _su{from{transform:translateY(100%)}to{transform:translateY(0)}}
-*{box-sizing:border-box;margin:0;padding:0}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:99px}input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.6)}select{color-scheme:dark}::selection{background:${A}33}
-._c{background:rgba(12,12,20,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:22px;backdrop-filter:blur(20px);transition:border-color .25s,box-shadow .25s}._c:hover{border-color:rgba(255,255,255,.1);box-shadow:0 4px 30px rgba(0,0,0,.2)}
-._ni{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:500;color:#666;transition:all .2s}._ni:hover{color:#CCC;background:rgba(255,255,255,.04)}._ni._a{color:#F0F0F0;background:rgba(16,185,129,.08);font-weight:600;box-shadow:inset 0 0 0 1px rgba(16,185,129,.15)}
-._ba{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:${FN};background:linear-gradient(135deg,${A},${A2});color:#000;transition:all .2s;box-shadow:0 2px 12px ${A}30}._ba:hover{box-shadow:0 4px 24px ${A}50;transform:translateY(-1px)}._ba:active{transform:scale(.98)}._bs{padding:5px 12px;font-size:12px;border-radius:8px}
-._bg{padding:9px 20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:13px;color:#AAA;cursor:pointer;font-family:${FN};font-weight:500;transition:all .2s;backdrop-filter:blur(10px)}._bg:hover{background:rgba(255,255,255,.08);color:#F0F0F0;border-color:rgba(255,255,255,.15)}
-._bo{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);cursor:pointer;font-size:12px;font-weight:600;font-family:${FN};color:#CCC;transition:all .2s;backdrop-filter:blur(10px)}._bo:hover{border-color:${A};color:${A};background:rgba(16,185,129,.05);box-shadow:0 0 16px ${A}15}
-table{width:100%;border-collapse:collapse;min-width:600px}th{padding:11px 16px;text-align:left;font-size:10px;font-weight:600;color:#444;text-transform:uppercase;letter-spacing:.08em;background:rgba(6,6,10,.8);border-bottom:1px solid rgba(255,255,255,.06)}td{padding:12px 16px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.04);color:#888;transition:background .15s}tr:hover td{background:rgba(16,185,129,.02)}
-._ab{padding:6px;border-radius:8px;border:none;background:transparent;color:#444;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}._ab:hover{color:${A};background:rgba(16,185,129,.08)}._ab._d:hover{color:#F87171;background:rgba(248,113,113,.08)}
-._tb{padding:7px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:#555;border:none;background:transparent;font-family:${FN};transition:all .2s}._tb:hover{color:#CCC}._tb._a{background:rgba(16,185,129,.12);color:${A};box-shadow:inset 0 0 0 1px rgba(16,185,129,.2)}
-._in{width:100%;padding:10px 14px;border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:14px;outline:none;font-family:${FN};background:rgba(255,255,255,.03);color:#F0F0F0;margin-bottom:10px;transition:border-color .2s,box-shadow .2s}._in:focus{border-color:${A};box-shadow:0 0 0 2px ${A}33}._in::placeholder{color:#333}
-._pb{height:4px;background:rgba(255,255,255,.04);border-radius:99px;overflow:hidden}._pf{height:100%;border-radius:99px}
-._bn{display:flex;background:rgba(6,6,10,.95);border-top:1px solid rgba(255,255,255,.06);padding:4px 0;backdrop-filter:blur(20px)}._bi{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;cursor:pointer;color:#333;transition:.2s}._bi._a{color:${A}}
-._mp2{position:absolute;bottom:60px;right:8px;background:rgba(12,12,20,.95);border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);padding:6px;width:200px;z-index:50;backdrop-filter:blur(20px)}
-._mo{position:fixed;inset:0;background:rgba(6,6,10,.8);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;z-index:100;animation:_fi .1s}._mp{background:rgba(12,12,20,.95);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px;width:520px;max-height:88vh;overflow-y:auto;animation:_si .2s ease-out;backdrop-filter:blur(40px);box-shadow:0 30px 100px rgba(0,0,0,.5)}._mm{width:100%;max-height:92vh;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;animation:_su .2s ease-out;padding:24px 16px 28px}._xb{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);width:30px;height:30px;border-radius:8px;cursor:pointer;color:#666;display:flex;align-items:center;justify-content:center;transition:all .15s}._xb:hover{color:#F0F0F0;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}`}</style>
- 
-    {!mob && <div style={{ width: 224, borderRight: "1px solid rgba(255,255,255,.06)", display: "flex", flexDirection: "column", flexShrink: 0, background: "rgba(8,8,14,.8)", backdropFilter: "blur(20px)", zIndex: 1 }}>
-      <div style={{ padding: "18px 16px", display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid rgba(255,255,255,.06)" }}><div style={{ width: 34, height: 34, borderRadius: 10, background: `linear-gradient(135deg, ${A}, ${A2})`, display: "flex", alignItems: "center", justifyContent: "center", color: "#000", fontSize: 15, fontWeight: 800, boxShadow: `0 0 24px ${A}30` }}>H</div><div><div style={{ fontWeight: 700, fontSize: 15, color: "#F0F0F0", letterSpacing: "-.01em" }}>{L.htinh}</div><div style={{ fontSize: 9, color: A, fontWeight: 700, letterSpacing: ".12em" }}>PREMIUM</div></div></div>
-      <nav style={{ flex: 1, padding: "10px 8px", overflow: "auto" }}>{menu.map((m) => { const Ic = m.ic; return <div key={m.id} className={"_ni" + (pg === m.id ? " _a" : "")} onClick={() => setPg(m.id)}><Ic size={16} strokeWidth={pg === m.id ? 2 : 1.5} />{m.l}</div>; })}</nav>
-      <div style={{ padding: "14px 12px", borderTop: "1px solid rgba(255,255,255,.06)" }}><div style={{ display: "flex", alignItems: "center", gap: 8 }}><div style={{ width: 30, height: 30, borderRadius: 8, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.06)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#888" }}>{user.name.charAt(0)}</div><div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#CCC" }}>{user.name}</div><div style={{ fontSize: 10, color: "#444" }}>{isAdmin ? "Admin" : "GV"}</div></div><button onClick={logout} className="_ab _d"><LogOut size={13} /></button></div></div>
-    </div>}
- 
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 1 }}>
-      <div style={{ padding: "10px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,.06)", flexShrink: 0, background: "rgba(6,6,10,.7)", backdropFilter: "blur(20px)" }}>
-        {mob ? <div style={{ display: "flex", alignItems: "center", gap: 8 }}><div style={{ width: 26, height: 26, borderRadius: 7, background: `linear-gradient(135deg, ${A}, ${A2})`, display: "flex", alignItems: "center", justifyContent: "center", color: "#000", fontSize: 10, fontWeight: 800 }}>H</div><span style={{ fontWeight: 700, fontSize: 14 }}>{L.htinh}</span></div> : <div style={{ position: "relative", width: 260 }}><Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#333" }} /><input className="_in" style={{ marginBottom: 0, paddingLeft: 34, fontSize: 13 }} placeholder={L.tkiem} value={q} onChange={(e) => setQ(e.target.value)} /></div>}
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>{!mob && (ov.length + needFU.length) > 0 && <span style={{ fontSize: 11, fontWeight: 600, color: "#F87171", background: "rgba(239,68,68,.1)", padding: "5px 12px", borderRadius: 999, border: "1px solid rgba(239,68,68,.15)" }}>{ov.length + needFU.length} {L.cxl}</span>}{mob && <button onClick={logout} className="_ab _d"><LogOut size={14} /></button>}</div>
+
+function toApp(t, o) {
+  const m = FM[t];
+  const rm = {};
+  if (m) Object.entries(m).forEach(([k, v]) => (rm[v] = k));
+  const r = {};
+  Object.entries(o || {}).forEach(([k, v]) => (r[rm[k] || k] = v));
+  return r;
+}
+
+async function loadT(t) {
+  try {
+    const { data, error } = await supabase.from(t).select("*");
+    if (error) return [];
+    return (data || []).map((r) => toApp(t, r));
+  } catch {
+    return [];
+  }
+}
+async function addRow(t, row) {
+  const d = toDb(t, row);
+  delete d.created_at;
+  await supabase.from(t).insert([d]);
+}
+async function updateRow(t, row) {
+  const d = toDb(t, row);
+  delete d.created_at;
+  await supabase.from(t).update(d).eq("id", row.id);
+}
+async function deleteRow(t, id) {
+  await supabase.from(t).delete().eq("id", id);
+}
+
+const vnd = (n) => new Intl.NumberFormat("vi-VN").format(n || 0) + "đ";
+const daysLeft = (d) => {
+  if (!d) return 0;
+  const t = new Date(d).getTime();
+  return Number.isFinite(t) ? Math.ceil((t - Date.now()) / 86400000) : 0;
+};
+
+const seed = {
+  classes: [
+    { id: "CN-A1", teacher: "Cô Hoa" },
+    { id: "CN-A2", teacher: "Cô Wang Li" },
+    { id: "CN-A3", teacher: "Thầy Long" },
+    { id: "CN-B1", teacher: "Thầy Nam" },
+  ],
+  students: [
+    { id: "HV001", name: "Minh Anh", phone: "0900000001", cls: "CN-A1", level: "HSK 2", score: 8.7, attend: 94, status: "Đang học", source: "Facebook" },
+    { id: "HV002", name: "Gia Hân", phone: "0900000002", cls: "CN-A2", level: "HSK 3", score: 7.8, attend: 89, status: "Đang học", source: "TikTok" },
+    { id: "HV003", name: "Hoàng Nam", phone: "0900000003", cls: "CN-A3", level: "HSK 1", score: 9.1, attend: 96, status: "Đang học", source: "Giới thiệu" },
+  ],
+  leads: [
+    { id: "LD001", name: "Thanh Vy", phone: "0911111111", source: "Facebook", stage: "inquiry", interest: "HSK 1", note: "Quan tâm lớp tối", created: today, lastContact: today },
+    { id: "LD002", name: "Bảo Ngọc", phone: "0922222222", source: "TikTok", stage: "trial", interest: "HSK 2", note: "Muốn học thử cuối tuần", created: today, lastContact: today },
+  ],
+  trials: [
+    { id: "TL001", name: "Bảo Ngọc", phone: "0922222222", date: today, time: "18:00", cls: "CN-A2", teacher: "Cô Wang Li", status: "scheduled", result: "", followUp: "" },
+  ],
+  contracts: [
+    { id: "HD001", name: "Minh Anh", cls: "CN-A1", start: today, end: "2026-08-31", duration: "6 tháng", fee: 12000000, status: "active" },
+  ],
+  hsk: [
+    { id: "HSK001", name: "Minh Anh", level: "HSK 2", examDate: "2026-06-12", score: 245, passed: "yes", status: "passed" },
+  ],
+  finance: [
+    { id: "HP001", name: "Minh Anh", cls: "CN-A1", total: 12000000, d1: 6000000, d2: 6000000, d2d: "2026-06-01", st: "pending" },
+  ],
+  reports: [
+    { id: "RP001", date: today, teacher: "Cô Hoa", cls: "CN-A1", present: 8, absent: 1, absentNames: "", lesson: "Ôn mẫu câu giao tiếp cơ bản", homework: "", flags: "", highlights: "Lớp tương tác tốt" },
+  ],
+  interactions: [
+    { id: "IT001", refName: "Thanh Vy", date: today, type: "message", by: "Admin", content: "Đã gửi lịch học thử và bảng học phí." },
+  ],
+};
+
+function useAppData() {
+  const [ok, setOk] = useState(false);
+  const [students, setStudents] = useState([]);
+  const [classes, setClasses] = useState([]);
+  const [finance, setFinance] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [leads, setLeads] = useState([]);
+  const [interactions, setInteractions] = useState([]);
+  const [trials, setTrials] = useState([]);
+  const [contracts, setContracts] = useState([]);
+  const [hsk, setHsk] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const [s, c, f, r, l, i, t, ct, h] = await Promise.all([
+        loadT("students"),
+        loadT("classes"),
+        loadT("finance"),
+        loadT("reports"),
+        loadT("leads"),
+        loadT("interactions"),
+        loadT("trials"),
+        loadT("contracts"),
+        loadT("hsk_exams"),
+      ]);
+      setStudents(s.length ? s : seed.students);
+      setClasses(c.length ? c : seed.classes);
+      setFinance(f.length ? f : seed.finance);
+      setReports(r.length ? r : seed.reports);
+      setLeads(l.length ? l : seed.leads);
+      setInteractions(i.length ? i : seed.interactions);
+      setTrials(t.length ? t : seed.trials);
+      setContracts(ct.length ? ct : seed.contracts);
+      setHsk(h.length ? h : seed.hsk);
+      setOk(true);
+    })();
+  }, []);
+
+  return {
+    ok,
+    students,
+    setStudents,
+    classes,
+    setClasses,
+    finance,
+    setFinance,
+    reports,
+    setReports,
+    leads,
+    setLeads,
+    interactions,
+    setInteractions,
+    trials,
+    setTrials,
+    contracts,
+    setContracts,
+    hsk,
+    setHsk,
+  };
+}
+
+function Tip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="tip">
+      <div className="tip-label">{label}</div>
+      {payload.map((p, i) => (
+        <div key={i} className="tip-row">
+          {p.name}: <span style={{ color: p.color || A }}>{p.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Badge({ children, tone = "muted" }) {
+  return <span className={`badge ${tone}`}>{children}</span>;
+}
+
+function OrbLogo({ small = false }) {
+  return (
+    <div className={small ? "orb-logo small" : "orb-logo"}>
+      <Sparkles size={small ? 15 : 22} />
+    </div>
+  );
+}
+
+function KpiCard({ label, value, icon: Icon, trend, tone = "pink" }) {
+  return (
+    <div className={`kpi-card ${tone}`}>
+      <div className="kpi-head">
+        <span>{label}</span>
+        <Icon size={18} />
       </div>
-      <div style={{ flex: 1, overflow: "auto", padding: mob ? 14 : 28 }}>
- 
-        {pg === "home" && <div><div style={{ fontSize: mob ? 24 : 32, fontWeight: 800, marginBottom: 28, letterSpacing: "-.03em" }}>{L.tq}</div>
-          {isAdmin && <div style={{ display: "inline-flex", gap: 2, background: "rgba(255,255,255,.03)", borderRadius: 10, padding: 3, marginBottom: 24, border: "1px solid rgba(255,255,255,.06)" }}>{[["kpi", L.chiso], ["funnel", L.pheu], ["trends", L.xhg]].map(([id, l]) => <button key={id} className={"_tb" + (dtab === id ? " _a" : "")} onClick={() => setDtab(id)}>{l}</button>)}</div>}
-          <div style={{ display: "grid", gridTemplateColumns: gc(isAdmin ? 3 : 2), gap: 14, marginBottom: 24 }}>{(isAdmin ? [{ l: L.km, v: leads.filter((l) => l.stage !== "lost").length, sp: [8, 12, 10, 15, 11, 14], tr: 12 }, { l: L.hv, v: act.length, sp: [18, 20, 22, 21, 24, 26], tr: 8 }, { l: L.hskdo, v: `${hskRate}%`, sp: [60, 65, 70, 68, 75, hskRate] }, { l: L.dthu, v: vnd(collected), sp: [42, 48, 52, 58, 65, 72], tr: 11 }, { l: L.nohp, v: ov.length, er: ov.length > 0 }, { l: L.cnhac, v: needFU.length }] : [{ l: L.hvlt, v: stu.filter((s) => canSee(s.cls)).length }, { l: L.bc, v: rpt.filter((r) => r.teacher === user.name).length }, { l: L.dtb, v: (stu.filter((s) => canSee(s.cls) && s.status === L.dhoc).reduce((a, s) => a + s.score, 0) / Math.max(stu.filter((s) => canSee(s.cls) && s.status === L.dhoc).length, 1)).toFixed(1) }, { l: L.ccan, v: `${Math.round(stu.filter((s) => canSee(s.cls) && s.status === L.dhoc).reduce((a, s) => a + s.attend, 0) / Math.max(stu.filter((s) => canSee(s.cls) && s.status === L.dhoc).length, 1))}%` }]).map((s, i) => <div key={i} className="_c"><div style={{ fontSize: 11, fontWeight: 500, color: "#666", marginBottom: 10 }}>{s.l}</div><div style={{ fontSize: mob ? 30 : 40, fontWeight: 800, letterSpacing: "-.04em", color: s.er ? "#F87171" : "#F0F0F0", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{s.v}</div>{(s.sp || s.tr !== undefined) && <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>{s.sp && <Spark data={s.sp} />}{s.tr && <span style={{ fontSize: 12, fontWeight: 700, color: A, display: "flex", alignItems: "center", gap: 3 }}><TrendingUp size={12} />{s.tr}%</span>}</div>}</div>)}</div>
-          {dtab === "kpi" && isAdmin && <div style={{ display: "grid", gridTemplateColumns: gc(3), gap: 14 }}><div className="_c"><div style={{ fontSize: 10, fontWeight: 600, color: "#444", marginBottom: 16, textTransform: "uppercase", letterSpacing: ".08em" }}>{L.cthu}</div>{ov.map((f) => <div key={f.id} style={{ padding: "10px 0", borderBottom: "1px solid rgba(255,255,255,.04)", display: "flex", justifyContent: "space-between", alignItems: "center" }}><div><div style={{ fontWeight: 600, color: "#CCC", fontSize: 13 }}>{f.name}</div><div style={{ color: "#F87171", fontSize: 12, marginTop: 2 }}>{vnd(f.d2)}</div></div><button className="_ba _bs" onClick={() => { setFin(fin.map((x) => x.id === f.id ? { ...x, st: "paid" } : x)); updateRow("finance", { ...f, st: "paid" }); }}><Check size={12} /></button></div>)}{ov.length === 0 && <div style={{ color: A, fontSize: 13, fontWeight: 600 }}>OK</div>}</div><div className="_c"><div style={{ fontSize: 10, fontWeight: 600, color: "#444", marginBottom: 16, textTransform: "uppercase", letterSpacing: ".08em" }}>Top 5</div>{ranked.slice(0, 5).map((s, i) => <div key={s.id} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13 }}><span style={{ color: "#888" }}><span style={{ color: i < 3 ? A : "#333", fontWeight: 800, marginRight: 8, fontVariantNumeric: "tabular-nums" }}>{i + 1}</span>{s.name}</span><span style={{ fontWeight: 800, fontVariantNumeric: "tabular-nums", color: "#F0F0F0" }}>{s.score}</span></div>)}</div><div className="_c"><div style={{ fontSize: 10, fontWeight: 600, color: "#444", marginBottom: 16, textTransform: "uppercase", letterSpacing: ".08em" }}>{L.gday}</div>{rpt.slice(0, 4).map((r) => <div key={r.id} style={{ padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,.04)", fontSize: 12 }}><span style={{ color: "#CCC", fontWeight: 600 }}>{r.teacher}</span> <span style={{ color: "#444" }}>{r.cls} {r.date}</span></div>)}</div></div>}
-          {dtab === "funnel" && isAdmin && <div style={{ display: "grid", gridTemplateColumns: gc(2), gap: 14 }}><div className="_c"><div style={{ fontSize: 10, fontWeight: 600, color: "#444", marginBottom: 18, textTransform: "uppercase", letterSpacing: ".08em" }}>{L.pheu}</div>{funnelData.map((f, i) => <div key={f.s} style={{ height: 36, borderRadius: 8, display: "flex", alignItems: "center", padding: "0 14px", color: "#000", fontWeight: 700, fontSize: 12, marginBottom: 6, background: `linear-gradient(90deg, ${CX[i]}, ${CX[i]}99)`, width: `${Math.max((f.v / Math.max(funnelData[0].v, 1)) * 100, 25)}%`, boxShadow: `0 2px 12px ${CX[i]}30` }}>{f.s}: {f.v}</div>)}</div><Ch title={L.nguon}><PieChart><Pie data={srcData} cx="50%" cy="50%" innerRadius={30} outerRadius={60} dataKey="v" label={({ name, v }) => `${name.slice(0, 3)}:${v}`} fontSize={10} stroke="none">{srcData.map((e, i) => <Cell key={i} fill={CX[i]} />)}</Pie><Tooltip content={<Tip />} /></PieChart></Ch></div>}
-          {dtab === "trends" && isAdmin && <div style={{ display: "grid", gridTemplateColumns: gc(2), gap: 14 }}><Ch title={L.dthu2}><BarChart data={monthTrend}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.04)" /><XAxis dataKey="m" fontSize={10} stroke="#444" tickLine={false} axisLine={false} /><YAxis fontSize={10} stroke="#444" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="rev" fill={A} radius={[6, 6, 0, 0]} /></BarChart></Ch><Ch title={L.ccan}><LineChart data={attendTrend}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.04)" /><XAxis dataKey="w" fontSize={10} stroke="#444" tickLine={false} axisLine={false} /><YAxis domain={[80, 100]} fontSize={10} stroke="#444" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Line type="monotone" dataKey="v" stroke="#60A5FA" strokeWidth={2} dot={{ fill: "#60A5FA", r: 3, strokeWidth: 0 }} /></LineChart></Ch></div>}
-        </div>}
- 
-        {pg === "leads" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}><div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.02em" }}>{L.ktn}</div><button className="_ba" onClick={() => om("l", { id: `LD${Date.now()}`, name: "", phone: "", source: "Facebook", stage: "inquiry", interest: "HSK 1", note: "", created: today, lastContact: today }, 1)}><Plus size={14} />{L.them}</button></div><div style={{ overflow: "auto", borderRadius: 14 }}><div className="_c" style={{ padding: 0, overflow: "hidden" }}><table><thead><tr>{[L.ten, L.sdt, L.nguonh, "QT", "GD", ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{leads.map((l) => { const [st, sv] = stB(l.stage); return <tr key={l.id}><td style={{ fontWeight: 600, color: "#E0E0E0" }}>{l.name}</td><td>{l.phone}</td><td><Bd t={l.source} v={sb(l.source)} /></td><td><Bd t={l.interest} v="in" /></td><td><Bd t={st} v={sv} /></td><td><div style={{ display: "flex", gap: 4, alignItems: "center" }}>{l.stage === "inquiry" && <button className="_bo" onClick={() => { setLeads(leads.map((x) => x.id === l.id ? { ...x, stage: "trial" } : x)); updateRow("leads", { ...l, stage: "trial" }); }}><ChevronRight size={12} />{L.bthu}</button>}{l.stage === "trial" && <button className="_ba _bs" onClick={() => { setLeads(leads.map((x) => x.id === l.id ? { ...x, stage: "registered" } : x)); updateRow("leads", { ...l, stage: "registered" }); }}>{L.dk}</button>}<button className="_ab" onClick={() => om("l", { ...l }, 0)}><Pencil size={13} /></button><button className="_ab _d" onClick={() => { if (confirm(L.xoa)) doDel("l", l.id); }}><Trash2 size={13} /></button></div></td></tr>; })}</tbody></table></div></div></div>}
- 
-        {pg === "stu" && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}><div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.02em" }}>{L.hv}</div>{isAdmin && <button className="_ba" onClick={() => om("s", { id: `HV${Date.now()}`, name: "", phone: "", cls: cls2[0]?.id || "", level: "HSK 1", status: L.dhoc, score: 0, attend: 90, source: "Facebook" }, 1)}><Plus size={14} />{L.them}</button>}</div><div style={{ overflow: "auto", borderRadius: 14 }}><div className="_c" style={{ padding: 0, overflow: "hidden" }}><table><thead><tr>{["#", "HV", "Level", L.lop, L.diemh, "CC", "TT", ...(isAdmin ? [""] : [])].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{stu.filter((s) => (!q || s.name.toLowerCase().includes(query)) && canSee(s.cls)).map((s, i) => <tr key={s.id}><td style={{ color: "#333", fontSize: 11, fontWeight: 600 }}>{i + 1}</td><td><div style={{ fontWeight: 600, color: "#E0E0E0" }}>{s.name}</div><div style={{ color: "#555", fontSize: 12 }}>{s.phone}</div></td><td><Bd t={s.level} v="in" /></td><td style={{ color: "#666" }}>{s.cls}</td><td style={{ fontWeight: 800, color: s.score >= 8 ? "#34D399" : s.score >= 6.5 ? "#FBBF24" : "#F87171", fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{s.score}</td><td><div style={{ display: "flex", alignItems: "center", gap: 6 }}><div className="_pb" style={{ width: 48 }}><div className="_pf" style={{ width: `${s.attend}%`, background: s.attend >= 90 ? A : "#FBBF24", boxShadow: `0 0 8px ${s.attend >= 90 ? A : "#FBBF24"}40` }} /></div><span style={{ fontSize: 11, color: "#555", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{s.attend}%</span></div></td><td><Bd t={s.status} v={s.status === L.dhoc ? "ok" : s.status === L.tnghi ? "wa" : "mu"} /></td>{isAdmin && <td><div style={{ display: "flex", gap: 2 }}><button className="_ab" onClick={() => om("s", { ...s }, 0)}><Pencil size={13} /></button><button className="_ab _d" onClick={() => { if (confirm(L.xoa)) doDel("s", s.id); }}><Trash2 size={13} /></button></div></td>}</tr>)}</tbody></table></div></div></div>}
- 
-        {pg === "trials" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}><div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.02em" }}>{L.ht}</div><button className="_ba" onClick={() => om("tr", { id: `TL${Date.now()}`, name: "", phone: "", source: "Facebook", date: today, time: "18:00", cls: cls2[0]?.id || "", teacher: teachers[0] || "", status: "scheduled", result: "", followUp: "" }, 1)}><Plus size={14} />{L.xlich}</button></div><div style={{ overflow: "auto", borderRadius: 14 }}><div className="_c" style={{ padding: 0, overflow: "hidden" }}><table><thead><tr>{[L.ten, L.ngay, L.lop, "TT", "KQ", L.nhac, ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{trials.map((t) => <tr key={t.id}><td style={{ fontWeight: 600, color: "#E0E0E0" }}>{t.name}</td><td style={{ fontSize: 13, color: "#666" }}>{t.date} {t.time}</td><td style={{ color: "#666" }}>{t.cls}</td><td><Bd t={{ scheduled: L.bxep, completed: L.bxong, "no-show": L.bkd }[t.status] || t.status} v={{ scheduled: "in", completed: "ok", "no-show": "er" }[t.status] || "mu"} /></td><td>{t.result ? <Bd t={{ enrolled: L.dk, thinking: L.bnghi, "not-interested": L.bkqt }[t.result]} v={{ enrolled: "ok", thinking: "wa", "not-interested": "mu" }[t.result]} /> : <span style={{ color: "#222" }}>--</span>}</td><td style={{ color: t.followUp && daysLeft(t.followUp) <= 1 ? "#F87171" : "#444", fontSize: 12 }}>{t.followUp || "--"}</td><td><div style={{ display: "flex", gap: 4 }}>{t.status === "scheduled" && <button className="_ba _bs" onClick={() => { setTrials(trials.map((x) => x.id === t.id ? { ...x, status: "completed" } : x)); updateRow("trials", { ...t, status: "completed" }); }}><Check size={12} /></button>}<button className="_ab" onClick={() => om("tr", { ...t }, 0)}><Pencil size={13} /></button></div></td></tr>)}</tbody></table></div></div></div>}
- 
-        {pg === "contracts" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}><div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.02em" }}>{L.hd}</div><button className="_ba" onClick={() => om("ct", { id: `HD${Date.now()}`, name: "", cls: cls2[0]?.id || "", start: today, end: "", duration: L["6t"], fee: 0, status: "active", note: "" }, 1)}><Plus size={14} />{L.tao}</button></div><div style={{ overflow: "auto", borderRadius: 14 }}><div className="_c" style={{ padding: 0, overflow: "hidden" }}><table><thead><tr>{["HV", L.lop, "BD", "KT", L.phi, "TT", L.con, ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{contracts.map((c) => { const dl = daysLeft(c.end); const rs = c.status === "renewed" ? "renewed" : dl <= 0 ? "expired" : dl <= 30 ? "expiring" : "active"; return <tr key={c.id}><td style={{ fontWeight: 600, color: "#E0E0E0" }}>{c.name}</td><td><Bd t={c.cls} v="in" /></td><td style={{ fontSize: 12, color: "#666" }}>{c.start}</td><td style={{ fontSize: 12, color: "#666" }}>{c.end}</td><td style={{ fontWeight: 700, color: "#34D399" }}>{vnd(c.fee)}</td><td><Bd t={{ active: "OK", expiring: L.bsap, expired: L.bhet, renewed: L.gh }[rs]} v={{ active: "ok", expiring: "wa", expired: "er", renewed: "in" }[rs]} /></td><td style={{ fontWeight: 700, color: dl <= 0 ? "#F87171" : dl <= 30 ? "#FBBF24" : "#34D399", fontVariantNumeric: "tabular-nums" }}>{dl <= 0 ? L.bhet : `${dl} ${L.ngaythuong}`}</td><td><div style={{ display: "flex", gap: 4 }}>{(rs === "expiring" || rs === "expired") && <button className="_ba _bs" onClick={() => { const nc = { ...c, status: "renewed" }; setContracts(contracts.map((x) => x.id === c.id ? nc : x)); updateRow("contracts", nc); }}>{L.gh}</button>}<button className="_ab" onClick={() => om("ct", { ...c }, 0)}><Pencil size={13} /></button></div></td></tr>; })}</tbody></table></div></div></div>}
- 
-        {pg === "hsk" && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}><div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.02em" }}>Thi HSK</div>{isAdmin && <button className="_ba" onClick={() => om("hk", { id: `HSK${Date.now()}`, name: "", level: "HSK 1", examDate: "", score: 0, passed: "", status: "registered" }, 1)}><Plus size={14} />{L.dk}</button>}</div><div style={{ display: "grid", gridTemplateColumns: gc(2), gap: 14, marginBottom: 18 }}><Ch title={L.kqua}><BarChart data={["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5"].map((l) => ({ l, p: hsk.filter((h) => h.level === l && h.passed === "yes").length, f: hsk.filter((h) => h.level === l && h.passed === "no").length }))}><XAxis dataKey="l" fontSize={10} stroke="#444" tickLine={false} axisLine={false} /><YAxis fontSize={10} stroke="#444" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="p" name={L.dat} fill={A} stackId="a" radius={[6, 6, 0, 0]} /><Bar dataKey="f" name={L.btruot} fill="#F87171" stackId="a" radius={[6, 6, 0, 0]} /></BarChart></Ch><div className="_c" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: 10, fontWeight: 600, color: "#444", marginBottom: 14, textTransform: "uppercase", letterSpacing: ".08em" }}>{L.tyle}</div><div style={{ fontSize: 56, fontWeight: 800, color: hskRate >= 70 ? "#34D399" : "#FBBF24", lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-.04em", textShadow: `0 0 40px ${hskRate >= 70 ? A : "#FBBF24"}40` }}>{hskRate}%</div><div style={{ fontSize: 12, color: "#555", marginTop: 8 }}>{hskP}/{hskTt}</div><div className="_pb" style={{ marginTop: 14, width: "50%" }}><div className="_pf" style={{ width: `${hskRate}%`, background: `linear-gradient(90deg, ${A2}, ${A})`, boxShadow: `0 0 10px ${A}40` }} /></div></div></div><div style={{ overflow: "auto", borderRadius: 14 }}><div className="_c" style={{ padding: 0, overflow: "hidden" }}><table><thead><tr>{["HV", "Level", L.ngay, L.diemh, "KQ", ...(isAdmin ? [""] : [])].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{hsk.map((h) => <tr key={h.id}><td style={{ fontWeight: 600, color: "#E0E0E0" }}>{h.name}</td><td><Bd t={h.level} v="pu" /></td><td style={{ fontSize: 12, color: "#666" }}>{h.examDate}</td><td style={{ fontWeight: 800, fontSize: 18, fontVariantNumeric: "tabular-nums" }}>{h.score || <span style={{ color: "#222" }}>--</span>}</td><td>{h.passed === "yes" ? <Bd t={L.dat} v="ok" /> : h.passed === "no" ? <Bd t={L.btruot} v="er" /> : <Bd t={L.bchua} v="in" />}</td>{isAdmin && <td><button className="_ab" onClick={() => om("hk", { ...h }, 0)}><Pencil size={13} /></button></td>}</tr>)}</tbody></table></div></div></div>}
- 
-        {pg === "rpt" && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}><div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.02em" }}>{L.bc}</div><button className="_ba" onClick={() => om("r", { id: `RP${Date.now()}`, date: today, teacher: isAdmin ? (teachers[0] || "") : user.name, cls: cls2[0]?.id || "", present: 0, absent: 0, absentNames: "", lesson: "", homework: "", flags: "", highlights: "" }, 1)}><Plus size={14} />{L.tao}</button></div>{rpt.filter((r) => isAdmin || r.teacher === user.name).map((r) => <div key={r.id} className="_c" style={{ marginBottom: 12 }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}><div><span style={{ fontWeight: 600, color: "#CCC", fontSize: 14 }}>{r.teacher}</span> <span style={{ color: "#444", fontSize: 12 }}>{r.cls} {r.date}</span></div><div style={{ display: "flex", gap: 4, alignItems: "center" }}><Bd t={`${r.present}/${r.present + r.absent}`} v={r.absent === 0 ? "ok" : "wa"} /><button className="_ab" onClick={() => om("r", { ...r }, 0)}><Pencil size={13} /></button></div></div><div style={{ fontSize: 13, color: "#888", lineHeight: 1.7 }}>{r.lesson}</div>{r.flags && <div style={{ background: "rgba(248,113,113,.06)", border: "1px solid rgba(248,113,113,.1)", borderRadius: 10, padding: "8px 14px", marginTop: 8, fontSize: 12, color: "#F87171", fontWeight: 500 }}>! {r.flags}</div>}{r.highlights && <div style={{ background: "rgba(52,211,153,.06)", border: "1px solid rgba(52,211,153,.1)", borderRadius: 10, padding: "8px 14px", marginTop: 8, fontSize: 12, color: "#34D399", fontWeight: 500 }}>* {r.highlights}</div>}</div>)}</div>}
- 
-        {pg === "log" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}><div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.02em" }}>{L.ls}</div><button className="_ba" onClick={() => om("i", { id: `IT${Date.now()}`, ref: "", refName: "", date: today, type: "call", content: "", by: "Admin" }, 1)}><Plus size={14} />{L.them}</button></div>{inter.map((it) => <div key={it.id} style={{ display: "flex", gap: 12, padding: "14px 0", borderBottom: "1px solid rgba(255,255,255,.04)" }}><div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#666", fontSize: 14 }}>{it.type === "call" ? "\u260E" : it.type === "meeting" ? "\u2605" : "\u2709"}</div><div><div><span style={{ fontWeight: 600, color: "#CCC", fontSize: 14 }}>{it.refName}</span> <span style={{ color: "#444", fontSize: 11 }}>{it.date}</span> <Bd t={it.type === "call" ? L.goi : it.type === "meeting" ? L.gap : L.nhan} v={it.type === "call" ? "ok" : "in"} /></div><div style={{ color: "#666", marginTop: 6, fontSize: 13, lineHeight: 1.6 }}>{it.content}</div></div></div>)}</div>}
- 
-        {pg === "fin" && isAdmin && <div><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}><div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.02em" }}>{L.tc}</div><button className="_ba" onClick={() => om("f", { id: `HP${Date.now()}`, name: "", cls: cls2[0]?.id || "", total: 0, d1: 0, d2: 0, d2d: "", st: "pending" }, 1)}><Plus size={14} />{L.them}</button></div><div style={{ overflow: "auto", borderRadius: 14 }}><div className="_c" style={{ padding: 0, overflow: "hidden" }}><table><thead><tr>{["HV", L.lop, L.tong, "D1", "D2", L.han, "TT", ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{fin.map((f) => <tr key={f.id}><td style={{ fontWeight: 600, color: "#E0E0E0" }}>{f.name}</td><td><Bd t={f.cls} v="in" /></td><td style={{ fontWeight: 700, color: "#34D399" }}>{vnd(f.total)}</td><td style={{ fontSize: 12, color: "#666" }}>{vnd(f.d1)}</td><td style={{ fontSize: 12, color: "#666" }}>{vnd(f.d2)}</td><td style={{ color: f.st === "overdue" ? "#F87171" : "#444", fontSize: 12 }}>{f.d2d}</td><td>{f.st === "paid" ? <Bd t="OK" v="ok" /> : f.st === "pending" ? <Bd t={L.cho} v="wa" /> : <Bd t={L.bno} v="er" />}</td><td><div style={{ display: "flex", gap: 4 }}>{f.st !== "paid" && <button className="_ba _bs" onClick={() => { setFin(fin.map((x) => x.id === f.id ? { ...x, st: "paid" } : x)); updateRow("finance", { ...f, st: "paid" }); }}><Check size={12} /></button>}<button className="_ab" onClick={() => om("f", { ...f }, 0)}><Pencil size={13} /></button></div></td></tr>)}</tbody></table></div></div></div>}
- 
-        {pg === "charts" && isAdmin && <div><div style={{ fontSize: 24, fontWeight: 800, marginBottom: 24, letterSpacing: "-.02em" }}>{L.bd}</div><div style={{ display: "grid", gridTemplateColumns: gc(2), gap: 14 }}><Ch title={L.dthu2}><BarChart data={monthTrend}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.04)" /><XAxis dataKey="m" fontSize={10} stroke="#444" tickLine={false} axisLine={false} /><YAxis fontSize={10} stroke="#444" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="rev" fill={A} radius={[6, 6, 0, 0]} /></BarChart></Ch><Ch title={L.ccan}><LineChart data={attendTrend}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.04)" /><XAxis dataKey="w" fontSize={10} stroke="#444" tickLine={false} axisLine={false} /><YAxis domain={[80, 100]} fontSize={10} stroke="#444" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Line type="monotone" dataKey="v" stroke="#60A5FA" strokeWidth={2} dot={{ fill: "#60A5FA", r: 3, strokeWidth: 0 }} /></LineChart></Ch><Ch title={L.thtoan}><PieChart><Pie data={payPie} cx="50%" cy="50%" innerRadius={30} outerRadius={60} dataKey="v" label={({ n, v }) => `${n}:${v}`} fontSize={10} stroke="none">{payPie.map((e, i) => <Cell key={i} fill={[CX[0], CX[3], CX[4]][i]} />)}</Pie><Tooltip content={<Tip />} /></PieChart></Ch><Ch title={L.diem}><BarChart data={scoreDist}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.04)" /><XAxis dataKey="r" fontSize={10} stroke="#444" tickLine={false} axisLine={false} /><YAxis fontSize={10} stroke="#444" tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="n" fill="#A78BFA" radius={[6, 6, 0, 0]} /></BarChart></Ch></div></div>}
+      <div className="kpi-value">{value}</div>
+      {trend && (
+        <div className="kpi-trend">
+          <TrendingUp size={14} />
+          {trend}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Panel({ title, children, className = "", action }) {
+  return (
+    <section className={`panel ${className}`}>
+      {(title || action) && (
+        <div className="panel-title">
+          <span>{title}</span>
+          {action}
+        </div>
+      )}
+      {children}
+    </section>
+  );
+}
+
+function ChartBox({ title, children, h = 210 }) {
+  return (
+    <Panel title={title}>
+      <div style={{ height: h }}>
+        <ResponsiveContainer width="100%" height="100%">
+          {children}
+        </ResponsiveContainer>
+      </div>
+    </Panel>
+  );
+}
+
+function Field({ label, value, onChange, type = "text", options }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      {options ? (
+        <select value={value ?? ""} onChange={(e) => onChange(e.target.value)}>
+          {options.map((o) => (
+            <option key={Array.isArray(o) ? o[0] : o} value={Array.isArray(o) ? o[0] : o}>
+              {Array.isArray(o) ? o[1] : o}
+            </option>
+          ))}
+        </select>
+      ) : type === "textarea" ? (
+        <textarea value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
+      ) : (
+        <input type={type} value={value ?? ""} onChange={(e) => onChange(type === "number" ? Number(e.target.value) : e.target.value)} />
+      )}
+    </label>
+  );
+}
+
+function ModalForm({ modal, onClose, onSave, classes, teachers, user, isAdmin }) {
+  const [form, setForm] = useState(modal.d || {});
+  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+  const type = modal.t;
+  const classOpts = classes.map((c) => c.id);
+  const lv = ["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5", "HSK 6"];
+  const src = ["Facebook", "TikTok", "Giới thiệu", "Walk-in", "Website"];
+
+  return (
+    <div className="modal-back" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <div>
+            <div className="eyebrow">Hán Tinh CRM</div>
+            <h3>{modal.n ? LABEL.new : LABEL.edit}</h3>
+          </div>
+          <button className="icon-btn" onClick={onClose}><X size={16} /></button>
+        </div>
+
+        <div className="form-grid">
+          {type === "l" && (
+            <>
+              <Field label={LABEL.name} value={form.name} onChange={(v) => set("name", v)} />
+              <Field label={LABEL.phone} value={form.phone} onChange={(v) => set("phone", v)} />
+              <Field label={LABEL.source} value={form.source} onChange={(v) => set("source", v)} options={src} />
+              <Field label="Quan tâm" value={form.interest} onChange={(v) => set("interest", v)} options={lv} />
+              <Field label="Giai đoạn" value={form.stage} onChange={(v) => set("stage", v)} options={[["inquiry", "Hỏi thăm"], ["trial", "Học thử"], ["registered", "Đã ĐK"], ["lost", "Mất"]]} />
+              <Field label={LABEL.note} value={form.note} onChange={(v) => set("note", v)} type="textarea" />
+            </>
+          )}
+
+          {type === "s" && (
+            <>
+              <Field label={LABEL.name} value={form.name} onChange={(v) => set("name", v)} />
+              <Field label={LABEL.phone} value={form.phone} onChange={(v) => set("phone", v)} />
+              <Field label={LABEL.class} value={form.cls} onChange={(v) => set("cls", v)} options={classOpts} />
+              <Field label={LABEL.level} value={form.level} onChange={(v) => set("level", v)} options={lv} />
+              <Field label={LABEL.score} value={form.score} onChange={(v) => set("score", v)} type="number" />
+              <Field label="Chuyên cần %" value={form.attend} onChange={(v) => set("attend", v)} type="number" />
+              <Field label={LABEL.source} value={form.source} onChange={(v) => set("source", v)} options={src} />
+              <Field label={LABEL.status} value={form.status} onChange={(v) => set("status", v)} options={["Đang học", "Tạm nghỉ", "Nghỉ học"]} />
+            </>
+          )}
+
+          {type === "tr" && (
+            <>
+              <Field label={LABEL.name} value={form.name} onChange={(v) => set("name", v)} />
+              <Field label={LABEL.phone} value={form.phone} onChange={(v) => set("phone", v)} />
+              <Field label={LABEL.date} value={form.date} onChange={(v) => set("date", v)} type="date" />
+              <Field label={LABEL.time} value={form.time} onChange={(v) => set("time", v)} />
+              <Field label={LABEL.class} value={form.cls} onChange={(v) => set("cls", v)} options={classOpts} />
+              <Field label={LABEL.teacher} value={form.teacher} onChange={(v) => set("teacher", v)} options={teachers} />
+              <Field label={LABEL.status} value={form.status} onChange={(v) => set("status", v)} options={[["scheduled", "Đã xếp"], ["completed", "Đã học"], ["no-show", "Không đến"]]} />
+              <Field label={LABEL.result} value={form.result} onChange={(v) => set("result", v)} options={[["", "--"], ["enrolled", "Đã ĐK"], ["thinking", "Suy nghĩ"], ["not-interested", "Không QT"]]} />
+            </>
+          )}
+
+          {type === "ct" && (
+            <>
+              <Field label={LABEL.name} value={form.name} onChange={(v) => set("name", v)} />
+              <Field label={LABEL.class} value={form.cls} onChange={(v) => set("cls", v)} options={classOpts} />
+              <Field label={LABEL.duration} value={form.duration} onChange={(v) => set("duration", v)} options={["3 tháng", "6 tháng", "12 tháng", "18 tháng"]} />
+              <Field label={LABEL.start} value={form.start} onChange={(v) => set("start", v)} type="date" />
+              <Field label={LABEL.end} value={form.end} onChange={(v) => set("end", v)} type="date" />
+              <Field label={LABEL.fee} value={form.fee} onChange={(v) => set("fee", v)} type="number" />
+            </>
+          )}
+
+          {type === "hk" && (
+            <>
+              <Field label={LABEL.name} value={form.name} onChange={(v) => set("name", v)} />
+              <Field label="Level" value={form.level} onChange={(v) => set("level", v)} options={lv} />
+              <Field label="Ngày thi" value={form.examDate} onChange={(v) => set("examDate", v)} type="date" />
+              <Field label={LABEL.score} value={form.score} onChange={(v) => set("score", v)} type="number" />
+              <Field label="Kết quả" value={form.passed} onChange={(v) => set("passed", v)} options={[["", "Chưa thi"], ["yes", "ĐẠT"], ["no", "Chưa đạt"]]} />
+            </>
+          )}
+
+          {type === "r" && (
+            <>
+              <Field label={LABEL.date} value={form.date} onChange={(v) => set("date", v)} type="date" />
+              <Field label={LABEL.teacher} value={form.teacher || user.name} onChange={(v) => set("teacher", v)} options={isAdmin ? teachers : [user.name]} />
+              <Field label={LABEL.class} value={form.cls} onChange={(v) => set("cls", v)} options={classOpts} />
+              <Field label={LABEL.present} value={form.present} onChange={(v) => set("present", v)} type="number" />
+              <Field label={LABEL.absent} value={form.absent} onChange={(v) => set("absent", v)} type="number" />
+              <Field label="HV vắng" value={form.absentNames} onChange={(v) => set("absentNames", v)} />
+              <Field label={LABEL.lesson} value={form.lesson} onChange={(v) => set("lesson", v)} type="textarea" />
+              <Field label={LABEL.homework} value={form.homework} onChange={(v) => set("homework", v)} type="textarea" />
+              <Field label={LABEL.flags} value={form.flags} onChange={(v) => set("flags", v)} type="textarea" />
+              <Field label={LABEL.highlights} value={form.highlights} onChange={(v) => set("highlights", v)} type="textarea" />
+            </>
+          )}
+
+          {type === "i" && (
+            <>
+              <Field label="Người" value={form.refName} onChange={(v) => set("refName", v)} />
+              <Field label={LABEL.date} value={form.date} onChange={(v) => set("date", v)} type="date" />
+              <Field label="Loại" value={form.type} onChange={(v) => set("type", v)} options={[["call", "Gọi"], ["message", "Nhắn"], ["meeting", "Gặp"]]} />
+              <Field label="Bởi" value={form.by} onChange={(v) => set("by", v)} />
+              <Field label={LABEL.content} value={form.content} onChange={(v) => set("content", v)} type="textarea" />
+            </>
+          )}
+
+          {type === "f" && (
+            <>
+              <Field label={LABEL.name} value={form.name} onChange={(v) => set("name", v)} />
+              <Field label={LABEL.class} value={form.cls} onChange={(v) => set("cls", v)} options={classOpts} />
+              <Field label="Tổng phí" value={form.total} onChange={(v) => set("total", v)} type="number" />
+              <Field label="Hạn đợt 2" value={form.d2d} onChange={(v) => set("d2d", v)} />
+              <Field label="TT" value={form.st} onChange={(v) => set("st", v)} options={[["paid", "Đã đóng"], ["pending", "Chờ"], ["overdue", "Quá hạn"]]} />
+            </>
+          )}
+        </div>
+
+        <div className="modal-actions">
+          <button className="btn primary" onClick={() => onSave({ ...form })}><Save size={15} />{LABEL.save}</button>
+          <button className="btn ghost" onClick={onClose}>{LABEL.cancel}</button>
+        </div>
       </div>
     </div>
- 
-    {mob && <div className="_bn">{mobNav.map((m) => { const Ic = m.ic; return <div key={m.id} className={"_bi" + (pg === m.id || (m.id === "more" && showMenu) ? " _a" : "")} onClick={() => { if (m.id === "more") setShowMenu(!showMenu); else { setPg(m.id); setShowMenu(false); } }}><Ic size={18} strokeWidth={pg === m.id ? 2 : 1.5} /><span style={{ fontSize: 9, fontWeight: 600 }}>{m.l}</span></div>; })}{showMenu && <div className="_mp2">{moreMenu.map((m) => { const Ic = m.ic; return <div key={m.id} className="_ni" onClick={() => { setPg(m.id); setShowMenu(false); }}><Ic size={15} />{m.l}</div>; })}<div className="_ni" onClick={logout} style={{ color: "#F87171" }}><LogOut size={15} />{L.thoat}</div></div>}</div>}
-    {modal && <ModalForm type={modal.t} initial={modal.d} isNew={modal.n} cls2={cls2} teachers={teachers} isAdmin={isAdmin} userName={user.name} mob={mob} onSave={async (d) => { await doSave(modal.t, d, modal.n); setModal(null); }} onClose={() => setModal(null)} />}
-  </div>);
+  );
+}
+
+function Empty({ text = "Chưa có dữ liệu" }) {
+  return <div className="empty">{text}</div>;
+}
+
+function AppStyles() {
+  return (
+    <style>{`
+*{box-sizing:border-box} html,body,#root{min-height:100%;margin:0} body{background:${BRAND.bg};font-family:${FN};color:${BRAND.text}} button,input,select,textarea{font-family:${FN}} ::selection{background:${A}44} ::-webkit-scrollbar{width:6px;height:6px} ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.11);border-radius:999px} select{color-scheme:dark} input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.75)}
+.app{min-height:100vh;background:radial-gradient(circle at 72% 4%, rgba(255,110,168,.20), transparent 28%),radial-gradient(circle at 18% 80%, rgba(139,92,246,.16), transparent 35%),#05050B;position:relative;overflow:hidden;color:${BRAND.text}}
+.app:before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(circle at 50% 20%,black,transparent 78%);pointer-events:none}.app:after{content:"";position:fixed;inset:-20%;background:conic-gradient(from 180deg at 50% 50%,transparent,rgba(255,110,168,.12),transparent,rgba(139,92,246,.1),transparent);filter:blur(80px);opacity:.45;pointer-events:none;animation:spinSlow 26s linear infinite}@keyframes spinSlow{to{transform:rotate(360deg)}}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;z-index:1}.login-card{width:min(430px,100%);background:linear-gradient(180deg,rgba(22,18,35,.84),rgba(8,8,15,.76));border:1px solid rgba(255,255,255,.1);border-radius:28px;padding:42px;box-shadow:0 40px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(28px);position:relative;overflow:hidden}.login-card:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 0%,rgba(255,110,168,.2),transparent 40%);pointer-events:none}.login-title{font-size:30px;line-height:1;font-weight:900;letter-spacing:-.06em;text-align:center;margin:20px 0 8px}.login-sub{text-align:center;color:${BRAND.muted};font-size:13px;margin-bottom:30px}.input{width:100%;height:48px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.045);border-radius:14px;color:${BRAND.text};outline:0;padding:0 15px;margin-bottom:12px;font-size:14px}.input:focus{border-color:${A};box-shadow:0 0 0 4px rgba(255,110,168,.13)}.err{color:${BRAND.red};font-size:12px;text-align:center;margin-bottom:10px}
+.shell{height:100vh;display:flex;position:relative;z-index:1}.sidebar{width:258px;flex:0 0 258px;border-right:1px solid rgba(255,255,255,.08);background:rgba(3,3,8,.62);backdrop-filter:blur(28px);display:flex;flex-direction:column}.brand-row{height:74px;padding:0 18px;display:flex;align-items:center;gap:13px;border-bottom:1px solid rgba(255,255,255,.07)}.brand-name{font-weight:900;font-size:16px;letter-spacing:-.03em}.brand-tag{font-size:9px;color:${A};font-weight:900;letter-spacing:.18em}.orb-logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;background:radial-gradient(circle at 30% 20%,#fff,${A} 26%,${A2} 72%);color:#120713;box-shadow:0 0 46px rgba(255,110,168,.45)}.orb-logo.small{width:34px;height:34px;border-radius:12px}.nav{flex:1;padding:14px 10px;overflow:auto}.nav-item{display:flex;align-items:center;gap:11px;height:42px;padding:0 13px;border-radius:14px;color:${BRAND.dim};font-size:13px;font-weight:750;cursor:pointer;transition:.2s}.nav-item:hover{background:rgba(255,255,255,.045);color:#DCD4EA}.nav-item.active{background:linear-gradient(90deg,rgba(255,110,168,.17),rgba(139,92,246,.09));color:${BRAND.text};box-shadow:inset 0 0 0 1px rgba(255,110,168,.18)}.user-box{padding:14px;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}.avatar{width:36px;height:36px;border-radius:13px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);display:grid;place-items:center;font-weight:900;color:${BRAND.muted}}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}.topbar{height:74px;flex:0 0 74px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(5,5,11,.55);backdrop-filter:blur(28px);display:flex;align-items:center;justify-content:space-between;padding:0 30px}.search{position:relative;width:min(360px,44vw)}.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:${BRAND.dim}}.search input{padding-left:40px;margin:0}.warn-pill{font-size:12px;font-weight:850;color:#FFC0D9;background:rgba(255,110,168,.12);border:1px solid rgba(255,110,168,.22);border-radius:999px;padding:7px 13px}.content{flex:1;overflow:auto;padding:30px}.page-title{font-size:clamp(28px,3.4vw,54px);line-height:.95;font-weight:950;letter-spacing:-.075em;margin:0}.page-sub{color:${BRAND.muted};font-size:14px;margin-top:12px;max-width:640px;line-height:1.6}.hero{min-height:250px;border:1px solid rgba(255,255,255,.08);border-radius:32px;background:radial-gradient(circle at 70% 20%,rgba(255,110,168,.30),transparent 38%),linear-gradient(135deg,rgba(18,15,28,.92),rgba(8,7,15,.7));padding:34px;position:relative;overflow:hidden;box-shadow:0 32px 100px rgba(0,0,0,.42);margin-bottom:18px}.hero:before{content:"";position:absolute;right:80px;top:-130px;width:320px;height:320px;border:1px solid rgba(255,110,168,.26);border-radius:50%;box-shadow:0 0 42px rgba(255,110,168,.16), inset 0 0 30px rgba(255,110,168,.10)}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.035),transparent);transform:translateX(-100%);animation:sheen 7s ease-in-out infinite}@keyframes sheen{50%,100%{transform:translateX(100%)}}.hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:center}.hero-stat{text-align:center}.hero-stat .big{font-size:clamp(36px,5vw,72px);font-weight:950;letter-spacing:.06em}.hero-stat .big span{color:${A}}.hero-stat p{color:${BRAND.muted};font-size:13px;line-height:1.5;margin:12px auto 22px;max-width:430px}.hero-actions{display:flex;gap:10px;justify-content:center}.floating-icons{position:absolute;inset:0;pointer-events:none}.floating-icons span{position:absolute;width:38px;height:38px;border-radius:14px;border:1px solid rgba(255,255,255,.08);display:grid;place-items:center;color:rgba(255,255,255,.38);background:rgba(0,0,0,.18)}.floating-icons span:nth-child(1){left:58%;top:12%}.floating-icons span:nth-child(2){right:9%;top:18%}.floating-icons span:nth-child(3){right:18%;bottom:22%}.floating-icons span:nth-child(4){left:44%;bottom:15%}
+.grid{display:grid;gap:16px}.grid.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.panel,.kpi-card{border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(18,14,31,.76),rgba(8,8,15,.62));border-radius:24px;box-shadow:0 20px 70px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.04);backdrop-filter:blur(24px)}.panel{padding:22px;overflow:hidden}.panel-title{display:flex;align-items:center;justify-content:space-between;color:${BRAND.text};font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px}.kpi-card{padding:22px;min-height:148px;position:relative;overflow:hidden}.kpi-card:before{content:"";position:absolute;right:-28px;top:-34px;width:100px;height:100px;border-radius:50%;background:rgba(255,110,168,.12);filter:blur(3px)}.kpi-card.violet:before{background:rgba(139,92,246,.15)}.kpi-card.green:before{background:rgba(52,211,153,.14)}.kpi-card.amber:before{background:rgba(251,191,36,.14)}.kpi-head{display:flex;align-items:center;justify-content:space-between;color:${BRAND.muted};font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.kpi-value{margin-top:18px;font-size:clamp(28px,3vw,42px);font-weight:950;letter-spacing:-.06em;line-height:1}.kpi-trend{display:inline-flex;align-items:center;gap:5px;margin-top:14px;font-size:12px;color:${BRAND.green};font-weight:900}.btn{height:40px;border:0;border-radius:13px;padding:0 17px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-size:13px;font-weight:900;color:${BRAND.text};transition:.2s}.btn.primary{background:linear-gradient(135deg,${A},${A2});color:#140615;box-shadow:0 8px 30px rgba(255,110,168,.28)}.btn.primary:hover{transform:translateY(-1px);box-shadow:0 14px 40px rgba(255,110,168,.38)}.btn.ghost{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);color:#D6CCDF}.btn.danger{background:rgba(251,113,133,.1);color:${BRAND.red};border:1px solid rgba(251,113,133,.2)}.icon-btn{width:34px;height:34px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.045);color:${BRAND.muted};display:inline-grid;place-items:center;cursor:pointer}.icon-btn:hover{color:${BRAND.text};border-color:rgba(255,255,255,.18)}.table-wrap{overflow:auto;border-radius:22px;border:1px solid rgba(255,255,255,.08);background:rgba(7,7,13,.45)}table{width:100%;border-collapse:collapse;min-width:760px}th{padding:14px 18px;text-align:left;font-size:10px;color:${BRAND.dim};text-transform:uppercase;letter-spacing:.11em;background:rgba(5,5,11,.62);border-bottom:1px solid rgba(255,255,255,.07)}td{padding:15px 18px;border-bottom:1px solid rgba(255,255,255,.055);font-size:14px;color:${BRAND.muted)}tr:hover td{background:rgba(255,110,168,.035)}.primary-text{color:${BRAND.text};font-weight:900}.subtext{color:${BRAND.dim};font-size:12px;margin-top:4px}.badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:900;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.055);color:${BRAND.muted};white-space:nowrap}.badge.ok{color:#80F0C4;background:rgba(52,211,153,.10);border-color:rgba(52,211,153,.20)}.badge.warn{color:#FFD37A;background:rgba(251,191,36,.10);border-color:rgba(251,191,36,.20)}.badge.err{color:#FDA4AF;background:rgba(251,113,133,.10);border-color:rgba(251,113,133,.20)}.badge.info{color:#A8D9FF;background:rgba(125,211,252,.10);border-color:rgba(125,211,252,.20)}.badge.pink{color:#FFC0D9;background:rgba(255,110,168,.11);border-color:rgba(255,110,168,.23)}.badge.violet{color:#C4B5FD;background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.25)}.progress{width:74px;height:6px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}.progress b{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,${A2},${A})}.tabs{display:inline-flex;gap:4px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);padding:4px;border-radius:15px;margin:18px 0}.tab{height:34px;border:0;background:transparent;color:${BRAND.dim};border-radius:12px;padding:0 15px;font-weight:900;cursor:pointer}.tab.active{background:rgba(255,110,168,.16);color:${BRAND.text}}.funnel-row{height:42px;border-radius:14px;display:flex;align-items:center;padding:0 14px;color:#100710;font-weight:950;margin-bottom:9px;box-shadow:0 10px 30px rgba(0,0,0,.18)}.tip{background:rgba(9,7,16,.96);border:1px solid rgba(255,255,255,.11);border-radius:14px;padding:12px 14px;box-shadow:0 20px 60px rgba(0,0,0,.45);backdrop-filter:blur(20px)}.tip-label{color:${BRAND.dim};font-size:10px;text-transform:uppercase;font-weight:900;letter-spacing:.1em;margin-bottom:6px}.tip-row{color:${BRAND.text};font-size:12px;font-weight:800}.empty{padding:28px;text-align:center;color:${BRAND.dim};font-size:13px}.modal-back{position:fixed;inset:0;background:rgba(3,3,8,.76);backdrop-filter:blur(24px);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}.modal{width:min(680px,100%);max-height:90vh;overflow:auto;border-radius:28px;background:linear-gradient(180deg,rgba(22,18,35,.97),rgba(8,8,15,.95));border:1px solid rgba(255,255,255,.11);box-shadow:0 40px 140px rgba(0,0,0,.65);padding:24px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.08)}.modal h3{margin:0;font-size:24px;letter-spacing:-.04em}.eyebrow{font-size:10px;color:${A};font-weight:950;letter-spacing:.16em;text-transform:uppercase;margin-bottom:5px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:flex;flex-direction:column;gap:7px}.field span{font-size:11px;color:${BRAND.dim};font-weight:900;letter-spacing:.08em;text-transform:uppercase}.field input,.field select,.field textarea{min-height:44px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.045);color:${BRAND.text};outline:0;padding:10px 13px;font-size:14px}.field textarea{min-height:82px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:${A};box-shadow:0 0 0 4px rgba(255,110,168,.12)}.modal-actions{display:flex;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08)}.mobile-nav{display:none}.mobile-more{position:fixed;right:10px;bottom:68px;width:210px;z-index:20;border:1px solid rgba(255,255,255,.1);border-radius:20px;background:rgba(12,10,22,.96);box-shadow:0 24px 80px rgba(0,0,0,.55);padding:8px;backdrop-filter:blur(24px)}
+@keyframes loadspin{to{transform:rotate(360deg)}}.loader{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:12px;color:${BRAND.dim};background:${BRAND.bg};font-weight:900;letter-spacing:.08em}.loader b{width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.08);border-top-color:${A};animation:loadspin .7s linear infinite}
+@media(max-width:980px){.shell{display:block;height:100vh}.sidebar{display:none}.topbar{height:62px;padding:0 14px}.content{padding:14px 14px 82px}.hero{padding:22px;border-radius:24px}.hero-inner{display:block}.hero-stat{text-align:left;margin-top:26px}.hero-actions{justify-content:flex-start;flex-wrap:wrap}.grid.kpis,.grid.two,.grid.three{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.mobile-nav{display:flex;position:fixed;left:0;right:0;bottom:0;height:64px;background:rgba(5,5,11,.92);border-top:1px solid rgba(255,255,255,.08);z-index:15;backdrop-filter:blur(24px)}.mobile-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:${BRAND.dim};font-size:9px;font-weight:950}.mobile-item.active{color:${A}}.page-title{font-size:34px}.panel,.kpi-card{border-radius:20px}.modal{border-radius:24px 24px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:92vh}.search{width:100%}.search.desktop{display:none}.brand-mobile{display:flex!important}}`}</style>
+  );
+}
+
+function Home({ isAdmin, students, leads, finance, trials, reports, hsk, setPg }) {
+  const [tab, setTab] = useState("kpi");
+  const active = students.filter((s) => s.status === "Đang học");
+  const overdue = finance.filter((f) => f.st === "overdue");
+  const pending = finance.filter((f) => f.st === "pending");
+  const needFollow = trials.filter((t) => t.result === "thinking");
+  const collected = finance.reduce((a, f) => a + (f.d1 || 0) + (f.st === "paid" ? f.d2 || 0 : 0), 0);
+  const hskPass = hsk.filter((x) => x.passed === "yes").length;
+  const hskDone = hsk.filter((x) => x.status !== "registered").length;
+  const hskRate = hskDone ? Math.round((hskPass / hskDone) * 100) : 0;
+  const ranked = [...active].sort((a, b) => (b.score || 0) - (a.score || 0));
+
+  const srcData = ["Facebook", "TikTok", "Giới thiệu", "Walk-in", "Website"]
+    .map((s) => ({ name: s, v: [...students, ...leads].filter((x) => x.source === s).length }))
+    .filter((d) => d.v > 0);
+  const funnelData = [
+    { s: "Hỏi", v: leads.filter((l) => l.stage !== "lost").length },
+    { s: "Thử", v: leads.filter((l) => ["trial", "registered"].includes(l.stage)).length },
+    { s: "Đăng ký", v: leads.filter((l) => l.stage === "registered").length },
+    { s: "Đang học", v: active.length },
+  ];
+  const monthTrend = [
+    { m: "T12", rev: 42, lead: 8, enroll: 2 },
+    { m: "T1", rev: 48, lead: 12, enroll: 4 },
+    { m: "T2", rev: 52, lead: 10, enroll: 3 },
+    { m: "T3", rev: 58, lead: 15, enroll: 5 },
+    { m: "T4", rev: 65, lead: 11, enroll: 3 },
+    { m: "T5", rev: 72, lead: 14, enroll: 5 },
+  ];
+  const attendTrend = [
+    { w: "T1", v: 88 },
+    { w: "T2", v: 91 },
+    { w: "T3", v: 85 },
+    { w: "T4", v: 93 },
+    { w: "T5", v: 90 },
+    { w: "T6", v: 87 },
+    { w: "T7", v: 92 },
+    { w: "T8", v: 94 },
+  ];
+
+  return (
+    <>
+      <div className="hero">
+        <div className="floating-icons"><span><Coins size={18} /></span><span><ShieldCheck size={18} /></span><span><Network size={18} /></span><span><Activity size={18} /></span></div>
+        <div className="hero-inner">
+          <div>
+            <Badge tone="pink">Built for Hán Tinh Premium Operations</Badge>
+            <h1 className="page-title" style={{ marginTop: 18 }}>Command Center<br />for Language Growth</h1>
+            <p className="page-sub">Một CRM tối, sâu, có nhịp công nghệ: quản lý tuyển sinh, học thử, học viên, học phí và báo cáo lớp trong một trải nghiệm gọn như dashboard fintech.</p>
+            <div className="hero-actions">
+              <button className="btn primary" onClick={() => setPg("leads")}>Open Dashboard <ArrowUpRight size={16} /></button>
+              <button className="btn ghost" onClick={() => setPg("charts")}>Explore Data</button>
+            </div>
+          </div>
+          <div className="hero-stat">
+            <div className="big"><span>{active.length}</span> Active</div>
+            <p>Học viên đang học, {leads.filter((l) => l.stage !== "lost").length} khách tiềm năng, {pending.length + overdue.length} khoản học phí cần xử lý.</p>
+          </div>
+        </div>
+      </div>
+
+      {isAdmin && (
+        <div className="tabs">
+          {[["kpi", LABEL.index], ["funnel", LABEL.funnel], ["trends", LABEL.trend]].map(([id, label]) => (
+            <button key={id} className={`tab ${tab === id ? "active" : ""}`} onClick={() => setTab(id)}>{label}</button>
+          ))}
+        </div>
+      )}
+
+      <div className="grid kpis">
+        <KpiCard label={LABEL.leads} value={leads.filter((l) => l.stage !== "lost").length} icon={Target} trend="+12%" />
+        <KpiCard label={LABEL.students} value={active.length} icon={Users} tone="violet" trend="+8%" />
+        <KpiCard label="HSK đỗ" value={`${hskRate}%`} icon={GraduationCap} tone="green" />
+        <KpiCard label={LABEL.revenue} value={vnd(collected)} icon={Wallet} tone="amber" trend="+11%" />
+      </div>
+
+      {(!isAdmin || tab === "kpi") && (
+        <div className="grid three">
+          <Panel title={LABEL.collect}>{overdue.length ? overdue.map((f) => <div key={f.id} className="mini-row"><div><b>{f.name}</b><span>{vnd(f.d2)}</span></div><Badge tone="err">Nợ</Badge></div>) : <Empty text="Không có khoản quá hạn" />}</Panel>
+          <Panel title="Top học viên">{ranked.slice(0, 5).map((s, i) => <div key={s.id} className="mini-row"><div><b>{i + 1}. {s.name}</b><span>{s.cls}</span></div><Badge tone="ok">{s.score}</Badge></div>)}</Panel>
+          <Panel title={LABEL.recent}>{reports.slice(0, 4).map((r) => <div key={r.id} className="mini-row"><div><b>{r.teacher}</b><span>{r.cls} · {r.date}</span></div><Badge tone={r.absent ? "warn" : "ok"}>{r.present}/{r.present + r.absent}</Badge></div>)}</Panel>
+        </div>
+      )}
+
+      {isAdmin && tab === "funnel" && (
+        <div className="grid two">
+          <Panel title={LABEL.funnel}>
+            {funnelData.map((f, i) => (
+              <div key={f.s} className="funnel-row" style={{ width: `${Math.max((f.v / Math.max(funnelData[0]?.v || 1, 1)) * 100, 25)}%`, background: `linear-gradient(90deg, ${CX[i]}, ${CX[i]}AA)` }}>{f.s}: {f.v}</div>
+            ))}
+          </Panel>
+          <ChartBox title={LABEL.source}>
+            <PieChart><Pie data={srcData} cx="50%" cy="50%" innerRadius={44} outerRadius={78} dataKey="v" stroke="none" label={({ name, v }) => `${name.slice(0, 3)}:${v}`}>{srcData.map((_, i) => <Cell key={i} fill={CX[i]} />)}</Pie><Tooltip content={<Tip />} /></PieChart>
+          </ChartBox>
+        </div>
+      )}
+
+      {isAdmin && tab === "trends" && (
+        <div className="grid two">
+          <ChartBox title={LABEL.revenue}><BarChart data={monthTrend}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.05)" /><XAxis dataKey="m" stroke="#6B6478" fontSize={11} tickLine={false} axisLine={false} /><YAxis stroke="#6B6478" fontSize={11} tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="rev" fill={A} radius={[8, 8, 0, 0]} /></BarChart></ChartBox>
+          <ChartBox title={LABEL.attendance}><LineChart data={attendTrend}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.05)" /><XAxis dataKey="w" stroke="#6B6478" fontSize={11} tickLine={false} axisLine={false} /><YAxis domain={[80, 100]} stroke="#6B6478" fontSize={11} tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Line type="monotone" dataKey="v" stroke={BRAND.cyan} strokeWidth={3} dot={{ fill: BRAND.cyan, r: 4, strokeWidth: 0 }} /></LineChart></ChartBox>
+        </div>
+      )}
+    </>
+  );
+}
+
+function DataPage({ title, button, children }) {
+  return (
+    <>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14, marginBottom: 22 }}>
+        <div><h1 className="page-title">{title}</h1></div>
+        {button}
+      </div>
+      {children}
+    </>
+  );
+}
+
+function MiniActions({ onEdit, onDelete, extra }) {
+  return <div style={{ display: "flex", gap: 6, alignItems: "center" }}>{extra}<button className="icon-btn" onClick={onEdit}><Pencil size={14} /></button>{onDelete && <button className="icon-btn" onClick={onDelete}><Trash2 size={14} /></button>}</div>;
+}
+
+export default function App() {
+  const data = useAppData();
+  const [user, setUser] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("ht_user") || "null"); } catch { return null; }
+  });
+  const [lu, setLu] = useState("");
+  const [lp, setLp] = useState("");
+  const [le, setLe] = useState("");
+  const [pg, setPg] = useState("home");
+  const [q, setQ] = useState("");
+  const [modal, setModal] = useState(null);
+  const [showMore, setShowMore] = useState(false);
+
+  useEffect(() => {
+    if (document.getElementById("_ht_font")) return;
+    const pre = document.createElement("link");
+    pre.rel = "preconnect";
+    pre.href = "https://fonts.googleapis.com";
+    document.head.appendChild(pre);
+    const pre2 = document.createElement("link");
+    pre2.rel = "preconnect";
+    pre2.href = "https://fonts.gstatic.com";
+    pre2.crossOrigin = "anonymous";
+    document.head.appendChild(pre2);
+    const lk = document.createElement("link");
+    lk.id = "_ht_font";
+    lk.rel = "stylesheet";
+    lk.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap";
+    document.head.appendChild(lk);
+  }, []);
+
+  const isAdmin = user?.role === "admin";
+  const canSee = (c) => isAdmin || (user?.cls || "").split(",").includes(c);
+  const teachers = useMemo(() => [...new Set(data.classes.map((c) => c.teacher).filter(Boolean))], [data.classes]);
+  const query = q.trim().toLowerCase();
+
+  const setters = {
+    s: [data.students, data.setStudents, "students"],
+    l: [data.leads, data.setLeads, "leads"],
+    tr: [data.trials, data.setTrials, "trials"],
+    ct: [data.contracts, data.setContracts, "contracts"],
+    hk: [data.hsk, data.setHsk, "hsk_exams"],
+    r: [data.reports, data.setReports, "reports"],
+    i: [data.interactions, data.setInteractions, "interactions"],
+    f: [data.finance, data.setFinance, "finance"],
+  };
+
+  const openModal = (t, d, n = false) => setModal({ t, d, n });
+  const doSave = async (type, row) => {
+    const [arr, setter, tbl] = setters[type];
+    let final = { ...row };
+    if (type === "f" && final.total) {
+      final.d1 = Math.round(final.total / 2);
+      final.d2 = Math.round(final.total / 2);
+    }
+    if (type === "hk") final.status = final.passed === "yes" ? "passed" : final.passed === "no" ? "failed" : "registered";
+    if (modal.n) {
+      setter(type === "r" || type === "i" ? [final, ...arr] : [...arr, final]);
+      await addRow(tbl, final);
+    } else {
+      setter(arr.map((x) => (x.id === final.id ? final : x)));
+      await updateRow(tbl, final);
+    }
+    setModal(null);
+  };
+  const doDel = async (type, id) => {
+    const [arr, setter, tbl] = setters[type];
+    setter(arr.filter((x) => x.id !== id));
+    await deleteRow(tbl, id);
+  };
+
+  const login = () => {
+    const u = USERS.find((x) => x.user === lu && x.pass === lp);
+    if (!u) return setLe(LABEL.wrong);
+    setUser(u);
+    localStorage.setItem("ht_user", JSON.stringify(u));
+    setLe("");
+  };
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("ht_user");
+    setPg("home");
+  };
+
+  const adminMenu = [
+    { id: "home", l: LABEL.home, ic: LayoutDashboard },
+    { id: "leads", l: LABEL.leads, ic: Target },
+    { id: "trials", l: LABEL.trials, ic: BookOpen },
+    { id: "stu", l: LABEL.students, ic: Users },
+    { id: "contracts", l: LABEL.contracts, ic: FileText },
+    { id: "hsk", l: LABEL.hsk, ic: GraduationCap },
+    { id: "rpt", l: LABEL.reports, ic: ClipboardList },
+    { id: "log", l: LABEL.log, ic: MessageSquare },
+    { id: "fin", l: LABEL.finance, ic: Wallet },
+    { id: "charts", l: LABEL.charts, ic: BarChart3 },
+  ];
+  const teacherMenu = [
+    { id: "home", l: LABEL.home, ic: LayoutDashboard },
+    { id: "stu", l: LABEL.students, ic: Users },
+    { id: "rpt", l: LABEL.reports, ic: ClipboardList },
+    { id: "hsk", l: LABEL.hsk, ic: GraduationCap },
+  ];
+  const menu = isAdmin ? adminMenu : teacherMenu;
+  const mobNav = isAdmin ? [adminMenu[0], adminMenu[1], adminMenu[3], adminMenu[6], { id: "more", l: "More", ic: Menu }] : teacherMenu;
+  const moreMenu = adminMenu.filter((m) => !["home", "leads", "stu", "rpt"].includes(m.id));
+
+  if (!data.ok) return <><AppStyles /><div className="loader"><b />Loading</div></>;
+
+  if (!user) {
+    return (
+      <div className="app">
+        <AppStyles />
+        <div className="login-wrap">
+          <div className="login-card">
+            <div style={{ display: "grid", placeItems: "center" }}><OrbLogo /></div>
+            <div className="login-title">Hán Tinh<br />Premium CRM</div>
+            <div className="login-sub">{LABEL.login}</div>
+            <input className="input" placeholder={LABEL.account} value={lu} onChange={(e) => setLu(e.target.value)} onKeyDown={(e) => e.key === "Enter" && login()} />
+            <input className="input" placeholder={LABEL.pass} type="password" value={lp} onChange={(e) => setLp(e.target.value)} onKeyDown={(e) => e.key === "Enter" && login()} />
+            {le && <div className="err">{le}</div>}
+            <button className="btn primary" style={{ width: "100%", height: 48 }} onClick={login}>Đăng nhập</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const overdue = data.finance.filter((f) => f.st === "overdue");
+  const needFollow = data.trials.filter((t) => t.result === "thinking");
+  const hskPass = data.hsk.filter((h) => h.passed === "yes").length;
+  const hskDone = data.hsk.filter((h) => h.status !== "registered").length;
+  const hskRate = hskDone ? Math.round((hskPass / hskDone) * 100) : 0;
+
+  return (
+    <div className="app">
+      <AppStyles />
+      <div className="shell">
+        <aside className="sidebar">
+          <div className="brand-row">
+            <OrbLogo small />
+            <div><div className="brand-name">Hán Tinh</div><div className="brand-tag">PREMIUM</div></div>
+          </div>
+          <nav className="nav">
+            {menu.map((m) => {
+              const Ic = m.ic;
+              return <div key={m.id} className={`nav-item ${pg === m.id ? "active" : ""}`} onClick={() => setPg(m.id)}><Ic size={17} />{m.l}</div>;
+            })}
+          </nav>
+          <div className="user-box">
+            <div className="avatar">{user.name.charAt(0)}</div>
+            <div style={{ flex: 1, minWidth: 0 }}><div className="primary-text" style={{ fontSize: 13 }}>{user.name}</div><div className="subtext">{isAdmin ? "Admin" : "Teacher"}</div></div>
+            <button className="icon-btn" onClick={logout}><LogOut size={15} /></button>
+          </div>
+        </aside>
+
+        <main className="main">
+          <header className="topbar">
+            <div className="brand-mobile" style={{ display: "none", alignItems: "center", gap: 8 }}><OrbLogo small /><b>Hán Tinh</b></div>
+            <div className="search desktop"><Search size={16} /><input className="input" placeholder={LABEL.search} value={q} onChange={(e) => setQ(e.target.value)} /></div>
+            <div>{isAdmin && overdue.length + needFollow.length > 0 && <span className="warn-pill">{overdue.length + needFollow.length} cần xử lý</span>}</div>
+          </header>
+
+          <div className="content">
+            {pg === "home" && <Home isAdmin={isAdmin} students={data.students} leads={data.leads} finance={data.finance} trials={data.trials} reports={data.reports} hsk={data.hsk} setPg={setPg} />}
+
+            {pg === "leads" && isAdmin && (
+              <DataPage title="Khách tiềm năng" button={<button className="btn primary" onClick={() => openModal("l", { id: `LD${Date.now()}`, name: "", phone: "", source: "Facebook", stage: "inquiry", interest: "HSK 1", note: "", created: today, lastContact: today }, true)}><Plus size={15} />{LABEL.add}</button>}>
+                <div className="table-wrap"><table><thead><tr>{[LABEL.name, LABEL.phone, LABEL.source, "Quan tâm", "Giai đoạn", ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{data.leads.map((l) => <tr key={l.id}><td><div className="primary-text">{l.name}</div></td><td>{l.phone}</td><td><Badge tone="info">{l.source}</Badge></td><td><Badge tone="violet">{l.interest}</Badge></td><td><Badge tone={l.stage === "registered" ? "ok" : l.stage === "lost" ? "err" : l.stage === "trial" ? "warn" : "pink"}>{({ inquiry: "Hỏi thăm", trial: "Học thử", registered: "Đã ĐK", lost: "Mất" })[l.stage] || l.stage}</Badge></td><td><MiniActions onEdit={() => openModal("l", { ...l })} onDelete={() => confirm(LABEL.delete) && doDel("l", l.id)} extra={l.stage === "inquiry" && <button className="btn ghost" onClick={() => { const next = { ...l, stage: "trial" }; data.setLeads(data.leads.map((x) => x.id === l.id ? next : x)); updateRow("leads", next); }}><ChevronRight size={14} />Thử</button>} /></td></tr>)}</tbody></table></div>
+              </DataPage>
+            )}
+
+            {pg === "stu" && (
+              <DataPage title="Học viên" button={isAdmin && <button className="btn primary" onClick={() => openModal("s", { id: `HV${Date.now()}`, name: "", phone: "", cls: data.classes[0]?.id || "", level: "HSK 1", status: "Đang học", score: 0, attend: 90, source: "Facebook" }, true)}><Plus size={15} />{LABEL.add}</button>}>
+                <div className="table-wrap"><table><thead><tr>{["#", "HV", "Level", LABEL.class, LABEL.score, "CC", "TT", ...(isAdmin ? [""] : [])].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{data.students.filter((s) => (!query || s.name.toLowerCase().includes(query)) && canSee(s.cls)).map((s, i) => <tr key={s.id}><td>{i + 1}</td><td><div className="primary-text">{s.name}</div><div className="subtext">{s.phone}</div></td><td><Badge tone="info">{s.level}</Badge></td><td>{s.cls}</td><td><b style={{ color: s.score >= 8 ? BRAND.green : s.score >= 6.5 ? BRAND.amber : BRAND.red, fontSize: 22 }}>{s.score}</b></td><td><div style={{ display: "flex", alignItems: "center", gap: 8 }}><div className="progress"><b style={{ width: `${s.attend}%` }} /></div><span>{s.attend}%</span></div></td><td><Badge tone={s.status === "Đang học" ? "ok" : s.status === "Tạm nghỉ" ? "warn" : "err"}>{s.status}</Badge></td>{isAdmin && <td><MiniActions onEdit={() => openModal("s", { ...s })} onDelete={() => confirm(LABEL.delete) && doDel("s", s.id)} /></td>}</tr>)}</tbody></table></div>
+              </DataPage>
+            )}
+
+            {pg === "trials" && isAdmin && (
+              <DataPage title="Học thử" button={<button className="btn primary" onClick={() => openModal("tr", { id: `TL${Date.now()}`, name: "", phone: "", date: today, time: "18:00", cls: data.classes[0]?.id || "", teacher: teachers[0] || "", status: "scheduled", result: "", followUp: "" }, true)}><Plus size={15} />{LABEL.schedule}</button>}>
+                <div className="table-wrap"><table><thead><tr>{[LABEL.name, LABEL.date, LABEL.class, "TT", "KQ", LABEL.reminder, ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{data.trials.map((t) => <tr key={t.id}><td><div className="primary-text">{t.name}</div></td><td>{t.date} {t.time}</td><td>{t.cls}</td><td><Badge tone={t.status === "completed" ? "ok" : t.status === "no-show" ? "err" : "info"}>{({ scheduled: "Đã xếp", completed: "Đã học", "no-show": "Không đến" })[t.status]}</Badge></td><td>{t.result ? <Badge tone={t.result === "enrolled" ? "ok" : t.result === "thinking" ? "warn" : "err"}>{({ enrolled: "Đã ĐK", thinking: "Suy nghĩ", "not-interested": "Không QT" })[t.result]}</Badge> : "--"}</td><td>{t.followUp || "--"}</td><td><MiniActions onEdit={() => openModal("tr", { ...t })} extra={t.status === "scheduled" && <button className="btn primary" onClick={() => { const next = { ...t, status: "completed" }; data.setTrials(data.trials.map((x) => x.id === t.id ? next : x)); updateRow("trials", next); }}><Check size={14} /></button>} /></td></tr>)}</tbody></table></div>
+              </DataPage>
+            )}
+
+            {pg === "contracts" && isAdmin && (
+              <DataPage title="Hợp đồng" button={<button className="btn primary" onClick={() => openModal("ct", { id: `HD${Date.now()}`, name: "", cls: data.classes[0]?.id || "", start: today, end: "", duration: "6 tháng", fee: 0, status: "active" }, true)}><Plus size={15} />{LABEL.create}</button>}>
+                <div className="table-wrap"><table><thead><tr>{["HV", LABEL.class, "BD", "KT", LABEL.fee, "TT", "Còn", ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{data.contracts.map((c) => { const dl = daysLeft(c.end); const rs = c.status === "renewed" ? "renewed" : dl <= 0 ? "expired" : dl <= 30 ? "expiring" : "active"; return <tr key={c.id}><td><div className="primary-text">{c.name}</div></td><td><Badge tone="info">{c.cls}</Badge></td><td>{c.start}</td><td>{c.end}</td><td><b style={{ color: BRAND.green }}>{vnd(c.fee)}</b></td><td><Badge tone={rs === "active" || rs === "renewed" ? "ok" : rs === "expiring" ? "warn" : "err"}>{({ active: "OK", expiring: "Sắp hết", expired: "Hết", renewed: "Gia hạn" })[rs]}</Badge></td><td style={{ color: dl <= 0 ? BRAND.red : dl <= 30 ? BRAND.amber : BRAND.green, fontWeight: 900 }}>{dl <= 0 ? "Hết" : `${dl} ngày`}</td><td><MiniActions onEdit={() => openModal("ct", { ...c })} /></td></tr>; })}</tbody></table></div>
+              </DataPage>
+            )}
+
+            {pg === "hsk" && (
+              <DataPage title="Thi HSK" button={isAdmin && <button className="btn primary" onClick={() => openModal("hk", { id: `HSK${Date.now()}`, name: "", level: "HSK 1", examDate: "", score: 0, passed: "", status: "registered" }, true)}><Plus size={15} />Đăng ký</button>}>
+                <div className="grid two" style={{ marginBottom: 16 }}>
+                  <ChartBox title={LABEL.result}><BarChart data={["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5"].map((l) => ({ l, p: data.hsk.filter((h) => h.level === l && h.passed === "yes").length, f: data.hsk.filter((h) => h.level === l && h.passed === "no").length }))}><XAxis dataKey="l" stroke="#6B6478" fontSize={11} tickLine={false} axisLine={false} /><YAxis stroke="#6B6478" fontSize={11} tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="p" name="Đạt" fill={BRAND.green} stackId="a" radius={[8, 8, 0, 0]} /><Bar dataKey="f" name="Trượt" fill={BRAND.red} stackId="a" radius={[8, 8, 0, 0]} /></BarChart></ChartBox>
+                  <Panel title={LABEL.rate}><div style={{ display: "grid", placeItems: "center", minHeight: 210 }}><div style={{ fontSize: 72, fontWeight: 950, letterSpacing: "-.08em", color: hskRate >= 70 ? BRAND.green : BRAND.amber }}>{hskRate}%</div><div className="subtext">{hskPass}/{hskDone}</div></div></Panel>
+                </div>
+                <div className="table-wrap"><table><thead><tr>{["HV", "Level", LABEL.date, LABEL.score, "KQ", ...(isAdmin ? [""] : [])].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{data.hsk.map((h) => <tr key={h.id}><td><div className="primary-text">{h.name}</div></td><td><Badge tone="violet">{h.level}</Badge></td><td>{h.examDate}</td><td><b>{h.score || "--"}</b></td><td><Badge tone={h.passed === "yes" ? "ok" : h.passed === "no" ? "err" : "info"}>{h.passed === "yes" ? "ĐẠT" : h.passed === "no" ? "Chưa đạt" : "Chưa thi"}</Badge></td>{isAdmin && <td><MiniActions onEdit={() => openModal("hk", { ...h })} /></td>}</tr>)}</tbody></table></div>
+              </DataPage>
+            )}
+
+            {pg === "rpt" && (
+              <DataPage title="Báo cáo lớp" button={<button className="btn primary" onClick={() => openModal("r", { id: `RP${Date.now()}`, date: today, teacher: isAdmin ? teachers[0] || "" : user.name, cls: data.classes[0]?.id || "", present: 0, absent: 0, absentNames: "", lesson: "", homework: "", flags: "", highlights: "" }, true)}><Plus size={15} />{LABEL.create}</button>}>
+                <div className="grid two">{data.reports.filter((r) => isAdmin || r.teacher === user.name).map((r) => <Panel key={r.id} title={`${r.teacher} · ${r.cls}`} action={<MiniActions onEdit={() => openModal("r", { ...r })} />}><Badge tone={r.absent === 0 ? "ok" : "warn"}>{r.present}/{r.present + r.absent}</Badge><p className="page-sub" style={{ marginTop: 12 }}>{r.lesson}</p>{r.flags && <div style={{ marginTop: 10 }}><Badge tone="err">! {r.flags}</Badge></div>}{r.highlights && <div style={{ marginTop: 10 }}><Badge tone="ok">* {r.highlights}</Badge></div>}</Panel>)}</div>
+              </DataPage>
+            )}
+
+            {pg === "log" && isAdmin && (
+              <DataPage title="Lịch sử tương tác" button={<button className="btn primary" onClick={() => openModal("i", { id: `IT${Date.now()}`, refName: "", date: today, type: "message", content: "", by: "Admin" }, true)}><Plus size={15} />{LABEL.add}</button>}>
+                <div className="grid two">{data.interactions.map((it) => <Panel key={it.id} title={it.refName} action={<MiniActions onEdit={() => openModal("i", { ...it })} />}><Badge tone="info">{it.type}</Badge><p className="page-sub">{it.content}</p><div className="subtext">{it.date} · {it.by}</div></Panel>)}</div>
+              </DataPage>
+            )}
+
+            {pg === "fin" && isAdmin && (
+              <DataPage title="Tài chính" button={<button className="btn primary" onClick={() => openModal("f", { id: `HP${Date.now()}`, name: "", cls: data.classes[0]?.id || "", total: 0, d1: 0, d2: 0, d2d: "", st: "pending" }, true)}><Plus size={15} />{LABEL.add}</button>}>
+                <div className="table-wrap"><table><thead><tr>{["HV", LABEL.class, "Tổng", "D1", "D2", "Hạn", "TT", ""].map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{data.finance.map((f) => <tr key={f.id}><td><div className="primary-text">{f.name}</div></td><td><Badge tone="info">{f.cls}</Badge></td><td><b style={{ color: BRAND.green }}>{vnd(f.total)}</b></td><td>{vnd(f.d1)}</td><td>{vnd(f.d2)}</td><td>{f.d2d}</td><td><Badge tone={f.st === "paid" ? "ok" : f.st === "pending" ? "warn" : "err"}>{f.st === "paid" ? "OK" : f.st === "pending" ? "Chờ" : "Nợ"}</Badge></td><td><MiniActions onEdit={() => openModal("f", { ...f })} extra={f.st !== "paid" && <button className="btn primary" onClick={() => { const next = { ...f, st: "paid" }; data.setFinance(data.finance.map((x) => x.id === f.id ? next : x)); updateRow("finance", next); }}><Check size={14} /></button>} /></td></tr>)}</tbody></table></div>
+              </DataPage>
+            )}
+
+            {pg === "charts" && isAdmin && (
+              <DataPage title="Biểu đồ">
+                <div className="grid two">
+                  <ChartBox title="Doanh thu"><BarChart data={[{ m: "T12", rev: 42 }, { m: "T1", rev: 48 }, { m: "T2", rev: 52 }, { m: "T3", rev: 58 }, { m: "T4", rev: 65 }, { m: "T5", rev: 72 }]}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.05)" /><XAxis dataKey="m" stroke="#6B6478" fontSize={11} tickLine={false} axisLine={false} /><YAxis stroke="#6B6478" fontSize={11} tickLine={false} axisLine={false} /><Tooltip content={<Tip />} /><Bar dataKey="rev" fill={A} radius={[8, 8, 0, 0]} /></BarChart></ChartBox>
+                  <ChartBox title="Thanh toán"><PieChart><Pie data={[{ n: "Đủ", v: data.finance.filter((f) => f.st === "paid").length }, { n: "Chờ", v: data.finance.filter((f) => f.st === "pending").length }, { n: "Nợ", v: data.finance.filter((f) => f.st === "overdue").length }]} cx="50%" cy="50%" innerRadius={44} outerRadius={78} dataKey="v" stroke="none" label={({ n, v }) => `${n}:${v}`}>{[BRAND.green, BRAND.amber, BRAND.red].map((c, i) => <Cell key={i} fill={c} />)}</Pie><Tooltip content={<Tip />} /></PieChart></ChartBox>
+                </div>
+              </DataPage>
+            )}
+          </div>
+        </main>
+      </div>
+
+      <div className="mobile-nav">
+        {mobNav.map((m) => {
+          const Ic = m.ic;
+          const active = pg === m.id || (m.id === "more" && showMore);
+          return <div key={m.id} className={`mobile-item ${active ? "active" : ""}`} onClick={() => { if (m.id === "more") setShowMore(!showMore); else { setPg(m.id); setShowMore(false); } }}><Ic size={19} /><span>{m.l}</span></div>;
+        })}
+      </div>
+      {showMore && <div className="mobile-more">{moreMenu.map((m) => { const Ic = m.ic; return <div key={m.id} className="nav-item" onClick={() => { setPg(m.id); setShowMore(false); }}><Ic size={16} />{m.l}</div>; })}<div className="nav-item" style={{ color: BRAND.red }} onClick={logout}><LogOut size={16} />{LABEL.logout}</div></div>}
+
+      {modal && <ModalForm modal={modal} onClose={() => setModal(null)} onSave={(row) => doSave(modal.t, row)} classes={data.classes} teachers={teachers} user={user} isAdmin={isAdmin} />}
+    </div>
+  );
 }
