@@ -128,13 +128,13 @@ if(!user)return(
 <div style={{fontFamily:FN,minHeight:"100vh",background:"#09090B",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
 <style>{`@keyframes _sp{to{transform:rotate(360deg)}}@keyframes _fi{from{opacity:0}to{opacity:1}}@keyframes _si{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}@keyframes _su{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
 <div style={{width:mob?"100%":360,background:"#18181B",border:"1px solid #27272A",borderRadius:12,padding:mob?24:36}}>
-<div style={{width:40,height:40,borderRadius:10,background:A,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:18,fontWeight:800,margin:"0 auto 20px"}}><span style={{fontFamily:"serif"}}>&#28450;</span></div>
-<div style={{fontSize:20,fontWeight:700,color:"#FAFAFA",textAlign:"center",marginBottom:4}}>H&#225;n Tinh Premium</div>
-<div style={{color:"#52525B",fontSize:13,textAlign:"center",marginBottom:28}}>&#272;&#259;ng nh&#7853;p h&#7879; th&#7889;ng</div>
-<input className="_in" placeholder="T&#224;i kho&#7843;n" value={lu} onChange={e=>setLu(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()}/>
-<input className="_in" placeholder="M&#7853;t kh&#7849;u" type="password" value={lp} onChange={e=>setLp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()}/>
+<div style={{width:40,height:40,borderRadius:10,background:A,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:18,fontWeight:800,margin:"0 auto 20px"}}><span style={{fontFamily:"serif"}}>漢</span></div>
+<div style={{fontSize:20,fontWeight:700,color:"#FAFAFA",textAlign:"center",marginBottom:4}}>Hán Tinh Premium</div>
+<div style={{color:"#52525B",fontSize:13,textAlign:"center",marginBottom:28}}>Đăng nhập hệ thống</div>
+<input className="_in" placeholder="Tài khoản" value={lu} onChange={e=>setLu(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()}/>
+<input className="_in" placeholder="Mật khẩu" type="password" value={lp} onChange={e=>setLp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()}/>
 {le&&<div style={{color:"#EF4444",fontSize:12,marginBottom:8,textAlign:"center"}}>{le}</div>}
-<button className="_ba" style={{width:"100%",justifyContent:"center"}} onClick={login}>&#272;&#259;ng nh&#7853;p</button>
+<button className="_ba" style={{width:"100%",justifyContent:"center"}} onClick={login}>Đăng nhập</button>
 </div></div>);
  
 // ── DATA ──
@@ -218,8 +218,8 @@ tr:hover td{background:#1F1F23}
  
   {!mob&&<div style={{width:220,borderRight:"1px solid #27272A",display:"flex",flexDirection:"column",flexShrink:0}}>
     <div style={{padding:"16px 14px",display:"flex",alignItems:"center",gap:10,borderBottom:"1px solid #1F1F23"}}>
-      <div style={{width:30,height:30,borderRadius:8,background:A,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:14,fontWeight:800}}><span style={{fontFamily:"serif"}}>&#28450;</span></div>
-      <div><div style={{fontWeight:700,fontSize:14,color:"#FAFAFA"}}>H&#225;n Tinh</div><div style={{fontSize:10,color:"#52525B",fontWeight:500}}>Premium</div></div>
+      <div style={{width:30,height:30,borderRadius:8,background:A,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:14,fontWeight:800}}><span style={{fontFamily:"serif"}}>漢</span></div>
+      <div><div style={{fontWeight:700,fontSize:14,color:"#FAFAFA"}}>Hán Tinh</div><div style={{fontSize:10,color:"#52525B",fontWeight:500}}>Premium</div></div>
     </div>
     <nav style={{flex:1,padding:"8px 6px",overflow:"auto"}}>{menu.map(m=>{const Ic=m.ic;return<div key={m.id} className={"_ni"+(pg===m.id?" _a":"")} onClick={()=>setPg(m.id)}><Ic size={15} strokeWidth={pg===m.id?2:1.5}/>{m.l}</div>})}</nav>
     <div style={{padding:"12px 10px",borderTop:"1px solid #1F1F23"}}>
@@ -233,7 +233,7 @@ tr:hover td{background:#1F1F23}
  
   <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
     <div style={{padding:"8px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid #1F1F23",flexShrink:0}}>
-      {mob?<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:24,height:24,borderRadius:6,background:A,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:10,fontWeight:800}}><span style={{fontFamily:"serif"}}>&#28450;</span></div><span style={{fontWeight:700,fontSize:13}}>H&#225;n Tinh</span></div>
+      {mob?<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:24,height:24,borderRadius:6,background:A,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:10,fontWeight:800}}><span style={{fontFamily:"serif"}}>漢</span></div><span style={{fontWeight:700,fontSize:13}}>Hán Tinh</span></div>
       :<div style={{position:"relative",width:220}}><Search size={13} style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:"#3F3F46"}}/><input className="_in" style={{marginBottom:0,paddingLeft:30,fontSize:13}} placeholder="Tìm..." value={q} onChange={e=>setQ(e.target.value)}/></div>}
       <div style={{display:"flex",alignItems:"center",gap:6}}>
         {!mob&&(ov.length+needFU.length)>0&&<span style={{fontSize:10,fontWeight:600,color:"#EF4444",background:"#EF444412",padding:"3px 8px",borderRadius:4}}>{ov.length+needFU.length} cần xử lý</span>}
@@ -273,7 +273,7 @@ tr:hover td{background:#1F1F23}
   {dtab==="kpi"&&isAdmin&&<div style={{display:"grid",gridTemplateColumns:gc(3),gap:10}}>
     <div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>Cần thu</div>{ov.map(f=><div key={f.id} style={{padding:"8px 0",borderBottom:"1px solid #1F1F23",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{fontWeight:600,color:"#A1A1AA",fontSize:13}}>{f.name}</div><div style={{color:"#EF4444",fontSize:12}}>{vnd(f.d2)}</div></div><button className="_ba _bs" onClick={()=>{setFin(fin.map(x=>x.id===f.id?{...x,st:"paid"}:x));updateRow("finance",{...f,st:"paid"})}}><Check size={11}/></button></div>)}{ov.length===0&&<div style={{color:A,fontSize:12}}>OK</div>}</div>
     <div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>Top 5</div>{ranked.slice(0,5).map((s,i)=><div key={s.id} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",fontSize:13}}><span style={{color:"#71717A"}}><span style={{color:i<3?A:"#3F3F46",fontWeight:700,marginRight:8,fontVariantNumeric:"tabular-nums"}}>{i+1}</span>{s.name}</span><span style={{fontWeight:700,fontVariantNumeric:"tabular-nums"}}>{s.score}</span></div>)}</div>
-    <div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>Gần đây</div>{rpt.slice(0,4).map(r=><div key={r.id} style={{padding:"6px 0",borderBottom:"1px solid #1F1F23",fontSize:12}}><span style={{color:"#A1A1AA",fontWeight:600}}>{r.teacher}</span> <span style={{color:"#3F3F46"}}>&#183; {r.cls} &#183; {r.date}</span></div>)}</div>
+    <div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>Gần đây</div>{rpt.slice(0,4).map(r=><div key={r.id} style={{padding:"6px 0",borderBottom:"1px solid #1F1F23",fontSize:12}}><span style={{color:"#A1A1AA",fontWeight:600}}>{r.teacher}</span> <span style={{color:"#3F3F46"}}>· {r.cls} · {r.date}</span></div>)}</div>
   </div>}
   {dtab==="funnel"&&isAdmin&&<div style={{display:"grid",gridTemplateColumns:gc(2),gap:10}}>
     <div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:14,textTransform:"uppercase",letterSpacing:".05em"}}>Phễu</div>{funnelData.map((f,i)=><div key={f.s} style={{height:32,borderRadius:6,display:"flex",alignItems:"center",padding:"0 12px",color:"#000",fontWeight:700,fontSize:11,marginBottom:6,background:CC[i],width:Math.max((f.v/Math.max(funnelData[0].v,1))*100,25)+"%"}}>{f.s}: {f.v}</div>)}</div>
@@ -322,7 +322,7 @@ tr:hover td{background:#1F1F23}
   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Báo cáo</div><button className="_ba" onClick={()=>om("r",{id:"RP"+Date.now(),date:today,teacher:isAdmin?(teachers[0]||""):user.name,cls:cls2[0]?.id||"",present:0,absent:0,absentNames:"",lesson:"",homework:"",flags:"",highlights:""},1)}><Plus size={13}/>Tạo</button></div>
   {rpt.filter(r=>isAdmin||r.teacher===user.name).map(r=><div key={r.id} className="_c" style={{marginBottom:8}}>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-      <div><span style={{fontWeight:600,color:"#A1A1AA",fontSize:13}}>{r.teacher}</span> <span style={{color:"#3F3F46",fontSize:11}}>&#183; {r.cls} &#183; {r.date}</span></div>
+      <div><span style={{fontWeight:600,color:"#A1A1AA",fontSize:13}}>{r.teacher}</span> <span style={{color:"#3F3F46",fontSize:11}}>· {r.cls} · {r.date}</span></div>
       <div style={{display:"flex",gap:4,alignItems:"center"}}><Bd t={r.present+"/"+(r.present+r.absent)} v={r.absent===0?"ok":"wa"}/><button className="_ab" onClick={()=>om("r",{...r},0)}><Pencil size={12}/></button></div>
     </div>
     <div style={{fontSize:13,color:"#71717A",lineHeight:1.6}}>{r.lesson}</div>
