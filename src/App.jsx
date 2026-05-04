@@ -124,17 +124,48 @@ export default function App(){
 
   if(!ok)return<div style={{display:"flex",height:"100vh",alignItems:"center",justifyContent:"center",fontFamily:"system-ui",fontSize:18}}>Đang kết nối...</div>;
 
-  // ── ĐĂNG NHẬP ──
+  // ── ĐĂNG NHẬP · TECH HERO ──
   if(!user)return(
-    <div style={{display:"flex",height:"100vh",alignItems:"center",justifyContent:"center",background:"linear-gradient(135deg,#f0fdf4,#ecfdf5)",fontFamily:"system-ui",padding:mob?16:0}}>
-      <div style={{background:"#fff",borderRadius:24,padding:mob?28:48,width:mob?"100%":"420px",boxShadow:"0 20px 60px rgba(0,0,0,.08)",textAlign:"center"}}>
-        <div style={{width:mob?60:76,height:mob?60:76,borderRadius:mob?16:20,background:"#16a34a",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:mob?30:38,fontWeight:800,margin:"0 auto 16px"}}>漢</div>
-        <h2 style={{fontSize:mob?24:30,fontWeight:800,color:"#15803d",marginBottom:6}}>Hán Tinh Premium</h2>
-        <p style={{color:"#9ca3af",fontSize:mob?14:17,marginBottom:mob?24:34}}>Hệ thống quản lý trung tâm tiếng Trung</p>
-        <input style={{width:"100%",padding:mob?"12px 16px":"15px 20px",border:"1.5px solid #e5e7eb",borderRadius:12,fontSize:mob?16:17,marginBottom:mob?10:14,outline:"none",fontFamily:"inherit"}} placeholder="Tài khoản" value={lu} onChange={e=>setLu(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()}/>
-        <input style={{width:"100%",padding:mob?"12px 16px":"15px 20px",border:"1.5px solid #e5e7eb",borderRadius:12,fontSize:mob?16:17,marginBottom:mob?10:14,outline:"none",fontFamily:"inherit"}} placeholder="Mật khẩu" type="password" value={lp} onChange={e=>setLp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()}/>
-        {le&&<div style={{color:"#dc2626",fontSize:15,marginBottom:10}}>{le}</div>}
-        <button onClick={login} style={{width:"100%",padding:mob?14:16,background:"#16a34a",color:"#fff",border:"none",borderRadius:12,fontSize:mob?16:18,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Đăng nhập</button>
+    <div className="login-shell" style={{fontFamily:"Inter, ui-sans-serif, system-ui, sans-serif",padding:mob?18:0}}>
+      <style>{`
+        *{box-sizing:border-box;margin:0;padding:0}::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:rgba(148,163,184,.38);border-radius:999px}
+        .app-shell{position:relative;background:#05070b}
+        .app-shell:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 4%,rgba(122,240,191,.16),transparent 32%),radial-gradient(circle at 70% 0%,rgba(56,189,248,.10),transparent 28%),linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:auto,auto,54px 54px,54px 54px}
+        .ni{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:14px;cursor:pointer;font-size:14px;font-weight:650;color:#94a3b8;transition:all .16s;border:1px solid transparent}
+        .ni:hover{background:rgba(255,255,255,.055);color:#f8fafc;border-color:rgba(255,255,255,.08)}.ni.a{background:linear-gradient(135deg,rgba(122,240,191,.20),rgba(34,211,238,.10));color:#f8fafc;font-weight:800;border-color:rgba(122,240,191,.24);box-shadow:0 12px 32px rgba(0,0,0,.18)}
+        .cd{background:linear-gradient(180deg,rgba(255,255,255,.078),rgba(255,255,255,.035));border-radius:22px;padding:${mob?14:20}px;box-shadow:0 20px 70px rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.105);backdrop-filter:blur(18px);color:#e5e7eb}
+        .cd strong{color:#f8fafc}.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:14px;border:1px solid rgba(255,255,255,.10);cursor:pointer;font-size:14px;font-weight:750;font-family:inherit;transition:.16s}
+        .btn-p{background:linear-gradient(135deg,#ecfff6,#7af0bf 45%,#22d3ee);color:#04110b;border:none;box-shadow:0 14px 36px rgba(122,240,191,.15)}.btn-sm{padding:7px 13px;font-size:13px}
+        .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:22px}table{width:100%;border-collapse:collapse;min-width:${mob?"600px":"auto"}}
+        th{padding:${mob?"10px":"13px 16px"};text-align:left;font-size:${mob?11:12}px;font-weight:800;color:#64748b;text-transform:uppercase;background:rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.075);white-space:nowrap;letter-spacing:.7px}
+        td{padding:${mob?"10px":"13px 16px"};font-size:${mob?14:15}px;border-bottom:1px solid rgba(255,255,255,.055);white-space:nowrap;color:#cbd5e1}tr:hover td{background:rgba(122,240,191,.055)}
+        .ib{cursor:pointer;padding:6px 8px;border-radius:10px;border:1px solid transparent;background:transparent;color:#94a3b8;font-size:16px}.ib:hover{color:#7af0bf;background:rgba(122,240,191,.08);border-color:rgba(122,240,191,.14)}
+        .pb{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}.pf{height:100%;border-radius:999px}.tab{padding:8px 16px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:750;color:#94a3b8;border:1px solid transparent;background:transparent;font-family:inherit}.tab.a{background:#f8fafc;color:#020617}
+        .al{border-radius:16px;padding:12px;margin-bottom:8px;font-size:14px}.fb{height:38px;border-radius:12px;display:flex;align-items:center;padding:0 14px;color:#03120b;font-weight:850;font-size:14px;margin-bottom:8px}
+        .bot-nav{display:flex;background:rgba(2,6,23,.92);border-top:1px solid rgba(255,255,255,.10);padding:6px 0;position:relative;backdrop-filter:blur(18px)}.bot-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;cursor:pointer;font-size:10px;color:#94a3b8;font-weight:600}.bot-item.a{color:#7af0bf;font-weight:800}.bot-item span:first-child{font-size:20px}.more-menu{position:absolute;bottom:60px;right:8px;background:#071018;border:1px solid rgba(255,255,255,.12);border-radius:18px;box-shadow:0 18px 70px rgba(0,0,0,.5);padding:8px;width:200px;z-index:50}
+      `}</style>
+      <div className="login-card">
+        <section className="hero-panel">
+          <div>
+            <div style={{display:"inline-flex",gap:8,alignItems:"center",padding:"7px 11px",border:"1px solid rgba(255,255,255,.12)",borderRadius:999,color:"#a7f3d0",fontSize:12,fontWeight:800,letterSpacing:1.6,textTransform:"uppercase",marginBottom:24}}>
+              <span style={{width:7,height:7,borderRadius:999,background:"#7af0bf",boxShadow:"0 0 18px #7af0bf"}}/> Hanxing OS
+            </div>
+            <h1 style={{fontSize:mob?36:62,lineHeight:.94,letterSpacing:-2.4,fontWeight:850,maxWidth:640}}>Vận hành trung tâm bằng một lớp trí tuệ rõ ràng.</h1>
+            <p style={{marginTop:18,color:"#94a3b8",fontSize:mob?15:18,lineHeight:1.65,maxWidth:560}}>Dashboard quản trị học viên, học thử, hợp đồng, HSK và tài chính — gọn, tối, hiện đại, giống một control room.</p>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,position:"relative",zIndex:1}}>
+            {["Leads","Learning","Finance"].map((x,i)=><div key={x} style={{padding:14,border:"1px solid rgba(255,255,255,.10)",borderRadius:18,background:"rgba(2,6,23,.42)"}}><div style={{fontSize:20,fontWeight:850,color:i===0?"#7af0bf":i===1?"#e2e8f0":"#22d3ee"}}>{i===0?leads.length:i===1?stu.length:fin.length}</div><div style={{fontSize:12,color:"#64748b",marginTop:4}}>{x}</div></div>)}
+          </div>
+        </section>
+        <section className="auth-panel">
+          <div style={{width:58,height:58,borderRadius:18,background:"linear-gradient(135deg,#f8fafc,#7af0bf)",display:"flex",alignItems:"center",justifyContent:"center",color:"#03120b",fontSize:28,fontWeight:900,marginBottom:18}}>漢</div>
+          <h2 style={{fontSize:mob?24:30,fontWeight:850,letterSpacing:-.8,marginBottom:6}}>Hán Tinh Premium</h2>
+          <p style={{color:"#94a3b8",fontSize:15,lineHeight:1.55,marginBottom:24}}>Đăng nhập vào hệ thống vận hành.</p>
+          <input className="tech-input" placeholder="Tài khoản" value={lu} onChange={e=>setLu(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()}/>
+          <input className="tech-input" placeholder="Mật khẩu" type="password" value={lp} onChange={e=>setLp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()}/>
+          {le&&<div style={{color:"#fca5a5",fontSize:14,marginBottom:12}}>{le}</div>}
+          <button className="tech-button" onClick={login}>Đăng nhập</button>
+        </section>
       </div>
     </div>
   );
@@ -183,7 +214,7 @@ export default function App(){
   const grd=(cols)=>mob?`repeat(${Math.min(cols,2)},1fr)`:`repeat(${cols},1fr)`;
 
   return(
-    <div style={{fontFamily:"system-ui,sans-serif",display:"flex",flexDirection:mob?"column":"row",height:"100vh",background:"#f8faf8",color:"#1a1a1a",overflow:"hidden"}}>
+    <div className="app-shell" style={{fontFamily:"Inter, ui-sans-serif, system-ui, sans-serif",display:"flex",flexDirection:mob?"column":"row",height:"100vh",background:"#05070b",color:"#e5e7eb",overflow:"hidden"}}>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
         .ni{display:flex;align-items:center;gap:9px;padding:11px 14px;border-radius:10px;cursor:pointer;font-size:15px;font-weight:500;color:#6b7280;transition:all .12s}
@@ -209,15 +240,15 @@ export default function App(){
       `}</style>
 
       {/* SIDEBAR - chỉ hiện trên desktop */}
-      {!mob&&<div style={{width:220,background:"#fff",borderRight:"1px solid #e5e7eb",display:"flex",flexDirection:"column",flexShrink:0}}>
-        <div style={{padding:"16px 14px",borderBottom:"1px solid #e5e7eb",display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:38,height:38,borderRadius:10,background:"#16a34a",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:20,fontWeight:800}}>漢</div>
-          <div><div style={{fontWeight:800,fontSize:17,color:"#15803d"}}>Hán Tinh</div><div style={{fontSize:10,color:"#16a34a",fontWeight:700,letterSpacing:1.5}}>PREMIUM</div></div>
+      {!mob&&<div style={{width:242,background:"rgba(2,6,23,.74)",borderRight:"1px solid rgba(255,255,255,.09)",display:"flex",flexDirection:"column",flexShrink:0,backdropFilter:"blur(24px)",position:"relative",zIndex:1}}>
+        <div style={{padding:"18px 16px",borderBottom:"1px solid rgba(255,255,255,.08)",display:"flex",alignItems:"center",gap:12}}>
+          <div style={{width:40,height:40,borderRadius:14,background:"linear-gradient(135deg,#f8fafc,#7af0bf)",display:"flex",alignItems:"center",justifyContent:"center",color:"#03120b",fontSize:20,fontWeight:900,boxShadow:"0 0 36px rgba(122,240,191,.20)"}}>漢</div>
+          <div><div style={{fontWeight:850,fontSize:17,color:"#f8fafc",letterSpacing:-.3}}>Hán Tinh</div><div style={{fontSize:10,color:"#7af0bf",fontWeight:850,letterSpacing:1.8}}>PREMIUM OS</div></div>
         </div>
         <nav style={{padding:"8px 6px",flex:1}}>{menu.map(m=><div key={m.id} className={`ni ${pg===m.id?"a":""}`} onClick={()=>setPg(m.id)}>{m.i} {m.l}</div>)}</nav>
         <div style={{padding:"0 8px 10px"}}>
           {isAdmin&&ov.length>0&&<div className="al" style={{background:"#fef2f2",border:"1px solid #fecaca",color:"#dc2626",fontWeight:600,cursor:"pointer"}} onClick={()=>setPg("fin")}>⚠️ {ov.length} nợ học phí</div>}
-          <div style={{padding:"10px 8px",borderTop:"1px solid #e5e7eb",marginTop:6}}>
+          <div style={{padding:"12px 10px",borderTop:"1px solid rgba(255,255,255,.08)",marginTop:6}}>
             <div style={{fontSize:15,fontWeight:700}}>{user.name}</div>
             <div style={{fontSize:13,color:"#9ca3af"}}>{isAdmin?"Quản trị viên":"Giáo viên"}</div>
             <button onClick={logout} style={{marginTop:5,fontSize:13,color:"#dc2626",background:"none",border:"none",cursor:"pointer",fontWeight:600}}>Đăng xuất</button>
@@ -228,9 +259,9 @@ export default function App(){
       {/* NỘI DUNG */}
       <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
         {/* TOPBAR */}
-        <div style={{background:"#fff",padding:mob?"8px 12px":"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid #e5e7eb",flexShrink:0}}>
-          {mob?<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:28,height:28,borderRadius:8,background:"#16a34a",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:14,fontWeight:800}}>漢</div><span style={{fontWeight:700,fontSize:15,color:"#15803d"}}>Hán Tinh</span></div>
-          :<input style={{padding:"10px 16px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:15,outline:"none",width:300,fontFamily:"inherit"}} placeholder="🔍 Tìm kiếm..." value={q} onChange={e=>setQ(e.target.value)}/>}
+        <div style={{background:"rgba(2,6,23,.72)",padding:mob?"10px 12px":"14px 22px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid rgba(255,255,255,.08)",flexShrink:0,backdropFilter:"blur(18px)",position:"relative",zIndex:1}}>
+          {mob?<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:30,height:30,borderRadius:10,background:"linear-gradient(135deg,#f8fafc,#7af0bf)",display:"flex",alignItems:"center",justifyContent:"center",color:"#03120b",fontSize:14,fontWeight:900}}>漢</div><span style={{fontWeight:800,fontSize:15,color:"#f8fafc"}}>Hán Tinh</span></div>
+          :<input style={{padding:"11px 16px",border:"1px solid rgba(255,255,255,.10)",borderRadius:999,fontSize:14,outline:"none",width:320,fontFamily:"inherit",background:"rgba(255,255,255,.055)",color:"#f8fafc"}} placeholder="Tìm kiếm trong hệ thống..." value={q} onChange={e=>setQ(e.target.value)}/>}
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             {mob&&ov.length>0&&<span style={{background:"#dc2626",color:"#fff",borderRadius:20,padding:"2px 8px",fontSize:11,fontWeight:700}} onClick={()=>setPg("fin")}>{ov.length} nợ</span>}
             {!mob&&<div style={{fontSize:14,color:"#9ca3af"}}>{user.name}</div>}
@@ -239,22 +270,29 @@ export default function App(){
         </div>
 
         {/* SEARCH on mobile */}
-        {mob&&<div style={{padding:"8px 12px",background:"#fff",borderBottom:"1px solid #f3f4f6"}}>
-          <input style={{padding:"9px 14px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:15,outline:"none",width:"100%",fontFamily:"inherit"}} placeholder="🔍 Tìm kiếm..." value={q} onChange={e=>setQ(e.target.value)}/>
+        {mob&&<div style={{padding:"10px 12px",background:"rgba(2,6,23,.72)",borderBottom:"1px solid rgba(255,255,255,.08)",backdropFilter:"blur(18px)"}}>
+          <input style={{padding:"10px 14px",border:"1px solid rgba(255,255,255,.10)",borderRadius:999,fontSize:15,outline:"none",width:"100%",fontFamily:"inherit",background:"rgba(255,255,255,.055)",color:"#f8fafc"}} placeholder="Tìm kiếm..." value={q} onChange={e=>setQ(e.target.value)}/>
         </div>}
 
-        <div style={{flex:1,overflow:"auto",padding:mob?12:20}}>
+        <div style={{flex:1,overflow:"auto",padding:mob?14:24,position:"relative",zIndex:1}}>
           {saveErr&&<div className="al" style={{background:"#fef2f2",border:"1px solid #fecaca",color:"#dc2626",fontWeight:600,marginBottom:12}}>{saveErr}</div>}
 
           {/* TỔNG QUAN */}
           {pg==="home"&&<div>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}>
-              <h2 style={{fontSize:mob?20:24,fontWeight:800}}><span style={{color:"#16a34a"}}>Hán Tinh</span> — Tổng quan</h2>
-              {isAdmin&&<div style={{display:"flex",gap:3,background:"#f3f4f6",borderRadius:9,padding:3}}>
+            <div style={{border:"1px solid rgba(255,255,255,.10)",background:"linear-gradient(135deg,rgba(255,255,255,.09),rgba(122,240,191,.045) 52%,rgba(34,211,238,.035))",borderRadius:mob?24:32,padding:mob?20:30,marginBottom:18,boxShadow:"0 28px 90px rgba(0,0,0,.24)",position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",right:-80,top:-80,width:260,height:260,borderRadius:999,background:"rgba(122,240,191,.12)",filter:"blur(8px)"}}/>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:16,flexWrap:"wrap",position:"relative",zIndex:1}}>
+                <div>
+                  <div style={{display:"inline-flex",alignItems:"center",gap:8,padding:"6px 10px",borderRadius:999,border:"1px solid rgba(122,240,191,.22)",color:"#7af0bf",fontSize:12,fontWeight:850,letterSpacing:1.5,textTransform:"uppercase",marginBottom:14}}><span style={{width:7,height:7,borderRadius:999,background:"#7af0bf",boxShadow:"0 0 16px #7af0bf"}}/>Live Control Room</div>
+                  <h2 style={{fontSize:mob?32:54,lineHeight:.96,letterSpacing:mob?-1.2:-2.4,fontWeight:900,color:"#f8fafc",maxWidth:760}}>Hán Tinh Operating System</h2>
+                  <p style={{color:"#94a3b8",fontSize:mob?14:17,lineHeight:1.65,maxWidth:680,marginTop:12}}>Một màn hình để nhìn toàn bộ dòng chảy: khách mới → học thử → học viên → hợp đồng → HSK → tài chính.</p>
+                </div>
+              {isAdmin&&<div style={{display:"flex",gap:4,background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.08)",borderRadius:999,padding:4}}>
                 {[["kpi","Chỉ số"],["funnel","Phễu"],["trends","Xu hướng"]].map(([id,l])=><button key={id} className={`tab ${dtab===id?"a":""}`} onClick={()=>setDtab(id)}>{l}</button>)}
               </div>}
+              </div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:grd(isAdmin?3:2),gap:mob?8:10,marginBottom:14}}>
+            <div style={{display:"grid",gridTemplateColumns:grd(isAdmin?3:2),gap:mob?10:12,marginBottom:16}}>
               {(isAdmin?[{l:"Khách mới",v:leads.filter(l=>l.stage!=="lost").length,c:"#2563eb"},{l:"Học viên",v:act.length,c:"#16a34a"},{l:"Tỷ lệ đỗ HSK",v:hskRate+"%",c:"#7c3aed"},{l:"Đã thu",v:vnd(collected),c:"#16a34a"},{l:"Nợ học phí",v:ov.length,c:"#dc2626"},{l:"Cần nhắc",v:needFU.length,c:"#ea580c"}]
               :[{l:"HV lớp tôi",v:stu.filter(s=>canSee(s.cls)).length,c:"#16a34a"},{l:"Báo cáo",v:rpt.filter(r=>r.teacher===user.name).length,c:"#7c3aed"},{l:"Điểm TB",v:(stu.filter(s=>canSee(s.cls)&&s.status==="Đang học").reduce((a,s)=>a+s.score,0)/Math.max(stu.filter(s=>canSee(s.cls)&&s.status==="Đang học").length,1)).toFixed(1),c:"#2563eb"},{l:"Chuyên cần",v:Math.round(stu.filter(s=>canSee(s.cls)&&s.status==="Đang học").reduce((a,s)=>a+s.attend,0)/Math.max(stu.filter(s=>canSee(s.cls)&&s.status==="Đang học").length,1))+"%",c:"#0d9488"}]).map((s,i)=><div key={i} className="cd" style={{textAlign:"center",padding:mob?12:16}}><div style={{fontSize:mob?22:28,fontWeight:800,color:s.c}}>{s.v}</div><div style={{fontSize:mob?12:14,color:"#9ca3af",marginTop:3}}>{s.l}</div></div>)}
             </div>
