@@ -19,10 +19,10 @@ const daysLeft=d=>{if(!d)return 0;const t=new Date(d).getTime();return Number.is
 const FN="Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
 const USERS=[
 {user:"admin",pass:"hantinh2026",role:"admin",name:"Admin",cls:"all"},
-{user:"cohoa",pass:"gv2026",role:"teacher",name:"Co Hoa",cls:"CN-A1"},
-{user:"thaylong",pass:"gv2026",role:"teacher",name:"Thay Long",cls:"CN-A3,CN-B2"},
-{user:"cowang",pass:"gv2026",role:"teacher",name:"Co Wang Li",cls:"CN-A2"},
-{user:"thaynam",pass:"gv2026",role:"teacher",name:"Thay Nam",cls:"CN-B1"},
+{user:"cohoa",pass:"gv2026",role:"teacher",name:"Cô Hoa",cls:"CN-A1"},
+{user:"thaylong",pass:"gv2026",role:"teacher",name:"Thầy Long",cls:"CN-A3,CN-B2"},
+{user:"cowang",pass:"gv2026",role:"teacher",name:"Cô Wang Li",cls:"CN-A2"},
+{user:"thaynam",pass:"gv2026",role:"teacher",name:"Thầy Nam",cls:"CN-B1"},
 ];
 const monthTrend=[{m:"T12",rev:42,lead:8,enroll:2},{m:"T1",rev:48,lead:12,enroll:4},{m:"T2",rev:52,lead:10,enroll:3},{m:"T3",rev:58,lead:15,enroll:5},{m:"T4",rev:65,lead:11,enroll:3},{m:"T5",rev:72,lead:14,enroll:5}];
 const attendTrend=[{w:"T1",v:88},{w:"T2",v:91},{w:"T3",v:85},{w:"T4",v:93},{w:"T5",v:90},{w:"T6",v:87},{w:"T7",v:92},{w:"T8",v:94}];
@@ -50,26 +50,26 @@ const S=({label,k,opts})=><div style={{flex:1,marginBottom:12}}>
 <select style={{...is,appearance:"auto"}} defaultValue={d.current[k]||""} onChange={e=>{d.current[k]=e.target.value}}>{opts.map(o=>Array.isArray(o)?<option key={o[0]} value={o[0]}>{o[1]}</option>:<option key={o}>{o}</option>)}</select>
 </div>;
 const R=({children})=><div style={{display:"flex",gap:8}}>{children}</div>;
-const src=["Facebook","TikTok","Gioi thieu","Walk-in","Website"];
+const src=["Facebook","TikTok","Giới thiệu","Walk-in","Website"];
 const lv=["HSK 1","HSK 2","HSK 3","HSK 4","HSK 5","HSK 6"];
 return(
 <div className="_mo" onClick={onClose}>
 <div className={"_mp"+(mob?" _mm":"")} onClick={e=>e.stopPropagation()}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-<span style={{fontSize:15,fontWeight:600,color:"#FAFAFA"}}>{isNew?"Them moi":"Chinh sua"}</span>
+<span style={{fontSize:15,fontWeight:600,color:"#FAFAFA"}}>{isNew?"Thêm mới":"Chỉnh sửa"}</span>
 <button className="_xb" onClick={onClose}><X size={14}/></button>
 </div>
-{type==="l"&&<><R><F label="Ho ten" k="name"/><F label="SDT" k="phone"/></R><R><S label="Nguon" k="source" opts={src}/><S label="Quan tam" k="interest" opts={lv.slice(0,5)}/></R><S label="Giai doan" k="stage" opts={[["inquiry","Hoi tham"],["trial","Hoc thu"],["registered","Da DK"],["lost","Mat"]]}/><F label="Ghi chu" k="note" type="textarea"/></>}
-{type==="s"&&<><R><F label="Ho ten" k="name"/><F label="SDT" k="phone"/></R><R><S label="Lop" k="cls" opts={cls2.map(c=>c.id)}/><S label="Trinh do" k="level" opts={lv}/></R><R><F label="Diem" k="score" type="number"/><F label="CC %" k="attend" type="number"/></R><R><S label="Nguon" k="source" opts={src}/><S label="Trang thai" k="status" opts={["Dang hoc","Tam nghi","Nghi hoc"]}/></R></>}
-{type==="tr"&&<><R><F label="Ho ten" k="name"/><F label="SDT" k="phone"/></R><R><F label="Ngay" k="date" type="date"/><F label="Gio" k="time"/></R><R><S label="Lop" k="cls" opts={cls2.map(c=>c.id)}/><S label="GV" k="teacher" opts={teachers}/></R><R><S label="TT" k="status" opts={[["scheduled","Da xep"],["completed","Da hoc"],["no-show","Khong den"]]}/><S label="KQ" k="result" opts={[["","--"],["enrolled","Da DK"],["thinking","Suy nghi"],["not-interested","Khong QT"]]}/></R><F label="Nhac lai" k="followUp" type="date"/></>}
-{type==="ct"&&<><F label="Hoc vien" k="name"/><R><S label="Lop" k="cls" opts={cls2.map(c=>c.id)}/><S label="Thoi han" k="duration" opts={["3 thang","6 thang","12 thang","18 thang"]}/></R><R><F label="Bat dau" k="start" type="date"/><F label="Ket thuc" k="end" type="date"/></R><F label="Hoc phi" k="fee" type="number"/></>}
-{type==="hk"&&<><F label="Hoc vien" k="name"/><R><S label="Level" k="level" opts={lv}/><F label="Ngay thi" k="examDate" type="date"/></R><R><F label="Diem" k="score" type="number"/><S label="KQ" k="passed" opts={[["","Chua thi"],["yes","DAT"],["no","Chua dat"]]}/></R></>}
-{type==="r"&&<><R><F label="Ngay" k="date" type="date"/>{isAdmin?<S label="GV" k="teacher" opts={teachers}/>:<div style={{flex:1}}><label style={{display:"block",fontSize:11,color:"#52525B",fontWeight:500,marginBottom:6}}>GV</label><input style={{...is,opacity:.5}} value={userName} disabled/></div>}<S label="Lop" k="cls" opts={cls2.map(c=>c.id)}/></R><R><F label="Co mat" k="present" type="number"/><F label="Vang" k="absent" type="number"/></R><F label="HV vang" k="absentNames"/><F label="Bai hoc" k="lesson" type="textarea"/><F label="BTVN" k="homework" type="textarea"/><F label="Chu y" k="flags" type="textarea"/><F label="Noi bat" k="highlights" type="textarea"/></>}
-{type==="i"&&<><R><F label="Nguoi" k="refName"/><F label="Ngay" k="date" type="date"/></R><R><S label="Loai" k="type" opts={[["call","Goi"],["message","Nhan"],["meeting","Gap"]]}/><F label="Boi" k="by"/></R><F label="Noi dung" k="content" type="textarea"/></>}
-{type==="f"&&<><F label="Ho ten" k="name"/><R><S label="Lop" k="cls" opts={cls2.map(c=>c.id)}/><F label="Tong phi" k="total" type="number"/></R><R><F label="Han dot 2" k="d2d"/><S label="TT" k="st" opts={[["paid","Da dong"],["pending","Cho"],["overdue","Qua han"]]}/></R></>}
+{type==="l"&&<><R><F label="Họ tên" k="name"/><F label="SDT" k="phone"/></R><R><S label="Nguồn" k="source" opts={src}/><S label="Quan tâm" k="interest" opts={lv.slice(0,5)}/></R><S label="Giai đoạn" k="stage" opts={[["inquiry","Hỏi thăm"],["trial","Học thử"],["registered","Đã ĐK"],["lost","Mất"]]}/><F label="Ghi chú" k="note" type="textarea"/></>}
+{type==="s"&&<><R><F label="Họ tên" k="name"/><F label="SDT" k="phone"/></R><R><S label="Lớp" k="cls" opts={cls2.map(c=>c.id)}/><S label="Trình độ" k="level" opts={lv}/></R><R><F label="Điểm" k="score" type="number"/><F label="CC %" k="attend" type="number"/></R><R><S label="Nguồn" k="source" opts={src}/><S label="Trạng thái" k="status" opts={["Đang học","Tạm nghỉ","Nghỉ học"]}/></R></>}
+{type==="tr"&&<><R><F label="Họ tên" k="name"/><F label="SDT" k="phone"/></R><R><F label="Ngày" k="date" type="date"/><F label="Giờ" k="time"/></R><R><S label="Lớp" k="cls" opts={cls2.map(c=>c.id)}/><S label="GV" k="teacher" opts={teachers}/></R><R><S label="TT" k="status" opts={[["scheduled","Đã xếp"],["completed","Đã học"],["no-show","Không đến"]]}/><S label="KQ" k="result" opts={[["","--"],["enrolled","Đã ĐK"],["thinking","Suy nghĩ"],["not-interested","Không QT"]]}/></R><F label="Nhắc lại" k="followUp" type="date"/></>}
+{type==="ct"&&<><F label="Học viên" k="name"/><R><S label="Lớp" k="cls" opts={cls2.map(c=>c.id)}/><S label="Thời hạn" k="duration" opts={["3 tháng","6 tháng","12 tháng","18 tháng"]}/></R><R><F label="Bắt đầu" k="start" type="date"/><F label="Kết thúc" k="end" type="date"/></R><F label="Học phí" k="fee" type="number"/></>}
+{type==="hk"&&<><F label="Học viên" k="name"/><R><S label="Level" k="level" opts={lv}/><F label="Ngày thi" k="examDate" type="date"/></R><R><F label="Điểm" k="score" type="number"/><S label="KQ" k="passed" opts={[["","Chưa thi"],["yes","ĐẠT"],["no","Chưa đạt"]]}/></R></>}
+{type==="r"&&<><R><F label="Ngày" k="date" type="date"/>{isAdmin?<S label="GV" k="teacher" opts={teachers}/>:<div style={{flex:1}}><label style={{display:"block",fontSize:11,color:"#52525B",fontWeight:500,marginBottom:6}}>GV</label><input style={{...is,opacity:.5}} value={userName} disabled/></div>}<S label="Lớp" k="cls" opts={cls2.map(c=>c.id)}/></R><R><F label="Có mặt" k="present" type="number"/><F label="Vắng" k="absent" type="number"/></R><F label="HV vắng" k="absentNames"/><F label="Bài học" k="lesson" type="textarea"/><F label="BTVN" k="homework" type="textarea"/><F label="Chú ý" k="flags" type="textarea"/><F label="Nổi bật" k="highlights" type="textarea"/></>}
+{type==="i"&&<><R><F label="Người" k="refName"/><F label="Ngày" k="date" type="date"/></R><R><S label="Loại" k="type" opts={[["call","Goi"],["message","Nhan"],["meeting","Gap"]]}/><F label="Bởi" k="by"/></R><F label="Nội dung" k="content" type="textarea"/></>}
+{type==="f"&&<><F label="Họ tên" k="name"/><R><S label="Lớp" k="cls" opts={cls2.map(c=>c.id)}/><F label="Tổng phí" k="total" type="number"/></R><R><F label="Hạn đợt 2" k="d2d"/><S label="TT" k="st" opts={[["paid","Đã đóng"],["pending","Chờ"],["overdue","Quá hạn"]]}/></R></>}
 <div style={{display:"flex",gap:8,marginTop:16}}>
-<button className="_ba" style={{flex:1,justifyContent:"center"}} onClick={()=>{const data={...d.current};if(type==="f"&&data.total){data.d1=Math.round(data.total/2);data.d2=Math.round(data.total/2)}if(type==="hk"){data.status=data.passed==="yes"?"passed":data.passed==="no"?"failed":"registered"}onSave(data)}}><Save size={13}/>Luu</button>
-<button className="_bg" onClick={onClose}>Huy</button>
+<button className="_ba" style={{flex:1,justifyContent:"center"}} onClick={()=>{const data={...d.current};if(type==="f"&&data.total){data.d1=Math.round(data.total/2);data.d2=Math.round(data.total/2)}if(type==="hk"){data.status=data.passed==="yes"?"passed":data.passed==="no"?"failed":"registered"}onSave(data)}}><Save size={13}/>Lưu</button>
+<button className="_bg" onClick={onClose}>Huỷ</button>
 </div></div></div>);
 }
  
@@ -90,7 +90,7 @@ const tbl={s:"students",l:"leads",tr:"trials",ct:"contracts",hk:"hsk_exams",r:"r
 const stx={s:[stu,setStu],l:[leads,setLeads],tr:[trials,setTrials],ct:[contracts,setContracts],hk:[hsk,setHsk],r:[rpt,setRpt],i:[inter,setInter],f:[fin,setFin]};
 const doSave=async(type,data,isNew)=>{const[arr,setter]=stx[type];if(isNew){setter(type==="r"||type==="i"?[data,...arr]:[...arr,data]);await addRow(tbl[type],data)}else{setter(arr.map(x=>x.id===data.id?data:x));await updateRow(tbl[type],data)}};
 const doDel=async(type,id)=>{const[arr,setter]=stx[type];setter(arr.filter(x=>x.id!==id));await deleteRow(tbl[type],id)};
-const login=()=>{const u=USERS.find(u=>u.user===lu&&u.pass===lp);if(u){setUser(u);localStorage.setItem("ht_user",JSON.stringify(u));setLe("")}else setLe("Sai tai khoan hoac mat khau")};
+const login=()=>{const u=USERS.find(u=>u.user===lu&&u.pass===lp);if(u){setUser(u);localStorage.setItem("ht_user",JSON.stringify(u));setLe("")}else setLe("Sai tài khoản hoặc mật khẩu")};
 const logout=()=>{setUser(null);localStorage.removeItem("ht_user");setPg("home")};
 const isAdmin=user?.role==="admin";
 const canSee=c=>isAdmin||(user?.cls||"").split(",").includes(c);
@@ -102,34 +102,34 @@ if(!user)return(
 <style>{`@keyframes _sp{to{transform:rotate(360deg)}}`}</style>
 <div style={{width:mob?"100%":360,background:"#18181B",border:"1px solid #27272A",borderRadius:12,padding:mob?24:36}}>
 <div style={{width:40,height:40,borderRadius:10,background:A,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:18,fontWeight:800,margin:"0 auto 20px"}}>H</div>
-<div style={{fontSize:20,fontWeight:700,color:"#FAFAFA",textAlign:"center",marginBottom:4}}>Han Tinh Premium</div>
-<div style={{color:"#52525B",fontSize:13,textAlign:"center",marginBottom:28}}>Dang nhap he thong</div>
-<input className="_in" placeholder="Tai khoan" value={lu} onChange={e=>setLu(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()}/>
-<input className="_in" placeholder="Mat khau" type="password" value={lp} onChange={e=>setLp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()}/>
+<div style={{fontSize:20,fontWeight:700,color:"#FAFAFA",textAlign:"center",marginBottom:4}}>Hán Tinh Premium</div>
+<div style={{color:"#52525B",fontSize:13,textAlign:"center",marginBottom:28}}>Đăng nhập hệ thống</div>
+<input className="_in" placeholder="Tài khoản" value={lu} onChange={e=>setLu(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()}/>
+<input className="_in" placeholder="Mật khẩu" type="password" value={lp} onChange={e=>setLp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&login()}/>
 {le&&<div style={{color:"#EF4444",fontSize:12,marginBottom:8,textAlign:"center"}}>{le}</div>}
-<button className="_ba" style={{width:"100%",justifyContent:"center"}} onClick={login}>Dang nhap</button>
+<button className="_ba" style={{width:"100%",justifyContent:"center"}} onClick={login}>Đăng nhập</button>
 </div></div>);
  
 const query=q.trim().toLowerCase();
-const act=stu.filter(s=>s.status==="Dang hoc"),ov=fin.filter(f=>f.st==="overdue"),pend=fin.filter(f=>f.st==="pending");
+const act=stu.filter(s=>s.status==="Đang học"),ov=fin.filter(f=>f.st==="overdue"),pend=fin.filter(f=>f.st==="pending");
 const ranked=[...act].sort((a,b)=>(b.score||0)-(a.score||0));
 const teachers=[...new Set(cls2.map(c=>c.teacher).filter(Boolean))];
 const needFU=trials.filter(t=>t.result==="thinking");
 const hskP=hsk.filter(h=>h.passed==="yes").length,hskTt=hsk.filter(h=>h.status!=="registered").length,hskRate=hskTt>0?Math.round(hskP/hskTt*100):0;
 const collected=fin.reduce((a,f)=>a+(f.d1||0)+(f.st==="paid"?(f.d2||0):0),0);
-const srcData=["Facebook","TikTok","Gioi thieu","Walk-in","Website"].map(s=>({name:s,v:[...stu,...leads].filter(x=>x.source===s).length})).filter(d=>d.v>0);
-const funnelData=[{s:"Hoi",v:leads.filter(l=>l.stage!=="lost").length},{s:"Thu",v:leads.filter(l=>l.stage==="trial"||l.stage==="registered").length},{s:"DK",v:leads.filter(l=>l.stage==="registered").length},{s:"Hoc",v:act.length}];
-const payPie=[{n:"Du",v:fin.filter(f=>f.st==="paid").length},{n:"Cho",v:pend.length},{n:"No",v:ov.length}];
+const srcData=["Facebook","TikTok","Giới thiệu","Walk-in","Website"].map(s=>({name:s,v:[...stu,...leads].filter(x=>x.source===s).length})).filter(d=>d.v>0);
+const funnelData=[{s:"Hỏi",v:leads.filter(l=>l.stage!=="lost").length},{s:"Thử",v:leads.filter(l=>l.stage==="trial"||l.stage==="registered").length},{s:"DK",v:leads.filter(l=>l.stage==="registered").length},{s:"Hoc",v:act.length}];
+const payPie=[{n:"Đủ",v:fin.filter(f=>f.st==="paid").length},{n:"Chờ",v:pend.length},{n:"Nợ",v:ov.length}];
 const scoreDist=[{r:"<5",n:stu.filter(s=>(s.score||0)<5).length},{r:"5-6.5",n:stu.filter(s=>(s.score||0)>=5&&s.score<6.5).length},{r:"6.5-8",n:stu.filter(s=>(s.score||0)>=6.5&&s.score<8).length},{r:"8-9",n:stu.filter(s=>(s.score||0)>=8&&s.score<9).length},{r:"9+",n:stu.filter(s=>(s.score||0)>=9).length}];
  
 const om=(t,d,n)=>setModal({t,d,n});
 const gc=c=>mob?"1fr":`repeat(${c},1fr)`;
 const Ch=({title,children,h=180})=><div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>{title}</div><ResponsiveContainer width="100%" height={h}>{children}</ResponsiveContainer></div>;
-const sb=s=>({Facebook:"in",TikTok:"pu","Gioi thieu":"ok","Walk-in":"or",Website:"wa"})[s]||"mu";
-const stB=s=>({inquiry:["Hoi","in"],trial:["Thu","wa"],registered:["DK","ok"],lost:["Mat","mu"]})[s]||[s,"mu"];
+const sb=s=>({Facebook:"in",TikTok:"pu","Giới thiệu":"ok","Walk-in":"or",Website:"wa"})[s]||"mu";
+const stB=s=>({inquiry:["Hỏi","in"],trial:["Thử","wa"],registered:["DK","ok"],lost:["Mất","mu"]})[s]||[s,"mu"];
  
-const adminMenu=[{id:"home",l:"Tong quan",ic:LayoutDashboard},{id:"leads",l:"Khach moi",ic:Target},{id:"trials",l:"Hoc thu",ic:BookOpen},{id:"stu",l:"Hoc vien",ic:Users},{id:"contracts",l:"Hop dong",ic:FileText},{id:"hsk",l:"HSK",ic:GraduationCap},{id:"rpt",l:"Bao cao",ic:ClipboardList},{id:"log",l:"Lich su",ic:MessageSquare},{id:"fin",l:"Tai chinh",ic:Wallet},{id:"charts",l:"Bieu do",ic:BarChart3}];
-const teacherMenu=[{id:"home",l:"Tong quan",ic:LayoutDashboard},{id:"stu",l:"Hoc vien",ic:Users},{id:"rpt",l:"Bao cao",ic:ClipboardList},{id:"hsk",l:"HSK",ic:GraduationCap}];
+const adminMenu=[{id:"home",l:"Tổng quan",ic:LayoutDashboard},{id:"leads",l:"Khách mới",ic:Target},{id:"trials",l:"Học thử",ic:BookOpen},{id:"stu",l:"Học viên",ic:Users},{id:"contracts",l:"Hợp đồng",ic:FileText},{id:"hsk",l:"HSK",ic:GraduationCap},{id:"rpt",l:"Báo cáo",ic:ClipboardList},{id:"log",l:"Lịch sử",ic:MessageSquare},{id:"fin",l:"Tài chính",ic:Wallet},{id:"charts",l:"Biểu đồ",ic:BarChart3}];
+const teacherMenu=[{id:"home",l:"Tổng quan",ic:LayoutDashboard},{id:"stu",l:"Học viên",ic:Users},{id:"rpt",l:"Báo cáo",ic:ClipboardList},{id:"hsk",l:"HSK",ic:GraduationCap}];
 const menu=isAdmin?adminMenu:teacherMenu;
 const mobNav=isAdmin?[{id:"home",ic:LayoutDashboard,l:"Home"},{id:"leads",ic:Target,l:"Khach"},{id:"stu",ic:Users,l:"HV"},{id:"rpt",ic:ClipboardList,l:"BC"},{id:"more",ic:Menu,l:"More"}]:[{id:"home",ic:LayoutDashboard,l:"Home"},{id:"stu",ic:Users,l:"HV"},{id:"rpt",ic:ClipboardList,l:"BC"},{id:"hsk",ic:GraduationCap,l:"HSK"}];
 const moreMenu=adminMenu.filter(m=>!["home","leads","stu","rpt"].includes(m.id));
@@ -157,7 +157,7 @@ table{width:100%;border-collapse:collapse;min-width:600px}th{padding:10px 16px;t
 {!mob&&<div style={{width:220,borderRight:"1px solid #27272A",display:"flex",flexDirection:"column",flexShrink:0}}>
 <div style={{padding:"16px 14px",display:"flex",alignItems:"center",gap:10,borderBottom:"1px solid #1F1F23"}}>
 <div style={{width:30,height:30,borderRadius:8,background:A,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:14,fontWeight:800}}>H</div>
-<div><div style={{fontWeight:700,fontSize:14}}>Han Tinh</div><div style={{fontSize:10,color:"#52525B",fontWeight:500}}>Premium</div></div>
+<div><div style={{fontWeight:700,fontSize:14}}>Hán Tinh</div><div style={{fontSize:10,color:"#52525B",fontWeight:500}}>Premium</div></div>
 </div>
 <nav style={{flex:1,padding:"8px 6px",overflow:"auto"}}>{menu.map(m=>{const Ic=m.ic;return<div key={m.id} className={"_ni"+(pg===m.id?" _a":"")} onClick={()=>setPg(m.id)}><Ic size={15} strokeWidth={pg===m.id?2:1.5}/>{m.l}</div>})}</nav>
 <div style={{padding:"12px 10px",borderTop:"1px solid #1F1F23"}}><div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -168,33 +168,33 @@ table{width:100%;border-collapse:collapse;min-width:600px}th{padding:10px 16px;t
  
 <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
 <div style={{padding:"8px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid #1F1F23",flexShrink:0}}>
-{mob?<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:24,height:24,borderRadius:6,background:A,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:10,fontWeight:800}}>H</div><span style={{fontWeight:700,fontSize:13}}>Han Tinh</span></div>
-:<div style={{position:"relative",width:220}}><Search size={13} style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:"#3F3F46"}}/><input className="_in" style={{marginBottom:0,paddingLeft:30,fontSize:13}} placeholder="Tim kiem..." value={q} onChange={e=>setQ(e.target.value)}/></div>}
+{mob?<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:24,height:24,borderRadius:6,background:A,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:10,fontWeight:800}}>H</div><span style={{fontWeight:700,fontSize:13}}>Hán Tinh</span></div>
+:<div style={{position:"relative",width:220}}><Search size={13} style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:"#3F3F46"}}/><input className="_in" style={{marginBottom:0,paddingLeft:30,fontSize:13}} placeholder="Tìm kiếm..." value={q} onChange={e=>setQ(e.target.value)}/></div>}
 <div style={{display:"flex",alignItems:"center",gap:6}}>
-{!mob&&(ov.length+needFU.length)>0&&<span style={{fontSize:10,fontWeight:600,color:"#EF4444",background:"#EF444412",padding:"3px 8px",borderRadius:4}}>{ov.length+needFU.length} can xu ly</span>}
+{!mob&&(ov.length+needFU.length)>0&&<span style={{fontSize:10,fontWeight:600,color:"#EF4444",background:"#EF444412",padding:"3px 8px",borderRadius:4}}>{ov.length+needFU.length} cần xử lý</span>}
 {mob&&<button onClick={logout} className="_ab _d"><LogOut size={14}/></button>}
 </div></div>
  
 <div style={{flex:1,overflow:"auto",padding:mob?12:20}}>
  
 {pg==="home"&&<div>
-<div style={{fontSize:mob?20:24,fontWeight:700,marginBottom:20}}>Tong quan</div>
+<div style={{fontSize:mob?20:24,fontWeight:700,marginBottom:20}}>Tổng quan</div>
 {isAdmin&&<div style={{display:"inline-flex",gap:2,background:"#18181B",borderRadius:8,padding:2,marginBottom:16,border:"1px solid #27272A"}}>
-{[["kpi","Chi so"],["funnel","Pheu"],["trends","Xu huong"]].map(([id,l])=><button key={id} className={"_tb"+(dtab===id?" _a":"")} onClick={()=>setDtab(id)}>{l}</button>)}
+{[["kpi","Chỉ số"],["funnel","Phễu"],["trends","Xu hướng"]].map(([id,l])=><button key={id} className={"_tb"+(dtab===id?" _a":"")} onClick={()=>setDtab(id)}>{l}</button>)}
 </div>}
 <div style={{display:"grid",gridTemplateColumns:gc(isAdmin?3:2),gap:10,marginBottom:16}}>
 {(isAdmin?[
-{l:"Khach moi",v:leads.filter(l=>l.stage!=="lost").length,sp:[8,12,10,15,11,14],tr:12},
-{l:"Hoc vien",v:act.length,sp:[18,20,22,21,24,26],tr:8},
-{l:"HSK do",v:hskRate+"%",sp:[60,65,70,68,75,hskRate]},
-{l:"Da thu",v:vnd(collected),sp:[42,48,52,58,65,72],tr:11},
-{l:"No HP",v:ov.length,er:ov.length>0},
-{l:"Can nhac",v:needFU.length}
+{l:"Khách mới",v:leads.filter(l=>l.stage!=="lost").length,sp:[8,12,10,15,11,14],tr:12},
+{l:"Học viên",v:act.length,sp:[18,20,22,21,24,26],tr:8},
+{l:"HSK đỗ",v:hskRate+"%",sp:[60,65,70,68,75,hskRate]},
+{l:"Đã thu",v:vnd(collected),sp:[42,48,52,58,65,72],tr:11},
+{l:"Nợ HP",v:ov.length,er:ov.length>0},
+{l:"Cần nhắc",v:needFU.length}
 ]:[
-{l:"HV lop toi",v:stu.filter(s=>canSee(s.cls)).length},
-{l:"Bao cao",v:rpt.filter(r=>r.teacher===user.name).length},
-{l:"Diem TB",v:(stu.filter(s=>canSee(s.cls)&&s.status==="Dang hoc").reduce((a,s)=>a+s.score,0)/Math.max(stu.filter(s=>canSee(s.cls)&&s.status==="Dang hoc").length,1)).toFixed(1)},
-{l:"Chuyen can",v:Math.round(stu.filter(s=>canSee(s.cls)&&s.status==="Dang hoc").reduce((a,s)=>a+s.attend,0)/Math.max(stu.filter(s=>canSee(s.cls)&&s.status==="Dang hoc").length,1))+"%"}
+{l:"HV lớp tôi",v:stu.filter(s=>canSee(s.cls)).length},
+{l:"Báo cáo",v:rpt.filter(r=>r.teacher===user.name).length},
+{l:"Điểm TB",v:(stu.filter(s=>canSee(s.cls)&&s.status==="Đang học").reduce((a,s)=>a+s.score,0)/Math.max(stu.filter(s=>canSee(s.cls)&&s.status==="Đang học").length,1)).toFixed(1)},
+{l:"Chuyên cần",v:Math.round(stu.filter(s=>canSee(s.cls)&&s.status==="Đang học").reduce((a,s)=>a+s.attend,0)/Math.max(stu.filter(s=>canSee(s.cls)&&s.status==="Đang học").length,1))+"%"}
 ]).map((s,i)=><div key={i} className="_c">
 <div style={{fontSize:11,fontWeight:500,color:"#52525B",marginBottom:8}}>{s.l}</div>
 <div style={{fontSize:mob?28:36,fontWeight:800,letterSpacing:"-.04em",color:s.er?"#EF4444":"#FAFAFA",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{s.v}</div>
@@ -204,55 +204,55 @@ table{width:100%;border-collapse:collapse;min-width:600px}th{padding:10px 16px;t
 </div>}</div>)}
 </div>
 {dtab==="kpi"&&isAdmin&&<div style={{display:"grid",gridTemplateColumns:gc(3),gap:10}}>
-<div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>Can thu</div>{ov.map(f=><div key={f.id} style={{padding:"8px 0",borderBottom:"1px solid #1F1F23",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{fontWeight:600,color:"#A1A1AA",fontSize:13}}>{f.name}</div><div style={{color:"#EF4444",fontSize:12}}>{vnd(f.d2)}</div></div><button className="_ba _bs" onClick={()=>{setFin(fin.map(x=>x.id===f.id?{...x,st:"paid"}:x));updateRow("finance",{...f,st:"paid"})}}><Check size={11}/></button></div>)}{ov.length===0&&<div style={{color:A,fontSize:12}}>OK</div>}</div>
+<div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>Cần thu</div>{ov.map(f=><div key={f.id} style={{padding:"8px 0",borderBottom:"1px solid #1F1F23",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{fontWeight:600,color:"#A1A1AA",fontSize:13}}>{f.name}</div><div style={{color:"#EF4444",fontSize:12}}>{vnd(f.d2)}</div></div><button className="_ba _bs" onClick={()=>{setFin(fin.map(x=>x.id===f.id?{...x,st:"paid"}:x));updateRow("finance",{...f,st:"paid"})}}><Check size={11}/></button></div>)}{ov.length===0&&<div style={{color:A,fontSize:12}}>OK</div>}</div>
 <div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>Top 5</div>{ranked.slice(0,5).map((s,i)=><div key={s.id} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",fontSize:13}}><span style={{color:"#71717A"}}><span style={{color:i<3?A:"#3F3F46",fontWeight:700,marginRight:8}}>{i+1}</span>{s.name}</span><span style={{fontWeight:700}}>{s.score}</span></div>)}</div>
-<div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>Gan day</div>{rpt.slice(0,4).map(r=><div key={r.id} style={{padding:"6px 0",borderBottom:"1px solid #1F1F23",fontSize:12}}><span style={{color:"#A1A1AA",fontWeight:600}}>{r.teacher}</span> <span style={{color:"#3F3F46"}}>{r.cls} {r.date}</span></div>)}</div>
+<div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>Gần đây</div>{rpt.slice(0,4).map(r=><div key={r.id} style={{padding:"6px 0",borderBottom:"1px solid #1F1F23",fontSize:12}}><span style={{color:"#A1A1AA",fontWeight:600}}>{r.teacher}</span> <span style={{color:"#3F3F46"}}>{r.cls} {r.date}</span></div>)}</div>
 </div>}
 {dtab==="funnel"&&isAdmin&&<div style={{display:"grid",gridTemplateColumns:gc(2),gap:10}}>
-<div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:14,textTransform:"uppercase",letterSpacing:".05em"}}>Pheu</div>{funnelData.map((f,i)=><div key={f.s} style={{height:32,borderRadius:6,display:"flex",alignItems:"center",padding:"0 12px",color:"#000",fontWeight:700,fontSize:11,marginBottom:6,background:CX[i],width:Math.max((f.v/Math.max(funnelData[0].v,1))*100,25)+"%"}}>{f.s}: {f.v}</div>)}</div>
-<Ch title="Nguon"><PieChart><Pie data={srcData} cx="50%" cy="50%" innerRadius={30} outerRadius={60} dataKey="v" label={({name,v})=>name.slice(0,3)+":"+v} fontSize={10} stroke="none">{srcData.map((e,i)=><Cell key={i} fill={CX[i]}/>)}</Pie><Tooltip content={<Tip/>}/></PieChart></Ch>
+<div className="_c"><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:14,textTransform:"uppercase",letterSpacing:".05em"}}>Phễu</div>{funnelData.map((f,i)=><div key={f.s} style={{height:32,borderRadius:6,display:"flex",alignItems:"center",padding:"0 12px",color:"#000",fontWeight:700,fontSize:11,marginBottom:6,background:CX[i],width:Math.max((f.v/Math.max(funnelData[0].v,1))*100,25)+"%"}}>{f.s}: {f.v}</div>)}</div>
+<Ch title="Nguồn"><PieChart><Pie data={srcData} cx="50%" cy="50%" innerRadius={30} outerRadius={60} dataKey="v" label={({name,v})=>name.slice(0,3)+":"+v} fontSize={10} stroke="none">{srcData.map((e,i)=><Cell key={i} fill={CX[i]}/>)}</Pie><Tooltip content={<Tip/>}/></PieChart></Ch>
 </div>}
 {dtab==="trends"&&isAdmin&&<div style={{display:"grid",gridTemplateColumns:gc(2),gap:10}}>
 <Ch title="Doanh thu"><BarChart data={monthTrend}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23"/><XAxis dataKey="m" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><YAxis fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><Tooltip content={<Tip/>}/><Bar dataKey="rev" fill={A} radius={[4,4,0,0]}/></BarChart></Ch>
-<Ch title="Chuyen can"><LineChart data={attendTrend}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23"/><XAxis dataKey="w" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><YAxis domain={[80,100]} fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><Tooltip content={<Tip/>}/><Line type="monotone" dataKey="v" stroke="#3B82F6" strokeWidth={1.5} dot={{fill:"#3B82F6",r:3,strokeWidth:0}}/></LineChart></Ch>
+<Ch title="Chuyên cần"><LineChart data={attendTrend}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23"/><XAxis dataKey="w" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><YAxis domain={[80,100]} fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><Tooltip content={<Tip/>}/><Line type="monotone" dataKey="v" stroke="#3B82F6" strokeWidth={1.5} dot={{fill:"#3B82F6",r:3,strokeWidth:0}}/></LineChart></Ch>
 </div>}
 </div>}
  
 {pg==="leads"&&isAdmin&&<div>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Khach tiem nang</div><button className="_ba" onClick={()=>om("l",{id:"LD"+Date.now(),name:"",phone:"",source:"Facebook",stage:"inquiry",interest:"HSK 1",note:"",created:today,lastContact:today},1)}><Plus size={13}/>Them</button></div>
-<div style={{overflow:"auto",borderRadius:12}}><div className="_c" style={{padding:0}}><table><thead><tr>{["Ten","SDT","Nguon","QT","GD",""].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{leads.map(l=>{const[st,sv]=stB(l.stage);return<tr key={l.id}><td style={{fontWeight:600,color:"#D4D4D8"}}>{l.name}</td><td>{l.phone}</td><td><Bd t={l.source} v={sb(l.source)}/></td><td><Bd t={l.interest} v="in"/></td><td><Bd t={st} v={sv}/></td>
-<td><div style={{display:"flex",gap:3,alignItems:"center"}}>{l.stage==="inquiry"&&<button className="_bo" onClick={()=>{setLeads(leads.map(x=>x.id===l.id?{...x,stage:"trial"}:x));updateRow("leads",{...l,stage:"trial"})}}><ChevronRight size={11}/>Thu</button>}{l.stage==="trial"&&<button className="_ba _bs" onClick={()=>{setLeads(leads.map(x=>x.id===l.id?{...x,stage:"registered"}:x));updateRow("leads",{...l,stage:"registered"})}}>DK</button>}<button className="_ab" onClick={()=>om("l",{...l},0)}><Pencil size={12}/></button><button className="_ab _d" onClick={()=>{if(confirm("Xoa?"))doDel("l",l.id)}}><Trash2 size={12}/></button></div></td></tr>})}</tbody></table></div></div>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Khách tiềm năng</div><button className="_ba" onClick={()=>om("l",{id:"LD"+Date.now(),name:"",phone:"",source:"Facebook",stage:"inquiry",interest:"HSK 1",note:"",created:today,lastContact:today},1)}><Plus size={13}/>Thêm</button></div>
+<div style={{overflow:"auto",borderRadius:12}}><div className="_c" style={{padding:0}}><table><thead><tr>{["Tên","SDT","Nguồn","QT","GD",""].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{leads.map(l=>{const[st,sv]=stB(l.stage);return<tr key={l.id}><td style={{fontWeight:600,color:"#D4D4D8"}}>{l.name}</td><td>{l.phone}</td><td><Bd t={l.source} v={sb(l.source)}/></td><td><Bd t={l.interest} v="in"/></td><td><Bd t={st} v={sv}/></td>
+<td><div style={{display:"flex",gap:3,alignItems:"center"}}>{l.stage==="inquiry"&&<button className="_bo" onClick={()=>{setLeads(leads.map(x=>x.id===l.id?{...x,stage:"trial"}:x));updateRow("leads",{...l,stage:"trial"})}}><ChevronRight size={11}/>Thu</button>}{l.stage==="trial"&&<button className="_ba _bs" onClick={()=>{setLeads(leads.map(x=>x.id===l.id?{...x,stage:"registered"}:x));updateRow("leads",{...l,stage:"registered"})}}>DK</button>}<button className="_ab" onClick={()=>om("l",{...l},0)}><Pencil size={12}/></button><button className="_ab _d" onClick={()=>{if(confirm("Xoá?"))doDel("l",l.id)}}><Trash2 size={12}/></button></div></td></tr>})}</tbody></table></div></div>
 </div>}
  
 {pg==="stu"&&<div>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Hoc vien</div>{isAdmin&&<button className="_ba" onClick={()=>om("s",{id:"HV"+Date.now(),name:"",phone:"",cls:cls2[0]?.id||"",level:"HSK 1",status:"Dang hoc",score:0,attend:90,source:"Facebook"},1)}><Plus size={13}/>Them</button>}</div>
-<div style={{overflow:"auto",borderRadius:12}}><div className="_c" style={{padding:0}}><table><thead><tr>{["#","HV","Level","Lop","Diem","CC","TT",...(isAdmin?[""]:[])] .map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{stu.filter(s=>(!q||s.name.toLowerCase().includes(query))&&canSee(s.cls)).map((s,i)=><tr key={s.id}><td style={{color:"#3F3F46",fontSize:11}}>{i+1}</td><td><div style={{fontWeight:600,color:"#D4D4D8"}}>{s.name}</div><div style={{color:"#52525B",fontSize:12}}>{s.phone}</div></td><td><Bd t={s.level} v="in"/></td><td style={{color:"#52525B"}}>{s.cls}</td><td style={{fontWeight:800,color:s.score>=8?A:s.score>=6.5?"#F59E0B":"#EF4444",fontSize:18,fontVariantNumeric:"tabular-nums"}}>{s.score}</td><td><div style={{display:"flex",alignItems:"center",gap:6}}><div className="_pb" style={{width:44}}><div className="_pf" style={{width:s.attend+"%",background:s.attend>=90?A:"#F59E0B"}}/></div><span style={{fontSize:10,color:"#52525B",fontWeight:600}}>{s.attend}%</span></div></td><td><Bd t={s.status} v={s.status==="Dang hoc"?"ok":s.status==="Tam nghi"?"wa":"mu"}/></td>
-{isAdmin&&<td><button className="_ab" onClick={()=>om("s",{...s},0)}><Pencil size={12}/></button><button className="_ab _d" onClick={()=>{if(confirm("Xoa?"))doDel("s",s.id)}}><Trash2 size={12}/></button></td>}</tr>)}</tbody></table></div></div>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Học viên</div>{isAdmin&&<button className="_ba" onClick={()=>om("s",{id:"HV"+Date.now(),name:"",phone:"",cls:cls2[0]?.id||"",level:"HSK 1",status:"Đang học",score:0,attend:90,source:"Facebook"},1)}><Plus size={13}/>Thêm</button>}</div>
+<div style={{overflow:"auto",borderRadius:12}}><div className="_c" style={{padding:0}}><table><thead><tr>{["#","HV","Level","Lớp","Điểm","CC","TT",...(isAdmin?[""]:[])] .map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{stu.filter(s=>(!q||s.name.toLowerCase().includes(query))&&canSee(s.cls)).map((s,i)=><tr key={s.id}><td style={{color:"#3F3F46",fontSize:11}}>{i+1}</td><td><div style={{fontWeight:600,color:"#D4D4D8"}}>{s.name}</div><div style={{color:"#52525B",fontSize:12}}>{s.phone}</div></td><td><Bd t={s.level} v="in"/></td><td style={{color:"#52525B"}}>{s.cls}</td><td style={{fontWeight:800,color:s.score>=8?A:s.score>=6.5?"#F59E0B":"#EF4444",fontSize:18,fontVariantNumeric:"tabular-nums"}}>{s.score}</td><td><div style={{display:"flex",alignItems:"center",gap:6}}><div className="_pb" style={{width:44}}><div className="_pf" style={{width:s.attend+"%",background:s.attend>=90?A:"#F59E0B"}}/></div><span style={{fontSize:10,color:"#52525B",fontWeight:600}}>{s.attend}%</span></div></td><td><Bd t={s.status} v={s.status==="Đang học"?"ok":s.status==="Tạm nghỉ"?"wa":"mu"}/></td>
+{isAdmin&&<td><button className="_ab" onClick={()=>om("s",{...s},0)}><Pencil size={12}/></button><button className="_ab _d" onClick={()=>{if(confirm("Xoá?"))doDel("s",s.id)}}><Trash2 size={12}/></button></td>}</tr>)}</tbody></table></div></div>
 </div>}
  
 {pg==="trials"&&isAdmin&&<div>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Hoc thu</div><button className="_ba" onClick={()=>om("tr",{id:"TL"+Date.now(),name:"",phone:"",source:"Facebook",date:today,time:"18:00",cls:cls2[0]?.id||"",teacher:teachers[0]||"",status:"scheduled",result:"",followUp:""},1)}><Plus size={13}/>Xep lich</button></div>
-<div style={{overflow:"auto",borderRadius:12}}><div className="_c" style={{padding:0}}><table><thead><tr>{["Ten","Ngay","Lop","TT","KQ","Nhac",""].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{trials.map(t=><tr key={t.id}><td style={{fontWeight:600,color:"#D4D4D8"}}>{t.name}</td><td style={{fontSize:13,color:"#52525B"}}>{t.date} {t.time}</td><td style={{color:"#52525B"}}>{t.cls}</td><td><Bd t={{scheduled:"Xep",completed:"Xong","no-show":"KD"}[t.status]||t.status} v={{scheduled:"in",completed:"ok","no-show":"er"}[t.status]||"mu"}/></td><td>{t.result?<Bd t={{enrolled:"DK",thinking:"Nghi","not-interested":"KQT"}[t.result]} v={{enrolled:"ok",thinking:"wa","not-interested":"mu"}[t.result]}/>:<span style={{color:"#27272A"}}>--</span>}</td><td style={{color:t.followUp&&daysLeft(t.followUp)<=1?"#EF4444":"#3F3F46",fontSize:12}}>{t.followUp||"--"}</td>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Học thử</div><button className="_ba" onClick={()=>om("tr",{id:"TL"+Date.now(),name:"",phone:"",source:"Facebook",date:today,time:"18:00",cls:cls2[0]?.id||"",teacher:teachers[0]||"",status:"scheduled",result:"",followUp:""},1)}><Plus size={13}/>Xếp lịch</button></div>
+<div style={{overflow:"auto",borderRadius:12}}><div className="_c" style={{padding:0}}><table><thead><tr>{["Tên","Ngày","Lớp","TT","KQ","Nhắc",""].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{trials.map(t=><tr key={t.id}><td style={{fontWeight:600,color:"#D4D4D8"}}>{t.name}</td><td style={{fontSize:13,color:"#52525B"}}>{t.date} {t.time}</td><td style={{color:"#52525B"}}>{t.cls}</td><td><Bd t={{scheduled:"Xếp",completed:"Xong","no-show":"KD"}[t.status]||t.status} v={{scheduled:"in",completed:"ok","no-show":"er"}[t.status]||"mu"}/></td><td>{t.result?<Bd t={{enrolled:"DK",thinking:"Nghĩ","not-interested":"KQT"}[t.result]} v={{enrolled:"ok",thinking:"wa","not-interested":"mu"}[t.result]}/>:<span style={{color:"#27272A"}}>--</span>}</td><td style={{color:t.followUp&&daysLeft(t.followUp)<=1?"#EF4444":"#3F3F46",fontSize:12}}>{t.followUp||"--"}</td>
 <td><div style={{display:"flex",gap:3}}>{t.status==="scheduled"&&<button className="_ba _bs" onClick={()=>{setTrials(trials.map(x=>x.id===t.id?{...x,status:"completed"}:x));updateRow("trials",{...t,status:"completed"})}}><Check size={11}/></button>}<button className="_ab" onClick={()=>om("tr",{...t},0)}><Pencil size={12}/></button></div></td></tr>)}</tbody></table></div></div>
 </div>}
  
 {pg==="contracts"&&isAdmin&&<div>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Hop dong</div><button className="_ba" onClick={()=>om("ct",{id:"HD"+Date.now(),name:"",cls:cls2[0]?.id||"",start:today,end:"",duration:"6 thang",fee:0,status:"active",note:""},1)}><Plus size={13}/>Tao</button></div>
-<div style={{overflow:"auto",borderRadius:12}}><div className="_c" style={{padding:0}}><table><thead><tr>{["HV","Lop","BD","KT","Phi","TT","Con",""].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{contracts.map(c=>{const dl=daysLeft(c.end);const rs=c.status==="renewed"?"renewed":dl<=0?"expired":dl<=30?"expiring":"active";return<tr key={c.id}><td style={{fontWeight:600,color:"#D4D4D8"}}>{c.name}</td><td><Bd t={c.cls} v="in"/></td><td style={{fontSize:12,color:"#52525B"}}>{c.start}</td><td style={{fontSize:12,color:"#52525B"}}>{c.end}</td><td style={{fontWeight:700,color:A}}>{vnd(c.fee)}</td><td><Bd t={{active:"OK",expiring:"Sap",expired:"Het",renewed:"GH"}[rs]} v={{active:"ok",expiring:"wa",expired:"er",renewed:"in"}[rs]}/></td><td style={{fontWeight:700,color:dl<=0?"#EF4444":dl<=30?"#F59E0B":A,fontVariantNumeric:"tabular-nums"}}>{dl<=0?"Het":dl+"d"}</td>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Hợp đồng</div><button className="_ba" onClick={()=>om("ct",{id:"HD"+Date.now(),name:"",cls:cls2[0]?.id||"",start:today,end:"",duration:"6 tháng",fee:0,status:"active",note:""},1)}><Plus size={13}/>Tạo</button></div>
+<div style={{overflow:"auto",borderRadius:12}}><div className="_c" style={{padding:0}}><table><thead><tr>{["HV","Lớp","BD","KT","Phí","TT","Còn",""].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{contracts.map(c=>{const dl=daysLeft(c.end);const rs=c.status==="renewed"?"renewed":dl<=0?"expired":dl<=30?"expiring":"active";return<tr key={c.id}><td style={{fontWeight:600,color:"#D4D4D8"}}>{c.name}</td><td><Bd t={c.cls} v="in"/></td><td style={{fontSize:12,color:"#52525B"}}>{c.start}</td><td style={{fontSize:12,color:"#52525B"}}>{c.end}</td><td style={{fontWeight:700,color:A}}>{vnd(c.fee)}</td><td><Bd t={{active:"OK",expiring:"Sắp",expired:"Hết",renewed:"GH"}[rs]} v={{active:"ok",expiring:"wa",expired:"er",renewed:"in"}[rs]}/></td><td style={{fontWeight:700,color:dl<=0?"#EF4444":dl<=30?"#F59E0B":A,fontVariantNumeric:"tabular-nums"}}>{dl<=0?"Hết":dl+"d"}</td>
 <td><div style={{display:"flex",gap:3}}>{(rs==="expiring"||rs==="expired")&&<button className="_ba _bs" onClick={()=>{const nc={...c,status:"renewed"};setContracts(contracts.map(x=>x.id===c.id?nc:x));updateRow("contracts",nc)}}>GH</button>}<button className="_ab" onClick={()=>om("ct",{...c},0)}><Pencil size={12}/></button></div></td></tr>})}</tbody></table></div></div>
 </div>}
  
 {pg==="hsk"&&<div>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Thi HSK</div>{isAdmin&&<button className="_ba" onClick={()=>om("hk",{id:"HSK"+Date.now(),name:"",level:"HSK 1",examDate:"",score:0,passed:"",status:"registered"},1)}><Plus size={13}/>DK</button>}</div>
 <div style={{display:"grid",gridTemplateColumns:gc(2),gap:10,marginBottom:14}}>
-<Ch title="Ket qua"><BarChart data={["HSK 1","HSK 2","HSK 3","HSK 4","HSK 5"].map(l=>({l,p:hsk.filter(h=>h.level===l&&h.passed==="yes").length,f:hsk.filter(h=>h.level===l&&h.passed==="no").length}))}><XAxis dataKey="l" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><YAxis fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><Tooltip content={<Tip/>}/><Bar dataKey="p" name="Dat" fill={A} stackId="a" radius={[4,4,0,0]}/><Bar dataKey="f" name="Truot" fill="#EF4444" stackId="a" radius={[4,4,0,0]}/></BarChart></Ch>
-<div className="_c" style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>Ty le</div><div style={{fontSize:48,fontWeight:800,color:hskRate>=70?A:"#F59E0B",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{hskRate}%</div><div style={{fontSize:12,color:"#52525B",marginTop:6}}>{hskP}/{hskTt}</div><div className="_pb" style={{marginTop:10,width:"40%"}}><div className="_pf" style={{width:hskRate+"%",background:A}}/></div></div>
+<Ch title="Kết quả"><BarChart data={["HSK 1","HSK 2","HSK 3","HSK 4","HSK 5"].map(l=>({l,p:hsk.filter(h=>h.level===l&&h.passed==="yes").length,f:hsk.filter(h=>h.level===l&&h.passed==="no").length}))}><XAxis dataKey="l" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><YAxis fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><Tooltip content={<Tip/>}/><Bar dataKey="p" name="Đạt" fill={A} stackId="a" radius={[4,4,0,0]}/><Bar dataKey="f" name="Trượt" fill="#EF4444" stackId="a" radius={[4,4,0,0]}/></BarChart></Ch>
+<div className="_c" style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}><div style={{fontSize:11,fontWeight:600,color:"#52525B",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>Tỷ lệ</div><div style={{fontSize:48,fontWeight:800,color:hskRate>=70?A:"#F59E0B",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{hskRate}%</div><div style={{fontSize:12,color:"#52525B",marginTop:6}}>{hskP}/{hskTt}</div><div className="_pb" style={{marginTop:10,width:"40%"}}><div className="_pf" style={{width:hskRate+"%",background:A}}/></div></div>
 </div>
-<div style={{overflow:"auto",borderRadius:12}}><div className="_c" style={{padding:0}}><table><thead><tr>{["HV","Level","Ngay","Diem","KQ",...(isAdmin?[""]:[])] .map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{hsk.map(h=><tr key={h.id}><td style={{fontWeight:600,color:"#D4D4D8"}}>{h.name}</td><td><Bd t={h.level} v="pu"/></td><td style={{fontSize:12,color:"#52525B"}}>{h.examDate}</td><td style={{fontWeight:800,fontSize:16,fontVariantNumeric:"tabular-nums"}}>{h.score||<span style={{color:"#27272A"}}>--</span>}</td><td>{h.passed==="yes"?<Bd t="DAT" v="ok"/>:h.passed==="no"?<Bd t="Truot" v="er"/>:<Bd t="Chua" v="in"/>}</td>{isAdmin&&<td><button className="_ab" onClick={()=>om("hk",{...h},0)}><Pencil size={12}/></button></td>}</tr>)}</tbody></table></div></div>
+<div style={{overflow:"auto",borderRadius:12}}><div className="_c" style={{padding:0}}><table><thead><tr>{["HV","Level","Ngày","Điểm","KQ",...(isAdmin?[""]:[])] .map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{hsk.map(h=><tr key={h.id}><td style={{fontWeight:600,color:"#D4D4D8"}}>{h.name}</td><td><Bd t={h.level} v="pu"/></td><td style={{fontSize:12,color:"#52525B"}}>{h.examDate}</td><td style={{fontWeight:800,fontSize:16,fontVariantNumeric:"tabular-nums"}}>{h.score||<span style={{color:"#27272A"}}>--</span>}</td><td>{h.passed==="yes"?<Bd t="ĐẠT" v="ok"/>:h.passed==="no"?<Bd t="Trượt" v="er"/>:<Bd t="Chưa" v="in"/>}</td>{isAdmin&&<td><button className="_ab" onClick={()=>om("hk",{...h},0)}><Pencil size={12}/></button></td>}</tr>)}</tbody></table></div></div>
 </div>}
  
 {pg==="rpt"&&<div>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Bao cao</div><button className="_ba" onClick={()=>om("r",{id:"RP"+Date.now(),date:today,teacher:isAdmin?(teachers[0]||""):user.name,cls:cls2[0]?.id||"",present:0,absent:0,absentNames:"",lesson:"",homework:"",flags:"",highlights:""},1)}><Plus size={13}/>Tao</button></div>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Báo cáo</div><button className="_ba" onClick={()=>om("r",{id:"RP"+Date.now(),date:today,teacher:isAdmin?(teachers[0]||""):user.name,cls:cls2[0]?.id||"",present:0,absent:0,absentNames:"",lesson:"",homework:"",flags:"",highlights:""},1)}><Plus size={13}/>Tạo</button></div>
 {rpt.filter(r=>isAdmin||r.teacher===user.name).map(r=><div key={r.id} className="_c" style={{marginBottom:8}}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
 <div><span style={{fontWeight:600,color:"#A1A1AA",fontSize:13}}>{r.teacher}</span> <span style={{color:"#3F3F46",fontSize:11}}>{r.cls} {r.date}</span></div>
@@ -265,7 +265,7 @@ table{width:100%;border-collapse:collapse;min-width:600px}th{padding:10px 16px;t
 </div>}
  
 {pg==="log"&&isAdmin&&<div>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Lich su</div><button className="_ba" onClick={()=>om("i",{id:"IT"+Date.now(),ref:"",refName:"",date:today,type:"call",content:"",by:"Admin"},1)}><Plus size={13}/>Them</button></div>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Lịch sử</div><button className="_ba" onClick={()=>om("i",{id:"IT"+Date.now(),ref:"",refName:"",date:today,type:"call",content:"",by:"Admin"},1)}><Plus size={13}/>Thêm</button></div>
 {inter.map(it=><div key={it.id} style={{display:"flex",gap:10,padding:"12px 0",borderBottom:"1px solid #1F1F23"}}>
 <div style={{width:28,height:28,borderRadius:7,background:"#27272A",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:"#52525B"}}>{it.type==="call"?<Phone size={12}/>:it.type==="meeting"?<Handshake size={12}/>:<MessageCircle size={12}/>}</div>
 <div><div><span style={{fontWeight:600,color:"#A1A1AA",fontSize:13}}>{it.refName}</span> <span style={{color:"#3F3F46",fontSize:10}}>{it.date}</span> <Bd t={it.type==="call"?"Goi":it.type==="meeting"?"Gap":"Nhan"} v={it.type==="call"?"ok":"in"}/></div><div style={{color:"#52525B",marginTop:4,fontSize:13,lineHeight:1.5}}>{it.content}</div></div>
@@ -273,25 +273,25 @@ table{width:100%;border-collapse:collapse;min-width:600px}th{padding:10px 16px;t
 </div>}
  
 {pg==="fin"&&isAdmin&&<div>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Tai chinh</div><button className="_ba" onClick={()=>om("f",{id:"HP"+Date.now(),name:"",cls:cls2[0]?.id||"",total:0,d1:0,d2:0,d2d:"",st:"pending"},1)}><Plus size={13}/>Them</button></div>
-<div style={{overflow:"auto",borderRadius:12}}><div className="_c" style={{padding:0}}><table><thead><tr>{["HV","Lop","Tong","D1","D2","Han","TT",""].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{fin.map(f=><tr key={f.id}><td style={{fontWeight:600,color:"#D4D4D8"}}>{f.name}</td><td><Bd t={f.cls} v="in"/></td><td style={{fontWeight:700,color:A}}>{vnd(f.total)}</td><td style={{fontSize:12,color:"#52525B"}}>{vnd(f.d1)}</td><td style={{fontSize:12,color:"#52525B"}}>{vnd(f.d2)}</td><td style={{color:f.st==="overdue"?"#EF4444":"#3F3F46",fontSize:12}}>{f.d2d}</td><td>{f.st==="paid"?<Bd t="OK" v="ok"/>:f.st==="pending"?<Bd t="Cho" v="wa"/>:<Bd t="No" v="er"/>}</td>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:20,fontWeight:700}}>Tài chính</div><button className="_ba" onClick={()=>om("f",{id:"HP"+Date.now(),name:"",cls:cls2[0]?.id||"",total:0,d1:0,d2:0,d2d:"",st:"pending"},1)}><Plus size={13}/>Thêm</button></div>
+<div style={{overflow:"auto",borderRadius:12}}><div className="_c" style={{padding:0}}><table><thead><tr>{["HV","Lớp","Tổng","D1","D2","Hạn","TT",""].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{fin.map(f=><tr key={f.id}><td style={{fontWeight:600,color:"#D4D4D8"}}>{f.name}</td><td><Bd t={f.cls} v="in"/></td><td style={{fontWeight:700,color:A}}>{vnd(f.total)}</td><td style={{fontSize:12,color:"#52525B"}}>{vnd(f.d1)}</td><td style={{fontSize:12,color:"#52525B"}}>{vnd(f.d2)}</td><td style={{color:f.st==="overdue"?"#EF4444":"#3F3F46",fontSize:12}}>{f.d2d}</td><td>{f.st==="paid"?<Bd t="OK" v="ok"/>:f.st==="pending"?<Bd t="Chờ" v="wa"/>:<Bd t="Nợ" v="er"/>}</td>
 <td><div style={{display:"flex",gap:3}}>{f.st!=="paid"&&<button className="_ba _bs" onClick={()=>{setFin(fin.map(x=>x.id===f.id?{...x,st:"paid"}:x));updateRow("finance",{...f,st:"paid"})}}><Check size={11}/></button>}<button className="_ab" onClick={()=>om("f",{...f},0)}><Pencil size={12}/></button></div></td></tr>)}</tbody></table></div></div>
 </div>}
  
 {pg==="charts"&&isAdmin&&<div>
-<div style={{fontSize:20,fontWeight:700,marginBottom:16}}>Bieu do</div>
+<div style={{fontSize:20,fontWeight:700,marginBottom:16}}>Biểu đồ</div>
 <div style={{display:"grid",gridTemplateColumns:gc(2),gap:10}}>
 <Ch title="Doanh thu"><BarChart data={monthTrend}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23"/><XAxis dataKey="m" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><YAxis fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><Tooltip content={<Tip/>}/><Bar dataKey="rev" fill={A} radius={[4,4,0,0]}/></BarChart></Ch>
-<Ch title="Chuyen can"><LineChart data={attendTrend}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23"/><XAxis dataKey="w" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><YAxis domain={[80,100]} fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><Tooltip content={<Tip/>}/><Line type="monotone" dataKey="v" stroke="#3B82F6" strokeWidth={1.5} dot={{fill:"#3B82F6",r:3,strokeWidth:0}}/></LineChart></Ch>
-<Ch title="Thanh toan"><PieChart><Pie data={payPie} cx="50%" cy="50%" innerRadius={30} outerRadius={60} dataKey="v" label={({n,v})=>n+":"+v} fontSize={10} stroke="none">{payPie.map((e,i)=><Cell key={i} fill={[CX[0],CX[3],CX[4]][i]}/>)}</Pie><Tooltip content={<Tip/>}/></PieChart></Ch>
-<Ch title="Diem"><BarChart data={scoreDist}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23"/><XAxis dataKey="r" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><YAxis fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><Tooltip content={<Tip/>}/><Bar dataKey="n" fill="#8B5CF6" radius={[4,4,0,0]}/></BarChart></Ch>
+<Ch title="Chuyên cần"><LineChart data={attendTrend}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23"/><XAxis dataKey="w" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><YAxis domain={[80,100]} fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><Tooltip content={<Tip/>}/><Line type="monotone" dataKey="v" stroke="#3B82F6" strokeWidth={1.5} dot={{fill:"#3B82F6",r:3,strokeWidth:0}}/></LineChart></Ch>
+<Ch title="Thanh toán"><PieChart><Pie data={payPie} cx="50%" cy="50%" innerRadius={30} outerRadius={60} dataKey="v" label={({n,v})=>n+":"+v} fontSize={10} stroke="none">{payPie.map((e,i)=><Cell key={i} fill={[CX[0],CX[3],CX[4]][i]}/>)}</Pie><Tooltip content={<Tip/>}/></PieChart></Ch>
+<Ch title="Điểm"><BarChart data={scoreDist}><CartesianGrid strokeDasharray="3 3" stroke="#1F1F23"/><XAxis dataKey="r" fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><YAxis fontSize={10} stroke="#3F3F46" tickLine={false} axisLine={false}/><Tooltip content={<Tip/>}/><Bar dataKey="n" fill="#8B5CF6" radius={[4,4,0,0]}/></BarChart></Ch>
 </div></div>}
  
 </div></div>
  
 {mob&&<div className="_bn">
 {mobNav.map(m=>{const Ic=m.ic;return<div key={m.id} className={"_bi"+(pg===m.id||(m.id==="more"&&showMenu)?" _a":"")} onClick={()=>{if(m.id==="more")setShowMenu(!showMenu);else{setPg(m.id);setShowMenu(false)}}}><Ic size={16} strokeWidth={pg===m.id?2:1.5}/><span style={{fontSize:9}}>{m.l}</span></div>})}
-{showMenu&&<div className="_mp2">{moreMenu.map(m=>{const Ic=m.ic;return<div key={m.id} className="_ni" onClick={()=>{setPg(m.id);setShowMenu(false)}}><Ic size={14}/>{m.l}</div>})}<div className="_ni" onClick={logout} style={{color:"#EF4444"}}><LogOut size={14}/>Thoat</div></div>}
+{showMenu&&<div className="_mp2">{moreMenu.map(m=>{const Ic=m.ic;return<div key={m.id} className="_ni" onClick={()=>{setPg(m.id);setShowMenu(false)}}><Ic size={14}/>{m.l}</div>})}<div className="_ni" onClick={logout} style={{color:"#EF4444"}}><LogOut size={14}/>Thoát</div></div>}
 </div>}
  
 {modal&&<ModalForm type={modal.t} initial={modal.d} isNew={modal.n} cls2={cls2} teachers={teachers} isAdmin={isAdmin} userName={user.name} mob={mob}
